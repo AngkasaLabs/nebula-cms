@@ -36,6 +36,23 @@
     @endforeach
 </div>
 
+{{-- Database Drivers --}}
+<div class="nsi-panel">
+    <h2 class="nsi-panel__title">{{ __('installer.drivers_title') }}</h2>
+    @foreach($requirements['drivers'] as $driver => $available)
+    <div class="nsi-row">
+        <span class="nsi-row__label">
+            <span class="nsi-dot {{ $available ? 'nsi-dot--ok' : 'nsi-dot--fail' }}"></span>
+            <code>{{ $driver === 'pgsql' ? 'pdo_pgsql' : 'pdo_mysql' }}</code>
+            <span style="color: var(--ns-muted); font-size: 0.75rem;">&mdash; {{ $driver === 'pgsql' ? __('installer.driver_pgsql') : __('installer.driver_mysql') }}</span>
+        </span>
+        <span class="nsi-row__value {{ $available ? 'nsi-row__value--ok' : 'nsi-row__value--fail' }}">
+            {{ $available ? __('installer.ext_available') : __('installer.ext_not_found') }}
+        </span>
+    </div>
+    @endforeach
+</div>
+
 {{-- Directories --}}
 <div class="nsi-panel">
     <h2 class="nsi-panel__title">{{ __('installer.directories_title') }}</h2>
@@ -53,9 +70,7 @@
 </div>
 
 @php
-    $allOk = $requirements['php']['ok']
-        && !in_array(false, $requirements['extensions'])
-        && !in_array(false, $requirements['paths']);
+    $allOk = $requirements['ok'];
 @endphp
 
 @if(!$allOk)

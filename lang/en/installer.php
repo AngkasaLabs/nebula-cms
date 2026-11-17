@@ -16,6 +16,7 @@ return [
     'status_ok'                => 'OK',
     'status_not_met'           => 'Not met',
     'extensions_title'         => 'PHP Extensions',
+    'drivers_title'            => 'Database Drivers',
     'ext_available'            => 'Available',
     'ext_not_found'            => 'Not found',
     'directories_title'        => 'Directory Permissions',
@@ -28,8 +29,12 @@ return [
 
     // Database
     'database_title'      => 'Database Configuration',
-    'database_lead'       => 'Enter your MySQL / MariaDB connection details.',
+    'database_lead'       => 'Choose your database engine and enter the connection details.',
     'connection_failed'   => 'Connection failed:',
+    'label_driver'        => 'Database Engine',
+    'driver_mysql'        => 'MySQL / MariaDB',
+    'driver_pgsql'        => 'PostgreSQL',
+    'driver_unavailable'  => 'The :driver PHP extension is not installed on this server.',
     'label_host'          => 'Host',
     'label_port'          => 'Port',
     'label_database_name' => 'Database Name',

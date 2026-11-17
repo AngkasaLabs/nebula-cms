@@ -46,26 +46,43 @@ class InstallerController extends Controller
             return redirect()->route('installer.welcome');
         }
 
+        $available = $this->availableDrivers();
+        $defaultDriver = $available[0] ?? 'mysql';
+        $defaultPort = $defaultDriver === 'pgsql' ? '5432' : '3306';
+
         $data = $request->session()->get('installer.database', [
+            'driver' => $defaultDriver,
             'host' => '127.0.0.1',
-            'port' => '3306',
+            'port' => $defaultPort,
             'database' => 'nebula_cms',
             'username' => 'root',
             'password' => '',
         ]);
 
-        return view('installer.database', compact('data'));
+        $data['driver'] ??= $defaultDriver;
+        if (! in_array($data['driver'], $available, true)) {
+            $data['driver'] = $defaultDriver;
+            $data['port'] = $defaultPort;
+        }
+
+        return view('installer.database', compact('data', 'available'));
     }
 
     public function saveDatabase(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'driver' => ['required', 'in:mysql,pgsql'],
             'host' => ['required', 'string'],
             'port' => ['required', 'numeric', 'between:1,65535'],
             'database' => ['required', 'string'],
             'username' => ['required', 'string'],
             'password' => ['nullable', 'string'],
         ]);
+
+        $unavailable = $this->unavailableDriverMessage($validated['driver']);
+        if ($unavailable) {
+            return back()->withInput()->withErrors(['driver' => $unavailable]);
+        }
 
         $error = $this->testDbConnection($validated);
         if ($error) {
@@ -79,7 +96,13 @@ class InstallerController extends Controller
 
     public function testDatabase(Request $request): JsonResponse
     {
-        $data = $request->only(['host', 'port', 'database', 'username', 'password']);
+        $data = $request->only(['driver', 'host', 'port', 'database', 'username', 'password']);
+
+        $unavailable = $this->unavailableDriverMessage($data['driver'] ?? 'mysql');
+        if ($unavailable) {
+            return response()->json(['success' => false, 'message' => $unavailable]);
+        }
+
         $error = $this->testDbConnection($data);
 
         if ($error) {
@@ -282,7 +305,7 @@ class InstallerController extends Controller
                     'SESSION_DRIVER' => 'file',
                     'SESSION_ENCRYPT' => 'false',
                     'SESSION_COOKIE' => config('session.cookie'),
-                    'DB_CONNECTION' => 'mysql',
+                    'DB_CONNECTION' => $db['driver'] ?? 'mysql',
                     'DB_HOST' => $db['host'],
                     'DB_PORT' => $db['port'],
                     'DB_DATABASE' => $db['database'],
@@ -414,10 +437,40 @@ class InstallerController extends Controller
         return $v === '' ? null : $v;
     }
 
+    /**
+     * @return array<int, string>
+     */
+    private function availableDrivers(): array
+    {
+        $drivers = [];
+
+        if (extension_loaded('pdo_mysql')) {
+            $drivers[] = 'mysql';
+        }
+
+        if (extension_loaded('pdo_pgsql')) {
+            $drivers[] = 'pgsql';
+        }
+
+        return $drivers;
+    }
+
+    private function unavailableDriverMessage(string $driver): ?string
+    {
+        $extension = $driver === 'pgsql' ? 'pdo_pgsql' : 'pdo_mysql';
+
+        return extension_loaded($extension)
+            ? null
+            : __('installer.driver_unavailable', ['driver' => $extension]);
+    }
+
     private function testDbConnection(array $config): ?string
     {
         try {
-            $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset=utf8mb4";
+            $dsn = ($config['driver'] ?? 'mysql') === 'pgsql'
+                ? "pgsql:host={$config['host']};port={$config['port']};dbname={$config['database']}"
+                : "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset=utf8mb4";
+
             new \PDO($dsn, $config['username'], $config['password'] ?? '', [
                 \PDO::ATTR_TIMEOUT => 5,
             ]);
@@ -430,17 +483,19 @@ class InstallerController extends Controller
 
     private function reconfigureDb(array $db): void
     {
+        $connection = ($db['driver'] ?? 'mysql') === 'pgsql' ? 'pgsql' : 'mysql';
+
         config([
-            'database.default' => 'mysql',
-            'database.connections.mysql.host' => $db['host'],
-            'database.connections.mysql.port' => $db['port'],
-            'database.connections.mysql.database' => $db['database'],
-            'database.connections.mysql.username' => $db['username'],
-            'database.connections.mysql.password' => $db['password'] ?? '',
+            'database.default' => $connection,
+            "database.connections.{$connection}.host" => $db['host'],
+            "database.connections.{$connection}.port" => $db['port'],
+            "database.connections.{$connection}.database" => $db['database'],
+            "database.connections.{$connection}.username" => $db['username'],
+            "database.connections.{$connection}.password" => $db['password'] ?? '',
         ]);
 
-        DB::purge('mysql');
-        DB::reconnect('mysql');
+        DB::purge($connection);
+        DB::reconnect($connection);
 
         // Forget resolved cache driver instances so they re-resolve using the updated connection
         if (app()->bound('cache')) {
@@ -474,11 +529,17 @@ class InstallerController extends Controller
         $phpVersion = phpversion();
         $phpOk = version_compare($phpVersion, '8.3.0', '>=');
 
-        $extensions = ['pdo', 'pdo_mysql', 'mbstring', 'openssl', 'tokenizer', 'xml', 'ctype', 'json', 'bcmath', 'fileinfo', 'curl', 'gd'];
+        $extensions = ['pdo', 'mbstring', 'openssl', 'tokenizer', 'xml', 'ctype', 'json', 'bcmath', 'fileinfo', 'curl', 'gd'];
         $extResults = [];
         foreach ($extensions as $ext) {
             $extResults[$ext] = extension_loaded($ext);
         }
+
+        // At least one database driver must be present; the database step lets the user pick.
+        $drivers = [
+            'mysql' => extension_loaded('pdo_mysql'),
+            'pgsql' => extension_loaded('pdo_pgsql'),
+        ];
 
         $paths = [
             'storage/' => storage_path(),
@@ -489,27 +550,21 @@ class InstallerController extends Controller
             $pathResults[$label] = is_writable($path);
         }
 
+        $extensionsOk = ! in_array(false, $extResults, true);
+        $pathsOk = ! in_array(false, $pathResults, true);
+        $driverOk = in_array(true, $drivers, true);
+
         return [
             'php' => ['version' => $phpVersion, 'ok' => $phpOk, 'required' => '8.3.0'],
             'extensions' => $extResults,
+            'drivers' => $drivers,
             'paths' => $pathResults,
+            'ok' => $phpOk && $extensionsOk && $driverOk && $pathsOk,
         ];
     }
 
     private function requirementsPass(): bool
     {
-        $req = $this->checkRequirements();
-
-        if (! $req['php']['ok']) {
-            return false;
-        }
-
-        foreach ($req['extensions'] as $loaded) {
-            if (! $loaded) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->checkRequirements()['ok'];
     }
 }

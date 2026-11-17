@@ -14,6 +14,15 @@
 <form action="{{ route('installer.database.save') }}" method="POST" id="db-form">
     @csrf
     <div class="nsi-panel">
+        <div class="nsi-field">
+            <label for="driver">{{ __('installer.label_driver') }}</label>
+            <select id="driver" name="driver">
+                @foreach($available as $driver)
+                <option value="{{ $driver }}" {{ old('driver', $data['driver'] ?? 'mysql') === $driver ? 'selected' : '' }}>{{ $driver === 'pgsql' ? __('installer.driver_pgsql') : __('installer.driver_mysql') }}</option>
+                @endforeach
+            </select>
+            @error('driver')<p class="nsi-field__error">{{ $message }}</p>@enderror
+        </div>
         <div class="nsi-field-row">
             <div class="nsi-field">
                 <label for="host">{{ __('installer.label_host') }}</label>
@@ -22,7 +31,7 @@
             </div>
             <div class="nsi-field">
                 <label for="port">{{ __('installer.label_port') }}</label>
-                <input type="number" id="port" name="port" value="{{ old('port', $data['port']) }}" placeholder="3306">
+                <input type="number" id="port" name="port" value="{{ old('port', $data['port']) }}" placeholder="{{ ($data['driver'] ?? 'mysql') === 'pgsql' ? '5432' : '3306' }}">
                 @error('port')<p class="nsi-field__error">{{ $message }}</p>@enderror
             </div>
         </div>
@@ -62,6 +71,19 @@
 
 @push('scripts')
 <script>
+(function () {
+    const driver   = document.getElementById('driver');
+    const port     = document.getElementById('port');
+    const defaults = { mysql: '3306', pgsql: '5432' };
+
+    driver.addEventListener('change', function () {
+        if (port.value === '' || Object.values(defaults).includes(port.value)) {
+            port.value = defaults[driver.value] || '';
+        }
+        port.placeholder = defaults[driver.value] || '';
+    });
+})();
+
 document.getElementById('btn-test').addEventListener('click', async function () {
     const btn    = this;
     const result = document.getElementById('test-result');
@@ -74,6 +96,7 @@ document.getElementById('btn-test').addEventListener('click', async function () 
 
     const body = new URLSearchParams({
         _token:   document.querySelector('meta[name="csrf-token"]').content,
+        driver:   form.driver.value,
         host:     form.host.value,
         port:     form.port.value,
         database: form.database.value,

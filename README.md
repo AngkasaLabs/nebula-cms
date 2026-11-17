@@ -10,7 +10,7 @@
 
 NebulaCMS is a modern and open-source Content Management System (CMS) built with Laravel 12 and React. It is designed to provide an intuitive, flexible, and powerful content management experience.
 
-[Demo](https://nebula.angkasalabs.com/demo) • [Documentation](https://nebula.angkasalabs.com/docs) • [Roadmap](https://github.com/AngkasaLabs/NebulaCMS/projects) • [Contribute](#-Contribute) 
+[Demo](https://nebula.angkasalabs.com/demo) • [Documentation](https://nebula.angkasalabs.com/docs) • [Roadmap](https://github.com/AngkasaLabs/nebula-cms/projects) • [Contribute](#-Contribute) 
 
 </div>
 
@@ -65,13 +65,13 @@ NebulaCMS is a modern and open-source Content Management System (CMS) built with
 
 ## 🚀 Quick Start
 
-**Installing without Git or a terminal?** Download the latest **`nebulacms-v*.zip`** from the **[Download page](https://nebula.angkasalabs.com/download)** (same package as [GitHub Releases](https://github.com/AngkasaLabs/NebulaCMS/releases)) — it includes dependencies and a production build. Upload and extract on your host, point the document root to the `public` folder, create a MySQL database, then open the site and complete the **web installer** at `/install`. See the [installation guide](https://nebula.angkasalabs.com/docs/installation) (section *Install from a release ZIP*).
+**Installing without Git or a terminal?** Download the latest **`nebulacms-v*.zip`** from the **[Download page](https://nebula.angkasalabs.com/download)** (same package as [GitHub Releases](https://github.com/AngkasaLabs/nebula-cms/releases)) — it includes dependencies and a production build. Upload and extract on your host, point the document root to the `public` folder, create a MySQL/MariaDB or PostgreSQL database, then open the site and complete the **web installer** at `/install`. See the [installation guide](https://nebula.angkasalabs.com/docs/installation) (section *Install from a release ZIP*).
 
 **Developing from source:**
 
 ```bash
 # Clone repository
-git clone https://github.com/AngkasaLabs/NebulaCMS.git
+git clone https://github.com/AngkasaLabs/nebula-cms.git
 
 # Install dependency
 composer install
@@ -127,13 +127,13 @@ Before contributing, please read our [Contribution Guidelines](CONTRIBUTING.md).
 
 ### Contributors
 
-<a href="https://github.com/AngkasaLabs/NebulaCMS/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=AngkasaLabs/NebulaCMS" />
+<a href="https://github.com/AngkasaLabs/nebula-cms/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=AngkasaLabs/nebula-cms" />
 </a>
 
 ## 📊 Roadmap
 
-See our [Project Board](https://github.com/AngkasaLabs/NebulaCMS/projects) for upcoming development plans.
+See our [Project Board](https://github.com/AngkasaLabs/nebula-cms/projects) for upcoming development plans.
 
 ## 📜 License
 
@@ -141,14 +141,14 @@ NebulaCMS is licensed under the [MIT License](LICENSE).
 
 ## 💬 Community
 
-- [GitHub Discussions](https://github.com/AngkasaLabs/NebulaCMS/discussions)
+- [GitHub Discussions](https://github.com/AngkasaLabs/nebula-cms/discussions)
 
 ## 🌟 Sponsors
 
 If you like NebulaCMS and want to support its development:
 
 [![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/AngkasaLabs)
-[![Sponsor on OpenCollective](https://img.shields.io/badge/Sponsor-OpenCollective-7FADF2?logo=open-collective)](https://opencollective.com/nebulacms)
+[![Sponsor on OpenCollective](https://img.shields.io/badge/Sponsor-OpenCollective-7FADF2?logo=open-collective)](https://opencollective.com/nebula-cms)
 
 ## 🙏 Special Thanks
 
@@ -157,4 +157,4 @@ If you like NebulaCMS and want to support its development:
 - [TailwindCSS](https://tailwindcss.com)
 - [Shadcn UI](https://ui.shadcn.com/)
 - [Radix UI](https://www.radix-ui.com)
-- [And all contributors](https://github.com/AngkasaLabs/NebulaCMS/graphs/contributors)
+- [And all contributors](https://github.com/AngkasaLabs/nebula-cms/graphs/contributors)

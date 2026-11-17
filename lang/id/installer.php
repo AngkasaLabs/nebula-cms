@@ -16,6 +16,7 @@ return [
     'status_ok'                => 'OK',
     'status_not_met'           => 'Tidak memenuhi',
     'extensions_title'         => 'Ekstensi PHP',
+    'drivers_title'            => 'Driver Database',
     'ext_available'            => 'Tersedia',
     'ext_not_found'            => 'Tidak ditemukan',
     'directories_title'        => 'Izin Direktori',
@@ -28,8 +29,12 @@ return [
 
     // Database
     'database_title'      => 'Konfigurasi Database',
-    'database_lead'       => 'Masukkan detail koneksi MySQL / MariaDB Anda.',
+    'database_lead'       => 'Pilih mesin database Anda lalu masukkan detail koneksi.',
     'connection_failed'   => 'Koneksi gagal:',
+    'label_driver'        => 'Mesin Database',
+    'driver_mysql'        => 'MySQL / MariaDB',
+    'driver_pgsql'        => 'PostgreSQL',
+    'driver_unavailable'  => 'Ekstensi PHP :driver tidak terpasang di server ini.',
     'label_host'          => 'Host',
     'label_port'          => 'Port',
     'label_database_name' => 'Nama Database',

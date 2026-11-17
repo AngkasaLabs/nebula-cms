@@ -24,6 +24,12 @@ return new class extends Migration
             Schema::table('pages', function (Blueprint $table) {
                 $table->string('status', 32)->default('draft')->change();
             });
+        } elseif ($driver === 'pgsql') {
+            // Laravel compiles enum() on PostgreSQL to an inline CHECK constraint.
+            DB::statement('ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_status_check');
+            DB::statement("ALTER TABLE posts ADD CONSTRAINT posts_status_check CHECK (status IN ('draft', 'published', 'scheduled', 'pending_review'))");
+            DB::statement('ALTER TABLE pages DROP CONSTRAINT IF EXISTS pages_status_check');
+            DB::statement("ALTER TABLE pages ADD CONSTRAINT pages_status_check CHECK (status IN ('draft', 'published', 'pending_review'))");
         }
     }
 
@@ -47,6 +53,11 @@ return new class extends Migration
             Schema::table('pages', function (Blueprint $table) {
                 $table->enum('status', ['draft', 'published'])->default('draft')->change();
             });
+        } elseif ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_status_check');
+            DB::statement("ALTER TABLE posts ADD CONSTRAINT posts_status_check CHECK (status IN ('draft', 'published', 'scheduled'))");
+            DB::statement('ALTER TABLE pages DROP CONSTRAINT IF EXISTS pages_status_check');
+            DB::statement("ALTER TABLE pages ADD CONSTRAINT pages_status_check CHECK (status IN ('draft', 'published'))");
         }
     }
 };
