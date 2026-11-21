@@ -28,6 +28,7 @@ class UpdateController extends Controller
         return Inertia::render('Admin/Settings/Update', [
             'currentVersion' => config('nebula.version'),
             'backups' => $service->getBackups(),
+            'backupRetention' => max(1, (int) config('nebula.backup_retention', 5)),
         ]);
     }
 
@@ -130,5 +131,35 @@ class UpdateController extends Controller
         }
 
         return back()->with('error', $result['message']);
+    }
+
+    /**
+     * Delete a single backup archive.
+     */
+    public function destroy(Request $request, UpdateService $service)
+    {
+        $request->validate([
+            'backup_path' => 'required|string',
+        ]);
+
+        if (! $service->deleteBackup((string) $request->input('backup_path'))) {
+            return back()->with('error', 'Could not delete backup. The file may no longer exist.');
+        }
+
+        return back()->with('success', 'Backup deleted.');
+    }
+
+    /**
+     * Remove backups beyond the configured retention limit.
+     */
+    public function prune(UpdateService $service)
+    {
+        $deleted = $service->pruneBackups();
+
+        if ($deleted === []) {
+            return back()->with('success', 'No old backups to remove.');
+        }
+
+        return back()->with('success', count($deleted).' old backup(s) deleted.');
     }
 }

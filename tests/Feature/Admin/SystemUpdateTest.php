@@ -5,6 +5,7 @@ use App\Services\UpdateService;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
 
 beforeEach(function () {
     $this->seed(RoleAndPermissionSeeder::class);
@@ -110,4 +111,71 @@ test('apply succeeds when session matches and uses stubbed update service', func
         ->assertSessionMissing('pending_update');
 
     expect(Cache::get(UpdateService::CACHE_KEY))->toBeNull();
+});
+
+test('admin can delete a single backup', function () {
+    $storage = sys_get_temp_dir().'/nebula-backups-'.uniqid('', true);
+    $this->app->useStoragePath($storage);
+    File::makeDirectory($storage.'/app/backups', 0755, true);
+    touch($storage.'/installed.lock');
+
+    $file = $storage.'/app/backups/pre-update-1.0.0-20260101_000000.zip';
+    file_put_contents($file, 'backup');
+
+    $this->actingAs(adminWithSettings())
+        ->from(route('admin.system.update', absolute: false))
+        ->delete(route('admin.system.update.backup.destroy', absolute: false), [
+            'backup_path' => $file,
+        ])
+        ->assertSessionHas('success');
+
+    expect(file_exists($file))->toBeFalse();
+
+    File::deleteDirectory($storage);
+});
+
+test('admin cannot delete a backup outside the backups directory', function () {
+    $storage = sys_get_temp_dir().'/nebula-backups-'.uniqid('', true);
+    $this->app->useStoragePath($storage);
+    File::makeDirectory($storage.'/app/backups', 0755, true);
+    touch($storage.'/installed.lock');
+
+    $outside = $storage.'/outside.zip';
+    file_put_contents($outside, 'backup');
+
+    $this->actingAs(adminWithSettings())
+        ->from(route('admin.system.update', absolute: false))
+        ->delete(route('admin.system.update.backup.destroy', absolute: false), [
+            'backup_path' => $outside,
+        ])
+        ->assertSessionHas('error');
+
+    expect(file_exists($outside))->toBeTrue();
+
+    File::deleteDirectory($storage);
+});
+
+test('admin can prune backups beyond the retention limit', function () {
+    Config::set('nebula.backup_retention', 2);
+
+    $storage = sys_get_temp_dir().'/nebula-backups-'.uniqid('', true);
+    $this->app->useStoragePath($storage);
+    $backupsDir = $storage.'/app/backups';
+    File::makeDirectory($backupsDir, 0755, true);
+    touch($storage.'/installed.lock');
+
+    foreach ([4, 3, 2, 1] as $age) {
+        $file = $backupsDir."/pre-update-1.0.0-2026010{$age}_000000.zip";
+        file_put_contents($file, 'backup');
+        touch($file, now()->subDays($age)->timestamp);
+    }
+
+    $this->actingAs(adminWithSettings())
+        ->from(route('admin.system.update', absolute: false))
+        ->post(route('admin.system.update.backup.prune', absolute: false))
+        ->assertSessionHas('success');
+
+    expect(File::glob($backupsDir.'/pre-update-*.zip'))->toHaveCount(2);
+
+    File::deleteDirectory($storage);
 });

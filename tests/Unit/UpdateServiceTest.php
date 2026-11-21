@@ -3,9 +3,11 @@
 use App\Services\UpdateService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 beforeEach(function () {
     Cache::forget(UpdateService::CACHE_KEY);
@@ -142,5 +144,62 @@ describe('UpdateService::getLatestReleaseZipInfo', function () {
         expect($info['download_url'])->toBeNull();
         expect($info['error'])->toContain('500');
         expect($info['releases_url'])->toBe('https://github.com/owner/cms/releases');
+    });
+});
+
+describe('UpdateService backup retention', function () {
+    beforeEach(function () {
+        $storage = sys_get_temp_dir().'/nebula-backups-'.uniqid('', true);
+        $this->app->useStoragePath($storage);
+        File::makeDirectory($storage.'/app/backups', 0755, true);
+    });
+
+    afterEach(function () {
+        File::deleteDirectory($this->app->storagePath());
+    });
+
+    it('keeps only the newest backups when pruning', function () {
+        Config::set('nebula.backup_retention', 3);
+
+        $dir = storage_path('app/backups');
+        foreach ([6, 5, 4, 3, 2, 1] as $age) {
+            $file = $dir."/pre-update-1.0.0-2026010{$age}_000000.zip";
+            file_put_contents($file, 'backup');
+            touch($file, now()->subDays($age)->timestamp);
+        }
+
+        $deleted = app(UpdateService::class)->pruneBackups();
+
+        expect($deleted)->toHaveCount(3);
+        expect(app(UpdateService::class)->getBackups())->toHaveCount(3);
+    });
+
+    it('honours an explicit keep limit', function () {
+        $dir = storage_path('app/backups');
+        foreach ([5, 4, 3, 2, 1] as $age) {
+            $file = $dir."/pre-update-1.0.0-2026010{$age}_000000.zip";
+            file_put_contents($file, 'backup');
+            touch($file, now()->subDays($age)->timestamp);
+        }
+
+        app(UpdateService::class)->pruneBackups(2);
+
+        expect(app(UpdateService::class)->getBackups())->toHaveCount(2);
+    });
+
+    it('deletes a backup inside the backups directory', function () {
+        $file = storage_path('app/backups/pre-update-1.0.0-20260101_000000.zip');
+        file_put_contents($file, 'backup');
+
+        expect(app(UpdateService::class)->deleteBackup($file))->toBeTrue();
+        expect(file_exists($file))->toBeFalse();
+    });
+
+    it('refuses to delete files outside the backups directory', function () {
+        $outside = storage_path('app/outside.zip');
+        file_put_contents($outside, 'backup');
+
+        expect(app(UpdateService::class)->deleteBackup($outside))->toBeFalse();
+        expect(file_exists($outside))->toBeTrue();
     });
 });

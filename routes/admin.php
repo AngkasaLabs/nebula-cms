@@ -182,6 +182,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         Route::post('/system-update/check', [UpdateController::class, 'check'])->name('admin.system.update.check');
         Route::post('/system-update/apply', [UpdateController::class, 'apply'])->name('admin.system.update.apply');
         Route::post('/system-update/rollback', [UpdateController::class, 'rollback'])->name('admin.system.update.rollback');
+        Route::delete('/system-update/backup', [UpdateController::class, 'destroy'])->name('admin.system.update.backup.destroy');
+        Route::post('/system-update/backup/prune', [UpdateController::class, 'prune'])->name('admin.system.update.backup.prune');
 
         // This should be last to avoid conflicts with specific routes
         Route::put('/{group}', [SettingsController::class, 'update'])->name('admin.settings.update');

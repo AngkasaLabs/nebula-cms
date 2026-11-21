@@ -7,7 +7,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem, type SharedData, type UpdateCheckResult } from '@/types';
 import { useState } from 'react';
 import { ReleaseNotesText } from '@/components/release-notes-text';
-import { CheckCircle, Download, AlertTriangle, RotateCcw, Loader2, Shield, ExternalLink } from 'lucide-react';
+import { CheckCircle, Download, AlertTriangle, RotateCcw, Loader2, Shield, ExternalLink, Trash2, Eraser } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -26,13 +26,14 @@ interface BackupItem {
 interface UpdatePageProps {
     currentVersion: string;
     backups: BackupItem[];
+    backupRetention: number;
 }
 
 type UpdateSettingsPageProps = SharedData & UpdatePageProps;
 
 type UpdateStep = 'idle' | 'checking' | 'checked' | 'updating' | 'done';
 
-export default function Update({ currentVersion, backups }: UpdatePageProps) {
+export default function Update({ currentVersion, backups, backupRetention }: UpdatePageProps) {
     const { props } = usePage<UpdateSettingsPageProps>();
     const flash = props.flash as { success?: string; error?: string; updateCheck?: UpdateCheckResult } | undefined;
     const updateAvailable = props.updateAvailable;
@@ -43,6 +44,8 @@ export default function Update({ currentVersion, backups }: UpdatePageProps) {
     const [step, setStep] = useState<UpdateStep>(initialStep);
     const [checkResult, setCheckResult] = useState<UpdateCheckResult | null>(initialCheckResult);
     const [isRollingBack, setIsRollingBack] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [isPruning, setIsPruning] = useState(false);
 
     const handleCheck = () => {
         setStep('checking');
@@ -111,6 +114,57 @@ export default function Update({ currentVersion, backups }: UpdatePageProps) {
             onError: () => {
                 toast.error('Rollback failed');
                 setIsRollingBack(null);
+            },
+        });
+    };
+
+    const handleDelete = (backupPath: string) => {
+        if (!confirm('Delete this backup? This cannot be undone.')) {
+            return;
+        }
+
+        setIsDeleting(backupPath);
+
+        router.delete(route('admin.system.update.backup.destroy'), {
+            data: { backup_path: backupPath },
+            preserveScroll: true,
+            onSuccess: (page) => {
+                const flash = page.props.flash as { success?: string; error?: string } | undefined;
+                if (flash?.success) {
+                    toast.success(flash.success);
+                } else if (flash?.error) {
+                    toast.error(flash.error);
+                }
+                setIsDeleting(null);
+            },
+            onError: () => {
+                toast.error('Failed to delete backup');
+                setIsDeleting(null);
+            },
+        });
+    };
+
+    const handlePrune = () => {
+        if (!confirm(`Delete all but the newest ${backupRetention} backups?`)) {
+            return;
+        }
+
+        setIsPruning(true);
+
+        router.post(route('admin.system.update.backup.prune'), {}, {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                const flash = page.props.flash as { success?: string; error?: string } | undefined;
+                if (flash?.success) {
+                    toast.success(flash.success);
+                } else if (flash?.error) {
+                    toast.error(flash.error);
+                }
+                setIsPruning(false);
+            },
+            onError: () => {
+                toast.error('Failed to clean up backups');
+                setIsPruning(false);
             },
         });
     };
@@ -273,31 +327,62 @@ export default function Update({ currentVersion, backups }: UpdatePageProps) {
                     {/* Backups */}
                     {backups.length > 0 && (
                         <div className="space-y-3">
-                            <HeadingSmall
-                                title="Backups"
-                                description="Pre-update backups. You can rollback to any of these."
-                            />
+                            <div className="flex items-start justify-between gap-4">
+                                <HeadingSmall
+                                    title="Backups"
+                                    description={`Pre-update backups. You can rollback to any of these. The newest ${backupRetention} are kept automatically.`}
+                                />
+                                {backups.length > backupRetention && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handlePrune}
+                                        disabled={isPruning}
+                                    >
+                                        {isPruning ? (
+                                            <><Loader2 className="mr-2 h-3 w-3 animate-spin" />Cleaning up...</>
+                                        ) : (
+                                            <><Eraser className="mr-2 h-3 w-3" />Delete old backups</>
+                                        )}
+                                    </Button>
+                                )}
+                            </div>
                             <div className="divide-y rounded-lg border">
                                 {backups.map((backup) => (
-                                    <div key={backup.filename} className="flex items-center justify-between p-3">
-                                        <div>
-                                            <p className="text-sm font-medium">{backup.filename}</p>
+                                    <div key={backup.filename} className="flex items-center justify-between gap-3 p-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-medium">{backup.filename}</p>
                                             <p className="text-xs text-muted-foreground">
                                                 {backup.created_at} · {formatSize(backup.size)}
                                             </p>
                                         </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleRollback(backup.path)}
-                                            disabled={isRollingBack !== null}
-                                        >
-                                            {isRollingBack === backup.path ? (
-                                                <><Loader2 className="mr-2 h-3 w-3 animate-spin" />Rolling back...</>
-                                            ) : (
-                                                <><RotateCcw className="mr-2 h-3 w-3" />Rollback</>
-                                            )}
-                                        </Button>
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleRollback(backup.path)}
+                                                disabled={isRollingBack !== null || isDeleting !== null}
+                                            >
+                                                {isRollingBack === backup.path ? (
+                                                    <><Loader2 className="mr-2 h-3 w-3 animate-spin" />Rolling back...</>
+                                                ) : (
+                                                    <><RotateCcw className="mr-2 h-3 w-3" />Rollback</>
+                                                )}
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleDelete(backup.path)}
+                                                disabled={isDeleting !== null || isRollingBack !== null}
+                                                title="Delete backup"
+                                            >
+                                                {isDeleting === backup.path ? (
+                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="h-3 w-3" />
+                                                )}
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

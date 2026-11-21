@@ -296,6 +296,8 @@ class UpdateService
 
         Log::info("Backup created: {$backupFile}");
 
+        $this->pruneBackups();
+
         return $backupFile;
     }
 
@@ -502,6 +504,50 @@ class UpdateService
             ->sortByDesc('created_at')
             ->values()
             ->all();
+    }
+
+    /**
+     * Delete backup archives beyond the configured retention limit.
+     * Keeps the newest `nebula.backup_retention` files (minimum 1).
+     *
+     * @return list<string> Filenames that were deleted.
+     */
+    public function pruneBackups(?int $keep = null): array
+    {
+        $keep = max(1, $keep ?? (int) config('nebula.backup_retention', 5));
+
+        $deleted = [];
+
+        foreach (array_slice($this->getBackups(), $keep) as $backup) {
+            try {
+                if (File::delete($backup['path'])) {
+                    $deleted[] = $backup['filename'];
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Could not prune backup: '.$e->getMessage(), ['path' => $backup['path']]);
+            }
+        }
+
+        return $deleted;
+    }
+
+    /**
+     * Delete a single backup archive, rejecting paths outside the backups directory.
+     */
+    public function deleteBackup(string $backupFile): bool
+    {
+        $backupsDir = realpath(storage_path('app/backups'));
+        $resolved = realpath($backupFile);
+
+        if (! $backupsDir
+            || ! $resolved
+            || ! str_starts_with($resolved, $backupsDir.DIRECTORY_SEPARATOR)
+            || ! is_file($resolved)
+        ) {
+            return false;
+        }
+
+        return File::delete($resolved);
     }
 
     /**
