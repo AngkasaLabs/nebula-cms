@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FrontendController;
-use App\Models\Plugin;
 use App\Http\Controllers\SitemapController;
 use App\Http\Middleware\EnsureContentPreviewAllowed;
+use App\Models\Plugin;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
@@ -157,8 +157,9 @@ require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
 // Static page route (catch-all, must be last)
-// Reserve "docs" for the Site Documentation plugin (routes registered after web.php).
+// Reserve top-level slugs owned by plugins (routes registered after web.php):
+// "docs" for Site Documentation, "shop" for Nebula Commerce.
 // Security: Only allow alphanumeric, underscore, and hyphen characters
 Route::get('/{page}', [FrontendController::class, 'staticPage'])
     ->name('static.page')
-    ->where('page', '^(?!docs$)[a-zA-Z0-9_-]+$');
+    ->where('page', '^(?!docs$)(?!shop$)[a-zA-Z0-9_-]+$');

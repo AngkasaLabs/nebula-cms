@@ -87,9 +87,21 @@ class ThemeServiceProvider extends ServiceProvider
             }
         }
 
-        // Then add active theme path (child theme if using parent)
+        // Then add active theme path (child theme if using parent).
+        // A child theme falls back to its parent's views for anything it does
+        // not override, so `theme::pages.blog` keeps working without wrappers.
+        $themePaths = [];
+
         if (file_exists($themePath)) {
-            $this->loadViewsFrom($themePath, 'theme');
+            $themePaths[] = $themePath;
+        }
+
+        if ($parentTheme && file_exists($parentThemePath)) {
+            $themePaths[] = $parentThemePath;
+        }
+
+        if ($themePaths !== []) {
+            $this->loadViewsFrom($themePaths, 'theme');
         } else {
             // Fallback: register default theme path for testing
             $defaultThemePath = base_path('themes/default/views');
