@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { AlertCircle, CheckCircle2, Download, Package, Puzzle, RefreshCw, Search, Store } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Download, Package, Puzzle, RefreshCw, Search, ShieldCheck, Store } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -127,6 +127,15 @@ export default function StoreIndex({
                         <AlertDescription>{error}</AlertDescription>
                     </Alert>
                 )}
+
+                <Alert>
+                    <ShieldCheck className="h-4 w-4" />
+                    <AlertTitle>Signed packages with automatic rollback</AlertTitle>
+                    <AlertDescription>
+                        Every download is verified before installation. Updates snapshot the installed package
+                        first; if an update fails, the previous files and metadata are restored automatically.
+                    </AlertDescription>
+                </Alert>
 
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                     <span>

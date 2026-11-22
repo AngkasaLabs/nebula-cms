@@ -37,6 +37,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Package Backup Retention
+    |--------------------------------------------------------------------------
+    |
+    | How many plugin/theme folder snapshots to keep per package. A snapshot is
+    | created before every store update so failures can be rolled back.
+    |
+    */
+    'package_backup_retention' => (int) env('NEBULA_PACKAGE_BACKUP_RETENTION', 5),
+
+    /*
+    |--------------------------------------------------------------------------
     | Package Store
     |--------------------------------------------------------------------------
     |

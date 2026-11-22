@@ -127,10 +127,15 @@ class StoreController extends Controller
 
         $manager = $result['type'] === 'theme' ? 'Themes' : 'Plugins';
 
-        return redirect()->back()->with(
-            'success',
-            "{$result['name']} {$result['version']} installed. Open {$manager} to activate it."
-        );
+        $message = "{$result['name']} {$result['version']} installed.";
+
+        if ($result['backup_created'] ?? false) {
+            $message .= ' The previous version was backed up and will be restored automatically if a future update fails.';
+        }
+
+        $message .= " Open {$manager} to activate it.";
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function refresh()
