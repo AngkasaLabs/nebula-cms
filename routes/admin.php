@@ -23,7 +23,7 @@ Route::get('/admin', function () {
     return redirect()->route('admin.dashboard');
 });
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'verified', 'permission:access admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('audit-log', [AuditLogController::class, 'index'])

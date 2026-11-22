@@ -6,19 +6,20 @@ use App\Contracts\UploadScanner;
 use App\Exceptions\UploadScanException;
 use App\Http\Controllers\Controller;
 use App\Models\Plugin;
+use App\Services\PackageInstaller;
+use App\Services\PluginMigrator;
 use App\Services\PluginRequirementChecker;
-use App\Services\SecureZipInspector;
 use App\Support\InertiaUploadSecurity;
 use App\Support\PluginHooks;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
-use ZipArchive;
 
 class PluginController extends Controller
 {
     public function __construct(
         protected PluginRequirementChecker $requirementChecker,
+        protected PluginMigrator $migrator,
     ) {
         $this->middleware('permission:manage plugins');
     }
@@ -63,6 +64,14 @@ class PluginController extends Controller
         $check = $this->requirementChecker->check($plugin);
         if (! $check['ok']) {
             return redirect()->back()->with('error', implode(' ', $check['errors']));
+        }
+
+        try {
+            $this->migrator->migrate($plugin);
+        } catch (\Throwable $e) {
+            \Log::error('Plugin migrations failed: '.$e->getMessage(), ['plugin' => $plugin->slug]);
+
+            return redirect()->back()->with('error', 'Plugin migration failed: '.$e->getMessage());
         }
 
         $plugin->activate();
@@ -237,6 +246,14 @@ class PluginController extends Controller
             }
         }
 
+        try {
+            $this->migrator->rollback($plugin);
+        } catch (\Throwable $e) {
+            \Log::error('Plugin migration rollback failed: '.$e->getMessage(), ['plugin' => $plugin->slug]);
+
+            return redirect()->back()->with('error', 'Plugin migration rollback failed: '.$e->getMessage());
+        }
+
         if (File::exists($pluginPath)) {
             File::deleteDirectory($pluginPath);
         }
@@ -254,9 +271,7 @@ class PluginController extends Controller
             'plugin' => ['required', 'file', 'mimes:zip', 'max:'.$maxZipKb],
         ]);
 
-        $zip = new ZipArchive;
         $file = $request->file('plugin');
-        $pluginsPath = base_path('plugins');
 
         try {
             app(UploadScanner::class)->scanPath($file->getRealPath());
@@ -264,88 +279,14 @@ class PluginController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
 
-        $inspector = app(SecureZipInspector::class);
-
         try {
-            $inspector->assertSafeArchive($file->getRealPath());
-            $inspector->assertPluginZipExtensions($file->getRealPath());
+            app(PackageInstaller::class)->installPluginZip($file->getRealPath());
         } catch (\InvalidArgumentException $e) {
             return redirect()->back()->with('error', __('Invalid ZIP: :msg', ['msg' => $e->getMessage()]));
-        }
-
-        // Create temporary file for extraction
-        $tempPath = storage_path('app/temp/'.uniqid());
-        File::makeDirectory($tempPath, 0755, true);
-
-        try {
-            // Extract zip to temporary folder
-            if ($zip->open($file->path()) === true) {
-                $zip->extractTo($tempPath);
-                $zip->close();
-
-                // Find plugin.json in root folder or first subfolder
-                $pluginJson = null;
-                $pluginFolder = null;
-
-                // Check in root folder
-                if (File::exists($tempPath.'/plugin.json')) {
-                    $pluginJson = $tempPath.'/plugin.json';
-                    $pluginFolder = $tempPath;
-                } else {
-                    // Check in first subfolder
-                    $directories = File::directories($tempPath);
-                    if (count($directories) > 0) {
-                        $firstDir = $directories[0];
-                        if (File::exists($firstDir.'/plugin.json')) {
-                            $pluginJson = $firstDir.'/plugin.json';
-                            $pluginFolder = $firstDir;
-                        }
-                    }
-                }
-
-                if (! $pluginJson) {
-                    throw new \Exception('Invalid plugin structure: plugin.json not found');
-                }
-
-                // Read and validate plugin.json
-                $config = json_decode(File::get($pluginJson), true);
-                if (! isset($config['name']) || ! isset($config['slug']) || ! isset($config['version'])) {
-                    throw new \Exception('Invalid plugin.json structure');
-                }
-
-                // Move to plugins folder
-                $targetPath = $pluginsPath.'/'.$config['slug'];
-                if (File::exists($targetPath)) {
-                    File::deleteDirectory($targetPath);
-                }
-                File::moveDirectory($pluginFolder, $targetPath);
-
-                // Register plugin in database
-                Plugin::updateOrCreate(
-                    ['folder_name' => $config['slug']],
-                    [
-                        'name' => $config['name'],
-                        'slug' => $config['slug'],
-                        'description' => $config['description'] ?? null,
-                        'version' => $config['version'],
-                        'author' => $config['author'] ?? null,
-                        'author_url' => $config['author_url'] ?? null,
-                        'settings' => $config['settings'] ?? null,
-                        'requires' => $config['requires'] ?? null,
-                    ]
-                );
-
-                return redirect()->back()->with('success', 'Plugin uploaded successfully');
-            }
-
-            throw new \Exception('Failed to open zip file');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return redirect()->back()->with('error', 'Failed to upload plugin: '.$e->getMessage());
-        } finally {
-            // Clean up temporary files
-            if (File::exists($tempPath)) {
-                File::deleteDirectory($tempPath);
-            }
         }
+
+        return redirect()->back()->with('success', 'Plugin uploaded successfully');
     }
 }

@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Models\Plugin;
-use App\Support\PluginHooks;
+use App\Services\PluginFrontendAssetRegistry;
 use App\Services\UpdateService;
+use App\Support\AuthRedirect;
+use App\Support\PluginHooks;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -43,6 +45,9 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $user = $request->user();
+        $isAdminUser = AuthRedirect::canAccessAdmin($user);
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -53,11 +58,12 @@ class HandleInertiaRequests extends Middleware
             ],
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
-                'permissions' => $request->user()
-                    ? $request->user()->getAllPermissions()->pluck('name')->values()->all()
+                'user' => $user,
+                'permissions' => $user
+                    ? $user->getAllPermissions()->pluck('name')->values()->all()
                     : [],
             ],
+            'registrationEnabled' => fn (): bool => AuthRedirect::registrationEnabled(),
             'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
@@ -68,9 +74,15 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
                 'updateCheck' => fn () => $request->session()->get('updateCheck'),
             ],
-            'updateAvailable' => fn () => app(UpdateService::class)->getSharedUpdateAvailability(),
-            'adminNavigation' => fn () => $this->buildAdminNavigation($request),
-            'pluginAssets' => fn () => app(\App\Services\PluginFrontendAssetRegistry::class)->allActivePluginAssets(),
+            // Admin-only payloads are withheld from members and guests so they
+            // never receive plugin navigation or update metadata.
+            'updateAvailable' => fn () => $isAdminUser
+                ? app(UpdateService::class)->getSharedUpdateAvailability()
+                : null,
+            'adminNavigation' => fn (): array => $isAdminUser
+                ? $this->buildAdminNavigation($request)
+                : [],
+            'pluginAssets' => fn () => app(PluginFrontendAssetRegistry::class)->allActivePluginAssets(),
         ];
     }
 

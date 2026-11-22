@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\AuthRedirect;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +16,7 @@ class EnsurePendingTwoFactorLogin
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->user()) {
-            return redirect()->route('admin.dashboard');
+            return redirect()->to(AuthRedirect::afterAuth($request->user()));
         }
 
         if (! $request->session()->has('two_factor_login.id')) {

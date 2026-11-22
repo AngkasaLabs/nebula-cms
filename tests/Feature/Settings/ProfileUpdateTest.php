@@ -2,9 +2,19 @@
 
 use App\Models\User;
 
+beforeEach(function () {
+    // These tests exercise profile settings, not the admin gate.
+    $this->adminUser = function (): User {
+        $user = User::factory()->create();
+        $user->markEmailAsVerified();
+        $user->givePermissionTo('access admin');
+
+        return $user;
+    };
+});
+
 test('profile page is displayed', function () {
-    $user = User::factory()->create();
-    $user->markEmailAsVerified();
+    $user = ($this->adminUser)();
 
     $response = $this
         ->actingAs($user)
@@ -14,8 +24,7 @@ test('profile page is displayed', function () {
 });
 
 test('profile information can be updated', function () {
-    $user = User::factory()->create();
-    $user->markEmailAsVerified();
+    $user = ($this->adminUser)();
 
     $response = $this
         ->actingAs($user)
@@ -36,8 +45,7 @@ test('profile information can be updated', function () {
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
-    $user->markEmailAsVerified();
+    $user = ($this->adminUser)();
 
     $response = $this
         ->actingAs($user)
@@ -54,8 +62,7 @@ test('email verification status is unchanged when the email address is unchanged
 });
 
 test('user can delete their account', function () {
-    $user = User::factory()->create();
-    $user->markEmailAsVerified();
+    $user = ($this->adminUser)();
 
     $response = $this
         ->actingAs($user)
@@ -72,8 +79,7 @@ test('user can delete their account', function () {
 });
 
 test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
-    $user->markEmailAsVerified();
+    $user = ($this->adminUser)();
 
     $response = $this
         ->actingAs($user)

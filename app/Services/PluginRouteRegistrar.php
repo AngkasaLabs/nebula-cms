@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Plugin;
+use App\Support\AuthRedirect;
 use App\Support\PluginHooks;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -79,11 +80,31 @@ class PluginRouteRegistrar
             $middleware = ['web'];
         }
 
+        $prefix = $this->normalizePrefix($config['prefix'] ?? '_plugin/'.$plugin->slug);
+
+        // Plugin routes mounted under /admin inherit the same gate as the core
+        // admin panel, even if the plugin forgot to declare auth middleware.
+        if ($this->isAdminPrefix($prefix)) {
+            if (! in_array('auth', $middleware, true)) {
+                $middleware[] = 'auth';
+            }
+
+            $permissionMiddleware = 'permission:'.AuthRedirect::ADMIN_PERMISSION;
+            if (! in_array($permissionMiddleware, $middleware, true)) {
+                $middleware[] = $permissionMiddleware;
+            }
+        }
+
         return [
-            'prefix' => $this->normalizePrefix($config['prefix'] ?? '_plugin/'.$plugin->slug),
+            'prefix' => $prefix,
             'name_prefix' => $this->normalizeNamePrefix($config['name_prefix'] ?? 'plugin.'.$plugin->slug.'.'),
             'middleware' => $middleware,
         ];
+    }
+
+    protected function isAdminPrefix(string $prefix): bool
+    {
+        return $prefix === 'admin' || str_starts_with($prefix, 'admin/');
     }
 
     protected function normalizePrefix(mixed $prefix): string

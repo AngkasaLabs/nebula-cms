@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\AuthRedirect;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,16 +23,20 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
+        abort_unless(AuthRedirect::registrationEnabled(), 403);
+
         return Inertia::render('auth/register');
     }
 
     /**
      * Handle an incoming registration request.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
+        abort_unless(AuthRedirect::registrationEnabled(), 403);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
@@ -42,10 +49,20 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $defaultRole = AuthRedirect::defaultRegistrationRole();
+
+        if ($defaultRole) {
+            try {
+                $user->assignRole($defaultRole);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to assign default registration role: '.$e->getMessage());
+            }
+        }
+
         event(new Registered($user));
 
         Auth::login($user);
 
-        return to_route('admin.dashboard');
+        return redirect()->to(AuthRedirect::afterAuth($user));
     }
 }

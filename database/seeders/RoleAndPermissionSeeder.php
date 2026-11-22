@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleAndPermissionSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class RoleAndPermissionSeeder extends Seeder
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions
         $permissions = [
@@ -46,7 +47,8 @@ class RoleAndPermissionSeeder extends Seeder
             // Settings
             ['name' => 'manage settings', 'group' => 'Settings'],
 
-            // Administration (dashboard, menus, themes, plugins, roles)
+            // Administration (admin gate, dashboard, menus, themes, plugins, roles)
+            ['name' => 'access admin', 'group' => 'Administration'],
             ['name' => 'view dashboard', 'group' => 'Administration'],
             ['name' => 'manage menus', 'group' => 'Administration'],
             ['name' => 'manage themes', 'group' => 'Administration'],
@@ -74,6 +76,7 @@ class RoleAndPermissionSeeder extends Seeder
             ['name' => 'Admin', 'guard_name' => 'web']
         );
         $admin->syncPermissions([
+            'access admin',
             'view users', 'create users', 'edit users',
             'view content', 'create content', 'edit content', 'delete content', 'publish content',
             'view categories', 'create categories', 'edit categories', 'delete categories',
@@ -87,6 +90,7 @@ class RoleAndPermissionSeeder extends Seeder
             ['name' => 'Editor', 'guard_name' => 'web']
         );
         $editor->syncPermissions([
+            'access admin',
             'view content', 'create content', 'edit content', 'publish content',
             'view categories',
             'view media', 'create media', 'edit media',
@@ -97,6 +101,7 @@ class RoleAndPermissionSeeder extends Seeder
             ['name' => 'Author', 'guard_name' => 'web']
         );
         $author->syncPermissions([
+            'access admin',
             'view content', 'create content', 'edit content',
             'view categories',
             'view media', 'create media', 'edit media',

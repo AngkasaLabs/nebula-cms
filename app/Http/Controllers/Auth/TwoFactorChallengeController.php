@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\TwoFactorService;
+use App\Support\AuthRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -51,6 +52,8 @@ class TwoFactorChallengeController extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard', absolute: false));
+        AuthRedirect::forgetUnsafeIntended($user);
+
+        return redirect()->intended(AuthRedirect::afterAuth($user));
     }
 }
