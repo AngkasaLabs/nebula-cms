@@ -164,7 +164,7 @@ describe('UpdateService backup retention', function () {
         $dir = storage_path('app/backups');
         foreach ([6, 5, 4, 3, 2, 1] as $age) {
             $file = $dir."/pre-update-1.0.0-2026010{$age}_000000.zip";
-            file_put_contents($file, 'backup');
+            writeValidZip($file);
             touch($file, now()->subDays($age)->timestamp);
         }
 
@@ -178,7 +178,7 @@ describe('UpdateService backup retention', function () {
         $dir = storage_path('app/backups');
         foreach ([5, 4, 3, 2, 1] as $age) {
             $file = $dir."/pre-update-1.0.0-2026010{$age}_000000.zip";
-            file_put_contents($file, 'backup');
+            writeValidZip($file);
             touch($file, now()->subDays($age)->timestamp);
         }
 
@@ -189,7 +189,7 @@ describe('UpdateService backup retention', function () {
 
     it('deletes a backup inside the backups directory', function () {
         $file = storage_path('app/backups/pre-update-1.0.0-20260101_000000.zip');
-        file_put_contents($file, 'backup');
+        writeValidZip($file);
 
         expect(app(UpdateService::class)->deleteBackup($file))->toBeTrue();
         expect(file_exists($file))->toBeFalse();

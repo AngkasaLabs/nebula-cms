@@ -166,7 +166,7 @@ test('admin can prune backups beyond the retention limit', function () {
 
     foreach ([4, 3, 2, 1] as $age) {
         $file = $backupsDir."/pre-update-1.0.0-2026010{$age}_000000.zip";
-        file_put_contents($file, 'backup');
+        writeValidZip($file);
         touch($file, now()->subDays($age)->timestamp);
     }
 

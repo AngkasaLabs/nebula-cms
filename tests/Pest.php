@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,8 +14,8 @@
 |
 */
 
-pest()->extend(Tests\TestCase::class)
-    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
     ->beforeEach(function () {
         $this->withoutVite();
     })
@@ -47,4 +50,25 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function writeValidZip(string $path, array $contents = ['backup.txt' => 'backup']): void
+{
+    $directory = dirname($path);
+
+    if (! is_dir($directory)) {
+        mkdir($directory, 0755, true);
+    }
+
+    $zip = new ZipArchive;
+
+    if ($zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        throw new RuntimeException("Cannot create test zip: {$path}");
+    }
+
+    foreach ($contents as $name => $content) {
+        $zip->addFromString($name, $content);
+    }
+
+    $zip->close();
 }

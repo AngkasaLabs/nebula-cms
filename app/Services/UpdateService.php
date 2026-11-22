@@ -254,6 +254,10 @@ class UpdateService
      */
     public function createBackup(): string
     {
+        @set_time_limit(0);
+        @ini_set('max_execution_time', '600');
+        @ignore_user_abort(true);
+
         $version = config('nebula.version');
         $timestamp = now()->format('Ymd_His');
         $backupDir = storage_path('app/backups');
@@ -269,30 +273,42 @@ class UpdateService
             throw new \RuntimeException('Could not create backup archive.');
         }
 
-        // Backup core directories
-        foreach ($this->coreItems as $item) {
-            $fullPath = base_path($item);
+        try {
+            // Backup core directories
+            foreach ($this->coreItems as $item) {
+                $fullPath = base_path($item);
 
-            if (is_dir($fullPath)) {
-                $this->addDirectoryToZip($zip, $fullPath, $item);
-            } elseif (is_file($fullPath)) {
-                $zip->addFile($fullPath, $item);
-            }
-        }
-
-        // Backup public/ core files (excluding preserved paths)
-        $publicPath = public_path();
-        $this->addDirectoryToZip($zip, $publicPath, 'public', function (string $relativePath) {
-            foreach ($this->publicPreserved as $preserved) {
-                if (str_starts_with($relativePath, "public/{$preserved}")) {
-                    return false;
+                if (is_dir($fullPath)) {
+                    $this->addDirectoryToZip($zip, $fullPath, $item);
+                } elseif (is_file($fullPath)) {
+                    $zip->addFile($fullPath, $item);
                 }
             }
 
-            return true;
-        });
+            // Backup public/ core files (excluding preserved paths)
+            $publicPath = public_path();
+            $this->addDirectoryToZip($zip, $publicPath, 'public', function (string $relativePath) {
+                foreach ($this->publicPreserved as $preserved) {
+                    if (str_starts_with($relativePath, "public/{$preserved}")) {
+                        return false;
+                    }
+                }
 
-        $zip->close();
+                return true;
+            });
+
+            if (! $zip->close()) {
+                throw new \RuntimeException('Could not finalize the backup archive.');
+            }
+        } catch (\Throwable $e) {
+            @$zip->close();
+
+            if (File::exists($backupFile)) {
+                @unlink($backupFile);
+            }
+
+            throw $e;
+        }
 
         Log::info("Backup created: {$backupFile}");
 
@@ -310,6 +326,7 @@ class UpdateService
 
         @set_time_limit(0);
         @ini_set('max_execution_time', '600');
+        @ignore_user_abort(true);
 
         try {
             File::makeDirectory($tempDir, 0755, true);
@@ -411,10 +428,21 @@ class UpdateService
      */
     public function rollback(string $backupFile): array
     {
+        @set_time_limit(0);
+        @ini_set('max_execution_time', '600');
+        @ignore_user_abort(true);
+
         if (! File::exists($backupFile)) {
             return [
                 'success' => false,
                 'message' => 'Backup file not found.',
+            ];
+        }
+
+        if (! $this->isValidBackup($backupFile)) {
+            return [
+                'success' => false,
+                'message' => 'Backup archive is invalid or incomplete. Delete it and use an earlier backup.',
             ];
         }
 
@@ -495,6 +523,7 @@ class UpdateService
         $files = File::glob($backupDir.'/pre-update-*.zip');
 
         return collect($files)
+            ->filter(fn (string $file) => $this->isValidBackup($file))
             ->map(fn (string $file) => [
                 'filename' => basename($file),
                 'path' => $file,
@@ -517,6 +546,17 @@ class UpdateService
         $keep = max(1, $keep ?? (int) config('nebula.backup_retention', 5));
 
         $deleted = [];
+        $backupDir = storage_path('app/backups');
+        $staleCutoff = now()->subHour()->timestamp;
+
+        // Remove incomplete archives left behind by an aborted backup.
+        foreach (File::glob($backupDir.'/pre-update-*.zip') ?: [] as $file) {
+            if (filemtime($file) < $staleCutoff && ! $this->isValidBackup($file)) {
+                if (@unlink($file)) {
+                    $deleted[] = basename($file);
+                }
+            }
+        }
 
         foreach (array_slice($this->getBackups(), $keep) as $backup) {
             try {
@@ -668,19 +708,53 @@ class UpdateService
 
     /**
      * Recursively add a directory to a ZipArchive.
+     *
+     * Uses a streaming recursive iterator instead of File::allFiles(), which
+     * sorts the whole tree first. On shared hosting that sort is what pushed
+     * update requests past the 30 second execution limit.
      */
     protected function addDirectoryToZip(ZipArchive $zip, string $path, string $zipPath, ?\Closure $filter = null): void
     {
-        $files = File::allFiles($path);
+        $root = rtrim($path, '/\\');
 
-        foreach ($files as $file) {
-            $relativePath = $zipPath.'/'.$file->getRelativePathname();
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
 
-            if ($filter && ! $filter($relativePath)) {
+        foreach ($iterator as $file) {
+            if (! $file instanceof \SplFileInfo || ! $file->isFile() || $file->isLink()) {
                 continue;
             }
 
-            $zip->addFile($file->getRealPath(), $relativePath);
+            $absolutePath = $file->getPathname();
+            $relativePath = str_replace('\\', '/', substr($absolutePath, strlen($root) + 1));
+            $zipRelative = $zipPath.'/'.$relativePath;
+
+            if ($filter && ! $filter($zipRelative)) {
+                continue;
+            }
+
+            $zip->addFile($absolutePath, $zipRelative);
         }
+    }
+
+    /**
+     * A backup is usable only when the ZIP central directory is readable.
+     */
+    protected function isValidBackup(string $file): bool
+    {
+        if (! is_file($file) || filesize($file) < 64) {
+            return false;
+        }
+
+        $zip = new ZipArchive;
+        $opened = $zip->open($file, ZipArchive::CHECKCONS);
+
+        if ($opened === true) {
+            $zip->close();
+        }
+
+        return $opened === true;
     }
 }
