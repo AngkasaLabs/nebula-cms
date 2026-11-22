@@ -17,6 +17,10 @@ interface StorePackage {
     description: string | null;
     category: string | null;
     author: string | null;
+    publisher: string | null;
+    publisher_url: string | null;
+    verification: 'unverified' | 'verified' | 'official';
+    verified_at: string | null;
     icon: string | null;
     screenshot: string | null;
     pricing: 'free' | 'paid';
@@ -123,7 +127,8 @@ export default function StoreIndex({ packages, meta, filters, storeUrl, error, u
                     <AlertTitle>Signed packages with automatic rollback</AlertTitle>
                     <AlertDescription>
                         Every download is verified before installation. Updates snapshot the installed package first; if an update fails, the previous
-                        files and metadata are restored automatically.
+                        files and metadata are restored automatically. Official and Verified badges are assigned by the store operator; they are not a
+                        guarantee of package behavior, so review permissions before installing.
                     </AlertDescription>
                 </Alert>
 
@@ -176,11 +181,12 @@ export default function StoreIndex({ packages, meta, filters, storeUrl, error, u
                                                     <CardTitle className="flex flex-wrap items-center gap-2">
                                                         {pkg.name}
                                                         <Badge variant="outline">{pkg.type}</Badge>
+                                                        <TrustBadge verification={pkg.verification} />
                                                         {pkg.pricing === 'paid' && <Badge variant="secondary">paid</Badge>}
                                                     </CardTitle>
                                                     <CardDescription>
                                                         {pkg.slug}
-                                                        {pkg.author ? ` · ${pkg.author}` : ''}
+                                                        {pkg.author ? ` · by ${pkg.author}` : ''}
                                                     </CardDescription>
                                                 </div>
                                             </div>
@@ -197,6 +203,24 @@ export default function StoreIndex({ packages, meta, filters, storeUrl, error, u
                                                 </p>
                                                 <p className="text-muted-foreground text-sm whitespace-pre-line">{pkg.latest_changelog}</p>
                                             </div>
+                                        )}
+
+                                        {pkg.publisher && (
+                                            <p className="text-muted-foreground text-sm">
+                                                Published by{' '}
+                                                {pkg.publisher_url ? (
+                                                    <a
+                                                        href={pkg.publisher_url}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="underline-offset-2 hover:underline"
+                                                    >
+                                                        {pkg.publisher}
+                                                    </a>
+                                                ) : (
+                                                    <span>{pkg.publisher}</span>
+                                                )}
+                                            </p>
                                         )}
 
                                         <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
@@ -266,6 +290,28 @@ export default function StoreIndex({ packages, meta, filters, storeUrl, error, u
             </div>
         </AppLayout>
     );
+}
+
+function TrustBadge({ verification }: { verification: StorePackage['verification'] }) {
+    if (verification === 'official') {
+        return (
+            <Badge>
+                <ShieldCheck className="mr-1 h-3 w-3" />
+                Official
+            </Badge>
+        );
+    }
+
+    if (verification === 'verified') {
+        return (
+            <Badge variant="secondary">
+                <ShieldCheck className="mr-1 h-3 w-3" />
+                Verified
+            </Badge>
+        );
+    }
+
+    return <Badge variant="outline">Unverified</Badge>;
 }
 
 function StatusBadge({ pkg }: { pkg: StorePackage }) {

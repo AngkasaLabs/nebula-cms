@@ -37,6 +37,10 @@ it('marks an installed package with a newer store version as update available', 
         'slug' => 'demo-plugin',
         'type' => 'plugin',
         'name' => 'Demo Plugin',
+        'author' => 'AngkasaLabs',
+        'publisher' => 'AngkasaLabs',
+        'publisher_url' => 'https://angkasalabs.com',
+        'verification' => 'official',
         'latest_version' => '1.2.0',
         'requires' => ['cms_version' => '^1.9.0'],
         'downloads' => 10,
@@ -54,6 +58,9 @@ it('marks an installed package with a newer store version as update available', 
             ->where('packages.0.status', 'update_available')
             ->where('packages.0.installed_version', '1.0.0')
             ->where('packages.0.compatible', true)
+            ->where('packages.0.author', 'AngkasaLabs')
+            ->where('packages.0.publisher', 'AngkasaLabs')
+            ->where('packages.0.verification', 'official')
         );
 });
 
