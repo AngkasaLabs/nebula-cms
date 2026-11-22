@@ -122,6 +122,32 @@ class PackageInstaller
     }
 
     /**
+     * Read a package manifest from a ZIP without installing it.
+     *
+     * Used by the store server to cross-check the manifest inside an uploaded
+     * archive against the signed manifest supplied by the publisher.
+     *
+     * @return array<string, mixed>
+     */
+    public function readManifestFromZip(string $zipPath, string $type): array
+    {
+        $this->inspector->assertSafeArchive($zipPath);
+
+        if ($type === 'theme') {
+            $this->inspector->assertThemeZipExtensions($zipPath);
+        } else {
+            $this->inspector->assertPluginZipExtensions($zipPath);
+        }
+
+        $manifestName = $type === 'theme' ? 'theme.json' : 'plugin.json';
+        $package = $this->extractPackage($zipPath, $manifestName);
+
+        $this->cleanupTemp($package['temp']);
+
+        return $package['manifest'];
+    }
+
+    /**
      * Extract the archive to a temporary folder and locate its manifest.
      *
      * @return array{manifest: array<string, mixed>, path: string, temp: string}
