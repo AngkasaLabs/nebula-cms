@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Plugin;
 use App\Services\PluginFrontendAssetRegistry;
+use App\Services\StoreUpdates;
 use App\Services\UpdateService;
 use App\Support\AuthRedirect;
 use App\Support\PluginHooks;
@@ -82,6 +83,9 @@ class HandleInertiaRequests extends Middleware
             'adminNavigation' => fn (): array => $isAdminUser
                 ? $this->buildAdminNavigation($request)
                 : [],
+            'storeUpdates' => fn (): ?array => $isAdminUser
+                ? app(StoreUpdates::class)->summary()
+                : null,
             'pluginAssets' => fn () => app(PluginFrontendAssetRegistry::class)->allActivePluginAssets(),
         ];
     }

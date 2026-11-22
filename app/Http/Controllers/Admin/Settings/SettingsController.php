@@ -30,6 +30,11 @@ class SettingsController extends Controller
         );
         $settings['registration_default_role'] = $settings['registration_default_role'] ?? '';
         $settings['member_redirect'] = $settings['member_redirect'] ?? '/';
+        $settings['store_url'] = $settings['store_url'] ?? config('nebula.store_url');
+        $settings['store_enabled'] = filter_var(
+            $settings['store_enabled'] ?? config('nebula.store_enabled', true),
+            FILTER_VALIDATE_BOOLEAN
+        );
 
         return Inertia::render('Admin/Settings/General', [
             'settings' => $settings,
@@ -58,6 +63,8 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'settings' => 'required|array',
             'settings.member_redirect' => ['sometimes', 'nullable', 'string', 'max:255', 'regex:/^\/(?!\/)/'],
+            'settings.store_url' => ['sometimes', 'nullable', 'url', 'max:255'],
+            'settings.store_enabled' => ['sometimes', 'boolean'],
             'settings.registration_default_role' => [
                 'sometimes',
                 'nullable',
@@ -72,6 +79,13 @@ class SettingsController extends Controller
             if (array_key_exists('registration_enabled', $settings)) {
                 $settings['registration_enabled'] = filter_var(
                     $settings['registration_enabled'],
+                    FILTER_VALIDATE_BOOLEAN
+                );
+            }
+
+            if (array_key_exists('store_enabled', $settings)) {
+                $settings['store_enabled'] = filter_var(
+                    $settings['store_enabled'],
                     FILTER_VALIDATE_BOOLEAN
                 );
             }

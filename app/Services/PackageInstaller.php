@@ -42,19 +42,28 @@ class PackageInstaller
             $this->cleanupTemp($package['temp']);
         }
 
-        return Plugin::updateOrCreate(
-            ['folder_name' => $slug],
-            [
-                'name' => $config['name'],
-                'slug' => $slug,
-                'description' => $config['description'] ?? null,
-                'version' => $config['version'],
-                'author' => $config['author'] ?? null,
-                'author_url' => $config['author_url'] ?? null,
-                'settings' => $config['settings'] ?? null,
-                'requires' => $config['requires'] ?? null,
-            ]
-        );
+        $plugin = Plugin::firstOrNew(['folder_name' => $slug]);
+        $isNew = ! $plugin->exists;
+
+        $plugin->fill([
+            'name' => $config['name'],
+            'slug' => $slug,
+            'description' => $config['description'] ?? null,
+            'version' => $config['version'],
+            'author' => $config['author'] ?? null,
+            'author_url' => $config['author_url'] ?? null,
+            'requires' => $config['requires'] ?? null,
+        ]);
+
+        // Updates must not wipe admin-managed settings or activation state.
+        if ($isNew) {
+            $plugin->settings = $config['settings'] ?? null;
+            $plugin->is_active = false;
+        }
+
+        $plugin->save();
+
+        return $plugin;
     }
 
     public function installThemeZip(string $zipPath, ?string $expectedSlug = null): Theme
@@ -78,18 +87,25 @@ class PackageInstaller
             $this->cleanupTemp($package['temp']);
         }
 
-        $theme = Theme::updateOrCreate(
-            ['folder_name' => $slug],
-            [
-                'name' => $config['name'],
-                'slug' => $slug,
-                'description' => $config['description'] ?? null,
-                'version' => $config['version'],
-                'author' => $config['author'] ?? null,
-                'settings' => $config['settings'] ?? null,
-                'preview' => $config['preview'] ?? null,
-            ]
-        );
+        $theme = Theme::firstOrNew(['folder_name' => $slug]);
+        $isNew = ! $theme->exists;
+
+        $theme->fill([
+            'name' => $config['name'],
+            'slug' => $slug,
+            'description' => $config['description'] ?? null,
+            'version' => $config['version'],
+            'author' => $config['author'] ?? null,
+            'preview' => $config['preview'] ?? null,
+        ]);
+
+        // Updates must not wipe admin-managed settings or activation state.
+        if ($isNew) {
+            $theme->settings = $config['settings'] ?? null;
+            $theme->is_active = false;
+        }
+
+        $theme->save();
 
         $this->publishThemeAssets($theme);
 

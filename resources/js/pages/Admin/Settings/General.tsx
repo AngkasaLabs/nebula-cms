@@ -28,6 +28,8 @@ interface GeneralSettingsProps {
         registration_enabled: boolean;
         registration_default_role: string;
         member_redirect: string;
+        store_url: string;
+        store_enabled: boolean;
     };
     roles: string[];
 }
@@ -42,6 +44,8 @@ export default function GeneralSettings({ settings, roles }: GeneralSettingsProp
             registration_enabled: Boolean(settings.registration_enabled),
             registration_default_role: settings.registration_default_role || '',
             member_redirect: settings.member_redirect || '/',
+            store_url: settings.store_url || '',
+            store_enabled: Boolean(settings.store_enabled),
         },
     });
 
@@ -128,6 +132,53 @@ export default function GeneralSettings({ settings, roles }: GeneralSettingsProp
                                 className="mt-1 block w-full"
                                 placeholder="Website Favicon URL"
                             />
+                        </div>
+
+                        <div className="border-border border-t pt-6">
+                            <h3 className="text-lg font-medium">Package Store</h3>
+                            <p className="text-muted-foreground text-sm">
+                                Sumber paket plugin dan theme yang bisa dipasang dari Admin → Marketplace.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <Label htmlFor="store_enabled">Aktifkan Marketplace</Label>
+                                <p className="text-muted-foreground text-sm">
+                                    Matikan untuk instalasi tanpa akses internet atau yang dikelola manual.
+                                </p>
+                            </div>
+                            <Switch
+                                id="store_enabled"
+                                checked={data.settings.store_enabled}
+                                onCheckedChange={(checked) =>
+                                    setData('settings', {
+                                        ...data.settings,
+                                        store_enabled: checked,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="store_url">Store URL</Label>
+                            <Input
+                                id="store_url"
+                                type="url"
+                                value={data.settings.store_url}
+                                onChange={(e) =>
+                                    setData('settings', {
+                                        ...data.settings,
+                                        store_url: e.target.value,
+                                    })
+                                }
+                                className="mt-1 block w-full"
+                                placeholder="https://nebula.angkasalabs.com"
+                            />
+                            <p className="text-muted-foreground text-xs">
+                                Alamat registry paket. Kosongkan untuk memakai nilai dari konfigurasi.
+                            </p>
+                            <InputError message={errors['settings.store_url']} />
                         </div>
 
                         <div className="border-border border-t pt-6">

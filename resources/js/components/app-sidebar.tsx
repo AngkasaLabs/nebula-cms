@@ -4,7 +4,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { type AdminNavigationItem, type NavItem } from '@/types';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, File, FileText, Settings, Users, Shield, Image, Paintbrush, AlignJustify, Puzzle, ScrollText } from 'lucide-react';
+import { LayoutGrid, File, FileText, Settings, Users, Shield, Image, Paintbrush, AlignJustify, Puzzle, ScrollText, Store } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
@@ -23,6 +23,7 @@ const iconMap = {
     ScrollText,
     Settings,
     Shield,
+    Store,
     Users,
 } as const;
 
@@ -40,7 +41,7 @@ function toNavItem(item: AdminNavigationItem): NavItem {
 }
 
 export function AppSidebar() {
-    const { auth, updateAvailable, adminNavigation } = usePage<SharedData>().props;
+    const { auth, updateAvailable, adminNavigation, storeUpdates } = usePage<SharedData>().props;
     const permissions = useMemo(() => auth.permissions ?? [], [auth.permissions]);
 
     const { mainNavItems, contentNavItems, adminNavItems } = useMemo(() => {
@@ -130,6 +131,14 @@ export function AppSidebar() {
                 icon: Puzzle,
             });
         }
+        if (can(permissions, 'store.install')) {
+            admin.push({
+                title: 'Marketplace',
+                href: '/admin/marketplace',
+                icon: Store,
+                badge: storeUpdates?.count ? String(storeUpdates.count) : undefined,
+            });
+        }
         if (can(permissions, 'manage settings')) {
             admin.push({
                 title: 'Settings',
@@ -156,7 +165,7 @@ export function AppSidebar() {
         }
 
         return { mainNavItems: main, contentNavItems: content, adminNavItems: admin };
-    }, [permissions, updateAvailable, adminNavigation]);
+    }, [permissions, updateAvailable, adminNavigation, storeUpdates]);
 
     return (
         <Sidebar collapsible="icon" variant="inset">

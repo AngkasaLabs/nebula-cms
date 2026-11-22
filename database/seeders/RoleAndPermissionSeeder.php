@@ -49,6 +49,7 @@ class RoleAndPermissionSeeder extends Seeder
 
             // Administration (admin gate, dashboard, menus, themes, plugins, roles)
             ['name' => 'access admin', 'group' => 'Administration'],
+            ['name' => 'store.install', 'group' => 'Administration'],
             ['name' => 'view dashboard', 'group' => 'Administration'],
             ['name' => 'manage menus', 'group' => 'Administration'],
             ['name' => 'manage themes', 'group' => 'Administration'],
@@ -76,7 +77,7 @@ class RoleAndPermissionSeeder extends Seeder
             ['name' => 'Admin', 'guard_name' => 'web']
         );
         $admin->syncPermissions([
-            'access admin',
+            'access admin', 'store.install',
             'view users', 'create users', 'edit users',
             'view content', 'create content', 'edit content', 'delete content', 'publish content',
             'view categories', 'create categories', 'edit categories', 'delete categories',

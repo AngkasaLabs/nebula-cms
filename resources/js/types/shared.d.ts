@@ -17,6 +17,11 @@ declare interface SharedData {
     ziggy: ZiggyConfigLike;
     sidebarOpen: boolean;
     adminNavigation: AdminNavigationItem[];
+    storeUpdates?: {
+        count: number;
+        items: Array<{ slug: string; type: string; latest: string | null }>;
+        checked_at: string | null;
+    } | null;
     [key: string]: unknown;
 }
 

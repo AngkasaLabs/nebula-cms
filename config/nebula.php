@@ -37,6 +37,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Package Store
+    |--------------------------------------------------------------------------
+    |
+    | URL of the NebulaCMS package registry. Can be overridden from
+    | Settings → General without editing this file.
+    |
+    */
+    'store_url' => env('NEBULA_STORE_URL', 'https://nebula.angkasalabs.com'),
+
+    'store_enabled' => filter_var(env('NEBULA_STORE_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
+
+    'store_timeout' => (int) env('NEBULA_STORE_TIMEOUT', 15),
+
+    /*
+    |--------------------------------------------------------------------------
     | Package Signing Keys
     |--------------------------------------------------------------------------
     |

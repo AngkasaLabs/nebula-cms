@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Services\StoreClient;
+use App\Services\StoreUpdates;
 use App\Services\UpdateService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -26,7 +28,7 @@ class CheckForUpdates extends Command
     /**
      * Execute the console command.
      */
-    public function handle(UpdateService $updateService)
+    public function handle(UpdateService $updateService, StoreUpdates $storeUpdates)
     {
         $this->info('Checking for NebulaCMS updates...');
 
@@ -49,6 +51,16 @@ class CheckForUpdates extends Command
             Log::error('Background check for updates failed: '.$e->getMessage());
 
             return Command::FAILURE;
+        }
+
+        try {
+            if (app(StoreClient::class)->enabled()) {
+                $storeItems = $storeUpdates->refresh();
+                $this->info('Store: '.count($storeItems).' package update(s) available.');
+            }
+        } catch (\Throwable $e) {
+            $this->warn('Store update check failed: '.$e->getMessage());
+            Log::warning('Background store update check failed: '.$e->getMessage());
         }
 
         return Command::SUCCESS;

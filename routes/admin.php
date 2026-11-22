@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\PluginController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\Settings\PasswordController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Admin\Settings\ProfileController;
 use App\Http\Controllers\Admin\Settings\SettingsController;
 use App\Http\Controllers\Admin\Settings\TwoFactorController;
 use App\Http\Controllers\Admin\Settings\UpdateController;
+use App\Http\Controllers\Admin\StoreController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\UserController;
@@ -126,15 +128,22 @@ Route::middleware(['auth', 'verified', 'permission:access admin'])->prefix('admi
         Route::post('/upload', [ThemeController::class, 'upload'])->name('admin.themes.upload');
     });
 
+    // Package Marketplace (store client)
+    Route::prefix('marketplace')->group(function () {
+        Route::get('/', [StoreController::class, 'index'])->name('admin.marketplace.index');
+        Route::post('/install', [StoreController::class, 'install'])->name('admin.marketplace.install');
+        Route::post('/refresh', [StoreController::class, 'refresh'])->name('admin.marketplace.refresh');
+    });
+
     // Plugin Management
     Route::prefix('plugins')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\PluginController::class, 'index'])->name('admin.plugins.index');
-        Route::post('/{plugin}/activate', [\App\Http\Controllers\Admin\PluginController::class, 'activate'])->name('admin.plugins.activate');
-        Route::post('/{plugin}/deactivate', [\App\Http\Controllers\Admin\PluginController::class, 'deactivate'])->name('admin.plugins.deactivate');
-        Route::patch('/{plugin}/settings', [\App\Http\Controllers\Admin\PluginController::class, 'updateSettings'])->name('admin.plugins.settings.update');
-        Route::post('/scan', [\App\Http\Controllers\Admin\PluginController::class, 'scan'])->name('admin.plugins.scan');
-        Route::delete('/{plugin}', [\App\Http\Controllers\Admin\PluginController::class, 'destroy'])->name('admin.plugins.destroy');
-        Route::post('/upload', [\App\Http\Controllers\Admin\PluginController::class, 'upload'])->name('admin.plugins.upload');
+        Route::get('/', [PluginController::class, 'index'])->name('admin.plugins.index');
+        Route::post('/{plugin}/activate', [PluginController::class, 'activate'])->name('admin.plugins.activate');
+        Route::post('/{plugin}/deactivate', [PluginController::class, 'deactivate'])->name('admin.plugins.deactivate');
+        Route::patch('/{plugin}/settings', [PluginController::class, 'updateSettings'])->name('admin.plugins.settings.update');
+        Route::post('/scan', [PluginController::class, 'scan'])->name('admin.plugins.scan');
+        Route::delete('/{plugin}', [PluginController::class, 'destroy'])->name('admin.plugins.destroy');
+        Route::post('/upload', [PluginController::class, 'upload'])->name('admin.plugins.upload');
     });
 
     // Menu Routes
