@@ -1,8 +1,10 @@
 <?php
 
 use App\Exceptions\StoreException;
+use App\Models\Plugin;
 use App\Models\Setting;
 use App\Services\StoreClient;
+use App\Services\StoreUpdates;
 use Illuminate\Support\Facades\Http;
 
 it('reads the store URL from settings before falling back to config', function () {
@@ -49,4 +51,57 @@ it('surfaces store errors as exceptions', function () {
 
     expect(fn () => app(StoreClient::class)->catalog())
         ->toThrow(StoreException::class, 'Server exploded');
+});
+
+it('requests updates for installed packages', function () {
+    Setting::set('store_url', 'https://store.test');
+
+    Http::fake([
+        'https://store.test/api/store/v1/updates' => Http::response([
+            'data' => [[
+                'slug' => 'demo',
+                'type' => 'plugin',
+                'current' => '1.0.0',
+                'latest' => '1.1.0',
+            ]],
+        ]),
+    ]);
+
+    $updates = app(StoreClient::class)->updates([
+        ['slug' => 'demo', 'type' => 'plugin', 'version' => '1.0.0'],
+    ]);
+
+    expect($updates)->toHaveCount(1);
+    expect($updates[0]['latest'])->toBe('1.1.0');
+});
+
+it('caches and summarises store updates', function () {
+    Plugin::create([
+        'name' => 'Demo',
+        'slug' => 'demo',
+        'folder_name' => 'demo',
+        'version' => '1.0.0',
+    ]);
+
+    Setting::set('store_url', 'https://store.test');
+
+    Http::fake([
+        'https://store.test/api/store/v1/updates' => Http::response([
+            'data' => [[
+                'slug' => 'demo',
+                'type' => 'plugin',
+                'current' => '1.0.0',
+                'latest' => '1.1.0',
+            ]],
+        ]),
+    ]);
+
+    $service = app(StoreUpdates::class);
+    $service->refresh();
+
+    $summary = $service->summary();
+
+    expect($summary['count'])->toBe(1);
+    expect($summary['items'][0])->toMatchArray(['slug' => 'demo', 'type' => 'plugin', 'latest' => '1.1.0']);
+    expect($service->map())->toHaveKey('plugin:demo');
 });
