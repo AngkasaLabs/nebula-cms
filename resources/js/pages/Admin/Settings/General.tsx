@@ -1,16 +1,16 @@
-import { Head, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import HeadingSmall from '@/components/heading-small';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import InputError from '@/components/input-error';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import HeadingSmall from '@/components/heading-small';
-import SettingsLayout from '@/layouts/settings/layout';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
+import { Head, useForm } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -61,10 +61,7 @@ export default function GeneralSettings({ settings, roles }: GeneralSettingsProp
             <Head title="General Settings" />
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall
-                        title="General Settings"
-                        description="Basic website settings like name, description, and logo"
-                    />
+                    <HeadingSmall title="General Settings" description="Basic website settings like name, description, and logo" />
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid gap-2">
@@ -175,9 +172,7 @@ export default function GeneralSettings({ settings, roles }: GeneralSettingsProp
                                 className="mt-1 block w-full"
                                 placeholder="https://nebula.angkasalabs.com"
                             />
-                            <p className="text-muted-foreground text-xs">
-                                Alamat registry paket. Kosongkan untuk memakai nilai dari konfigurasi.
-                            </p>
+                            <p className="text-muted-foreground text-xs">Alamat registry paket. Kosongkan untuk memakai nilai dari konfigurasi.</p>
                             <InputError message={errors['settings.store_url']} />
                         </div>
 
@@ -191,9 +186,7 @@ export default function GeneralSettings({ settings, roles }: GeneralSettingsProp
                         <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
                             <div className="space-y-0.5">
                                 <Label htmlFor="registration_enabled">Izinkan pendaftaran publik</Label>
-                                <p className="text-muted-foreground text-sm">
-                                    Jika dimatikan, halaman /register tidak dapat diakses. Default: mati.
-                                </p>
+                                <p className="text-muted-foreground text-sm">Jika dimatikan, halaman /register tidak dapat diakses. Default: mati.</p>
                             </div>
                             <Switch
                                 id="registration_enabled"
@@ -251,9 +244,7 @@ export default function GeneralSettings({ settings, roles }: GeneralSettingsProp
                                 className="mt-1 block w-full"
                                 placeholder="/"
                             />
-                            <p className="text-muted-foreground text-xs">
-                                Harus berupa path lokal yang diawali garis miring, misalnya / atau /akun.
-                            </p>
+                            <p className="text-muted-foreground text-xs">Harus berupa path lokal yang diawali garis miring, misalnya / atau /akun.</p>
                             <InputError message={errors['settings.member_redirect']} />
                         </div>
 

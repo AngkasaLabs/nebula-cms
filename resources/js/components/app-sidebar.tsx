@@ -1,10 +1,18 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from '@/components/ui/sidebar';
-import { type AdminNavigationItem, type NavItem } from '@/types';
-import { type SharedData } from '@/types';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarRail,
+} from '@/components/ui/sidebar';
+import { type AdminNavigationItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, File, FileText, Settings, Users, Shield, Image, Paintbrush, AlignJustify, Puzzle, ScrollText, Store } from 'lucide-react';
+import { AlignJustify, File, FileText, Image, LayoutGrid, Paintbrush, Puzzle, ScrollText, Settings, Shield, Store, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 

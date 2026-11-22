@@ -56,16 +56,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Marketplace', href: '/admin/marketplace' },
 ];
 
-export default function StoreIndex({
-    packages,
-    meta,
-    filters,
-    storeUrl,
-    error,
-    updatedCount,
-    checkedAt,
-    cmsVersion,
-}: Props) {
+export default function StoreIndex({ packages, meta, filters, storeUrl, error, updatedCount, checkedAt, cmsVersion }: Props) {
     const [installing, setInstalling] = useState<string | null>(null);
 
     const install = (pkg: StorePackage) => {
@@ -106,8 +97,7 @@ export default function StoreIndex({
                         <div>
                             <h1 className="text-2xl font-semibold tracking-tight">Marketplace</h1>
                             <p className="text-muted-foreground text-sm">
-                                Install signed plugins and themes from{' '}
-                                <span className="font-medium">{storeUrl || 'the store'}</span>.
+                                Install signed plugins and themes from <span className="font-medium">{storeUrl || 'the store'}</span>.
                             </p>
                         </div>
                     </div>
@@ -132,12 +122,12 @@ export default function StoreIndex({
                     <ShieldCheck className="h-4 w-4" />
                     <AlertTitle>Signed packages with automatic rollback</AlertTitle>
                     <AlertDescription>
-                        Every download is verified before installation. Updates snapshot the installed package
-                        first; if an update fails, the previous files and metadata are restored automatically.
+                        Every download is verified before installation. Updates snapshot the installed package first; if an update fails, the previous
+                        files and metadata are restored automatically.
                     </AlertDescription>
                 </Alert>
 
-                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-sm">
                     <span>
                         {meta.total} package(s) · NebulaCMS {cmsVersion}
                     </span>
@@ -145,23 +135,9 @@ export default function StoreIndex({
                     {checkedAt && <span>Updates checked {new Date(checkedAt).toLocaleString()}</span>}
                 </div>
 
-                <form
-                    method="get"
-                    action="/admin/marketplace"
-                    className="flex flex-wrap items-center gap-2"
-                >
-                    <Input
-                        type="search"
-                        name="q"
-                        defaultValue={filters.q ?? ''}
-                        placeholder="Search packages…"
-                        className="max-w-xs"
-                    />
-                    <select
-                        name="type"
-                        defaultValue={filters.type ?? ''}
-                        className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                    >
+                <form method="get" action="/admin/marketplace" className="flex flex-wrap items-center gap-2">
+                    <Input type="search" name="q" defaultValue={filters.q ?? ''} placeholder="Search packages…" className="max-w-xs" />
+                    <select name="type" defaultValue={filters.type ?? ''} className="border-input bg-background h-9 rounded-md border px-3 text-sm">
                         <option value="">All types</option>
                         <option value="plugin">Plugins</option>
                         <option value="theme">Themes</option>
@@ -178,9 +154,7 @@ export default function StoreIndex({
                             <Store className="text-muted-foreground h-10 w-10" />
                             <div>
                                 <p className="font-medium">No packages found</p>
-                                <p className="text-muted-foreground text-sm">
-                                    Try a different search or check the store URL in Settings.
-                                </p>
+                                <p className="text-muted-foreground text-sm">Try a different search or check the store URL in Settings.</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -196,11 +170,7 @@ export default function StoreIndex({
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="flex gap-3">
                                                 <div className="bg-muted rounded-xl p-2.5">
-                                                    {pkg.type === 'theme' ? (
-                                                        <Package className="h-5 w-5" />
-                                                    ) : (
-                                                        <Puzzle className="h-5 w-5" />
-                                                    )}
+                                                    {pkg.type === 'theme' ? <Package className="h-5 w-5" /> : <Puzzle className="h-5 w-5" />}
                                                 </div>
                                                 <div>
                                                     <CardTitle className="flex flex-wrap items-center gap-2">
@@ -218,30 +188,22 @@ export default function StoreIndex({
                                     </CardHeader>
 
                                     <CardContent className="flex flex-1 flex-col gap-4">
-                                        {pkg.description && (
-                                            <p className="text-muted-foreground text-sm whitespace-pre-line">
-                                                {pkg.description}
-                                            </p>
-                                        )}
+                                        {pkg.description && <p className="text-muted-foreground text-sm whitespace-pre-line">{pkg.description}</p>}
 
                                         {pkg.latest_changelog && pkg.status === 'update_available' && (
                                             <div className="bg-muted/50 rounded-lg border p-3">
-                                                <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+                                                <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">
                                                     What's new in v{pkg.latest_version}
                                                 </p>
-                                                <p className="text-muted-foreground text-sm whitespace-pre-line">
-                                                    {pkg.latest_changelog}
-                                                </p>
+                                                <p className="text-muted-foreground text-sm whitespace-pre-line">{pkg.latest_changelog}</p>
                                             </div>
                                         )}
 
-                                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                                        <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
                                             {pkg.latest_version && <span>v{pkg.latest_version}</span>}
                                             <span>{pkg.downloads.toLocaleString()} downloads</span>
                                             {pkg.installed_version && <span>installed v{pkg.installed_version}</span>}
-                                            {pkg.requires?.cms_version && (
-                                                <span>requires NebulaCMS {pkg.requires.cms_version}</span>
-                                            )}
+                                            {pkg.requires?.cms_version && <span>requires NebulaCMS {pkg.requires.cms_version}</span>}
                                         </div>
 
                                         <div className="mt-auto flex flex-wrap items-center justify-between gap-2">
@@ -259,11 +221,7 @@ export default function StoreIndex({
                                             ) : (
                                                 <Button size="sm" onClick={() => install(pkg)} disabled={busy}>
                                                     <Download className="mr-2 h-4 w-4" />
-                                                    {busy
-                                                        ? 'Installing…'
-                                                        : pkg.status === 'update_available'
-                                                          ? 'Update'
-                                                          : 'Install'}
+                                                    {busy ? 'Installing…' : pkg.status === 'update_available' ? 'Update' : 'Install'}
                                                 </Button>
                                             )}
                                         </div>
