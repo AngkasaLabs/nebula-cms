@@ -18,3 +18,21 @@ it('menolak entri zip dengan path traversal', function () {
         }
     }
 });
+
+it('mengizinkan file notice tanpa ekstensi di zip plugin', function () {
+    $zipPath = ZipTestHelper::createZipFile([
+        'plugin.json' => '{}',
+        'index.php' => '<?php',
+        'NOTICE' => 'notice',
+        'AUTHORS' => 'author',
+    ]);
+
+    try {
+        (new SecureZipInspector)->assertPluginZipExtensions($zipPath);
+        expect(true)->toBeTrue();
+    } finally {
+        if (file_exists($zipPath)) {
+            unlink($zipPath);
+        }
+    }
+});

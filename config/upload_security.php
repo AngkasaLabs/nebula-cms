@@ -74,6 +74,7 @@ return [
 
     'plugin_zip_allowed_extensionless_names' => [
         'LICENSE', 'COPYING', 'README', 'CHANGELOG', 'Makefile',
+        'NOTICE', 'AUTHORS', 'CONTRIBUTORS', 'PATENTS',
     ],
 
     /*
@@ -90,6 +91,7 @@ return [
 
     'theme_zip_allowed_extensionless_names' => [
         'LICENSE', 'COPYING', 'README', 'CHANGELOG', 'Makefile',
+        'NOTICE', 'AUTHORS', 'CONTRIBUTORS', 'PATENTS',
     ],
 
     /*
