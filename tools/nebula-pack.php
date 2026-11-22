@@ -181,7 +181,7 @@ function commandPack(array $argv): void
         fail("cannot create archive: {$zipPath}");
     }
 
-    $skipped = ['.git', 'node_modules', 'vendor', '.DS_Store'];
+    $skipped = ['.git', '.github', '.gitignore', '.gitattributes', '.editorconfig', '.idea', '.vscode', '.fleet', '.nova', '.zed', 'node_modules', 'vendor', '.DS_Store'];
 
     $addDirectory = function (string $directory, string $prefix) use (&$addDirectory, $zip, $skipped): void {
         foreach (scandir($directory) ?: [] as $entry) {
