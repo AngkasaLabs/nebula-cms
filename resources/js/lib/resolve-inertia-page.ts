@@ -1,4 +1,34 @@
+import { router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+
+type PluginAssetMap = Record<string, { scripts: string[]; styles: string[] }>;
+
+let latestPluginAssets: PluginAssetMap | undefined;
+
+// The initial HTML only knows the plugins that were active on first load.
+// Inertia fires beforeUpdate with the new page before resolving its component,
+// so plugins activated later in the same tab can still load their assets.
+router.on('beforeUpdate', (event) => {
+    const assets = (event.detail.page.props as { pluginAssets?: PluginAssetMap }).pluginAssets;
+
+    if (assets) {
+        latestPluginAssets = assets;
+    }
+});
+
+function initialPluginAssets(): PluginAssetMap | undefined {
+    try {
+        const appElement = document.getElementById('app');
+
+        if (appElement && appElement.dataset.page) {
+            return JSON.parse(appElement.dataset.page).props?.pluginAssets;
+        }
+    } catch (e) {
+        console.error('Failed to parse initial Inertia page data:', e);
+    }
+
+    return undefined;
+}
 
 const corePages = import.meta.glob('../pages/**/*.tsx');
 const availablePages = {
@@ -61,17 +91,7 @@ async function resolvePluginPage(name: string): Promise<ResolvedPageModule> {
     let page = runtimeWindow.NebulaCMS?.getInertiaPage(name) ?? runtimeWindow.NebulaPlugins?.[name];
 
     if (!page) {
-        let pluginAssets: Record<string, { scripts: string[]; styles: string[] }> | undefined;
-        try {
-            const appElement = document.getElementById('app');
-            if (appElement && appElement.dataset.page) {
-                const pageData = JSON.parse(appElement.dataset.page);
-                pluginAssets = pageData.props?.pluginAssets;
-            }
-        } catch (e) {
-            console.error('Failed to parse initial Inertia page data:', e);
-        }
-        const assets = pluginAssets?.[name];
+        const assets = latestPluginAssets?.[name] ?? initialPluginAssets()?.[name];
 
         if (assets) {
             try {
