@@ -21,7 +21,7 @@ return [
     | The GitHub repository used to check for updates. Format: owner/repo
     |
     */
-    'github_repo' => 'AngkasaLabs/NebulaCMS',
+    'github_repo' => 'AngkasaLabs/nebula-cms',
 
     /*
     |--------------------------------------------------------------------------

@@ -7,8 +7,8 @@ Thank you for considering contributing to NebulaCMS! We greatly appreciate every
 - Fork repositori NebulaCMS
 - Clone your fork to local
 ```bash
-git clone https://github.com/AngkasaLabs/NebulaCMS.git
-cd NebulaCMS
+git clone https://github.com/AngkasaLabs/nebula-cms.git
+cd nebula-cms
 ```
 
 ### 2. Setup Development Environment
