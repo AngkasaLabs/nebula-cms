@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\PluginHooks;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -11,3 +12,6 @@ Artisan::command('inspire', function () {
 // Publish scheduled posts every minute (requires `php artisan schedule:run` via system cron in production — see README).
 Schedule::command('posts:publish-scheduled')->everyMinute();
 Schedule::command('cms:check-updates')->daily();
+
+// Plugins and themes may register their own recurring work (cleanup, expiry, sync).
+do_action(PluginHooks::SCHEDULE_REGISTER);

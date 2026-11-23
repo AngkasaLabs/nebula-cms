@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Page;
 use App\Models\Post;
+use App\Support\PluginHooks;
 
 class SitemapController extends Controller
 {
@@ -46,6 +47,9 @@ class SitemapController extends Controller
                     ];
                 }
             });
+
+        // Let plugins add their own public URLs (for example products).
+        $urls = apply_filters(PluginHooks::SITEMAP_URLS, $urls);
 
         return response()
             ->view('sitemap.xml', ['urls' => $urls])

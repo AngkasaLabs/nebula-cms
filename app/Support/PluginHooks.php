@@ -92,4 +92,15 @@ final class PluginHooks
     public const THEME_PUBLIC_ASSETS_PATH = 'theme.public_assets_path';
 
     public const THEME_CONTENT = 'theme.content';
+
+    /**
+     * Let plugins register recurring work:
+     * add_action('schedule.register', fn () => Schedule::command('...'));
+     */
+    public const SCHEDULE_REGISTER = 'schedule.register';
+
+    /**
+     * Filter the generated sitemap entries: apply_filters('sitemap.urls', $urls).
+     */
+    public const SITEMAP_URLS = 'sitemap.urls';
 }
