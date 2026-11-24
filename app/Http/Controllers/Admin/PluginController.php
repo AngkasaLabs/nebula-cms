@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\UploadScanner;
+use App\Exceptions\PackageVerificationException;
 use App\Exceptions\UploadScanException;
+use App\Exceptions\UploadSignatureException;
 use App\Http\Controllers\Controller;
 use App\Models\Plugin;
 use App\Services\PackageInstaller;
+use App\Services\PackageVerifier;
 use App\Services\PluginMigrator;
 use App\Services\PluginRequirementChecker;
 use App\Support\InertiaUploadSecurity;
+use App\Support\PackageUploadSignature;
 use App\Support\PluginHooks;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -192,19 +196,25 @@ class PluginController extends Controller
                     continue;
                 }
 
-                $model = Plugin::updateOrCreate(
-                    ['folder_name' => $folderName],
-                    [
-                        'name' => $config['name'],
-                        'slug' => $config['slug'],
-                        'description' => $config['description'] ?? null,
-                        'version' => $config['version'],
-                        'author' => $config['author'] ?? null,
-                        'author_url' => $config['author_url'] ?? null,
-                        'settings' => $config['settings'] ?? null,
-                        'requires' => $config['requires'] ?? null,
-                    ]
-                );
+                $model = Plugin::firstOrNew(['folder_name' => $folderName]);
+
+                $model->fill([
+                    'name' => $config['name'],
+                    'slug' => $config['slug'],
+                    'description' => $config['description'] ?? null,
+                    'version' => $config['version'],
+                    'author' => $config['author'] ?? null,
+                    'author_url' => $config['author_url'] ?? null,
+                    'requires' => $config['requires'] ?? null,
+                ]);
+
+                // Settings are admin-managed state: seed them only on first
+                // registration, never overwrite them on a later scan.
+                if (! $model->exists) {
+                    $model->settings = $config['settings'] ?? null;
+                }
+
+                $model->save();
 
                 if (! $this->requirementChecker->check($model)['ok']) {
                     $incompatible++;
@@ -269,6 +279,7 @@ class PluginController extends Controller
 
         $request->validate([
             'plugin' => ['required', 'file', 'mimes:zip', 'max:'.$maxZipKb],
+            'signature' => ['required', 'file', 'mimes:json,txt', 'max:64'],
         ]);
 
         $file = $request->file('plugin');
@@ -280,7 +291,23 @@ class PluginController extends Controller
         }
 
         try {
-            app(PackageInstaller::class)->installPluginZip($file->getRealPath());
+            $signature = PackageUploadSignature::parse($request->file('signature'));
+            PackageUploadSignature::assertType($signature, 'plugin');
+
+            // Trust check happens before the installer touches the filesystem.
+            app(PackageVerifier::class)->verify(
+                $file->getRealPath(),
+                $signature,
+                $signature['signature'],
+                $signature['key_id'] ?? null,
+            );
+        } catch (UploadSignatureException|PackageVerificationException $e) {
+            return redirect()->back()->with('error', 'Package verification failed: '.$e->getMessage());
+        }
+
+        try {
+            // Bind the signed slug to the archive's own plugin.json.
+            app(PackageInstaller::class)->installPluginZip($file->getRealPath(), (string) $signature['slug']);
         } catch (\InvalidArgumentException $e) {
             return redirect()->back()->with('error', __('Invalid ZIP: :msg', ['msg' => $e->getMessage()]));
         } catch (\Throwable $e) {

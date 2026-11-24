@@ -39,7 +39,10 @@ const breadcrumbs = [
 export default function Index({ themes, uploadSecurity }: Props) {
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [signatureFile, setSignatureFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const signatureInputRef = useRef<HTMLInputElement>(null);
+    const signatureEmptyInputRef = useRef<HTMLInputElement>(null);
 
     const handleScan = () => {
         router.post(route('admin.themes.scan'));
@@ -51,18 +54,32 @@ export default function Index({ themes, uploadSecurity }: Props) {
         }
     };
 
+    const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSignatureFile(e.target.files[0]);
+        }
+    };
+
     const handleUpload = () => {
-        if (selectedFile) {
+        if (selectedFile && signatureFile) {
             const formData = new FormData();
             formData.append('theme', selectedFile);
+            formData.append('signature', signatureFile);
             router.post(route('admin.themes.upload'), formData, {
                 forceFormData: true,
                 preserveScroll: true,
             });
             setIsUploadDialogOpen(false);
             setSelectedFile(null);
+            setSignatureFile(null);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
+            }
+            if (signatureInputRef.current) {
+                signatureInputRef.current.value = '';
+            }
+            if (signatureEmptyInputRef.current) {
+                signatureEmptyInputRef.current.value = '';
             }
         }
     };
@@ -94,8 +111,7 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                             Upload Theme
                                         </DialogTitle>
                                         <DialogDescription className="text-sm text-muted-foreground pt-2">
-                                            ZIP maks. {uploadSecurity.zipMaxMb} MB, berisi <code className="text-xs">theme.json</code> di root atau satu subfolder. Hanya
-                                            unduh tema dari sumber tepercaya.
+                                            ZIP maks. {uploadSecurity.zipMaxMb} MB, berisi <code className="text-xs">theme.json</code> di root atau satu subfolder, plus signature <code className="text-xs">.sig.json</code> dari <code className="text-xs">nebula-pack</code>. Paket tanpa signature valid ditolak.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
@@ -110,13 +126,24 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                 className="cursor-pointer"
                                             />
                                         </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="theme-signature" className="text-sm font-medium">Signature File (.sig.json)</Label>
+                                            <Input
+                                                id="theme-signature"
+                                                type="file"
+                                                accept=".json,.sig.json,application/json,text/plain"
+                                                ref={signatureInputRef}
+                                                onChange={handleSignatureChange}
+                                                className="cursor-pointer"
+                                            />
+                                        </div>
                                     </div>
                                     <DialogFooter className="gap-2">
                                         <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
                                             Batal
                                         </Button>
-                                        <Button onClick={handleUpload} disabled={!selectedFile} className="min-w-[100px]">
-                                            {selectedFile ? 'Upload' : 'Pilih File'}
+                                        <Button onClick={handleUpload} disabled={!selectedFile || !signatureFile} className="min-w-[100px]">
+                                            {selectedFile && signatureFile ? 'Upload' : 'Pilih File'}
                                         </Button>
                                     </DialogFooter>
                                 </DialogContent>
@@ -159,7 +186,7 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                 Upload Theme
                                             </DialogTitle>
                                             <DialogDescription className="text-sm text-muted-foreground pt-2">
-                                                ZIP maks. {uploadSecurity.zipMaxMb} MB, berisi theme.json. Hanya unduh dari sumber tepercaya.
+                                                ZIP maks. {uploadSecurity.zipMaxMb} MB, berisi theme.json, plus signature .sig.json dari nebula-pack. Paket tanpa signature valid ditolak.
                                             </DialogDescription>
                                         </DialogHeader>
                                         <div className="grid gap-4 py-4">
@@ -174,13 +201,24 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                     className="cursor-pointer"
                                                 />
                                             </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="theme-empty-signature" className="text-sm font-medium">Signature File (.sig.json)</Label>
+                                                <Input
+                                                    id="theme-empty-signature"
+                                                    type="file"
+                                                    accept=".json,.sig.json,application/json,text/plain"
+                                                    ref={signatureEmptyInputRef}
+                                                    onChange={handleSignatureChange}
+                                                    className="cursor-pointer"
+                                                />
+                                            </div>
                                         </div>
                                         <DialogFooter className="gap-2">
                                             <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
                                                 Cancel
                                             </Button>
-                                            <Button onClick={handleUpload} disabled={!selectedFile} className="min-w-[100px]">
-                                                {selectedFile ? 'Upload' : 'Select File'}
+                                            <Button onClick={handleUpload} disabled={!selectedFile || !signatureFile} className="min-w-[100px]">
+                                                {selectedFile && signatureFile ? 'Upload' : 'Select Files'}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>

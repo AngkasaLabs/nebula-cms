@@ -64,7 +64,9 @@ export default function Index({ plugins, uploadSecurity }: Props) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [signatureFile, setSignatureFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const signatureInputRef = useRef<HTMLInputElement>(null);
     const [settingsPlugin, setSettingsPlugin] = useState<Plugin | null>(null);
     const [settingsForm, setSettingsForm] = useState<Record<string, unknown>>({});
 
@@ -94,18 +96,29 @@ export default function Index({ plugins, uploadSecurity }: Props) {
         }
     };
 
+    const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSignatureFile(e.target.files[0]);
+        }
+    };
+
     const handleUpload = () => {
-        if (selectedFile) {
+        if (selectedFile && signatureFile) {
             const formData = new FormData();
             formData.append('plugin', selectedFile);
+            formData.append('signature', signatureFile);
             router.post(route('admin.plugins.upload'), formData, {
                 forceFormData: true,
                 preserveScroll: true,
             });
             setIsUploadDialogOpen(false);
             setSelectedFile(null);
+            setSignatureFile(null);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
+            }
+            if (signatureInputRef.current) {
+                signatureInputRef.current.value = '';
             }
         }
     };
@@ -163,7 +176,7 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                             Upload Plugin
                                         </DialogTitle>
                                         <DialogDescription className="text-sm text-muted-foreground pt-2">
-                                            ZIP maks. {uploadSecurity.zipMaxMb} MB dengan plugin.json dan index.php. Plugin menjalankan kode PHP — hanya sumber tepercaya.
+                                            ZIP maks. {uploadSecurity.zipMaxMb} MB dengan plugin.json dan index.php, plus signature <code className="text-xs">.sig.json</code> dari <code className="text-xs">nebula-pack</code>. Paket tanpa signature valid ditolak. Plugin menjalankan kode PHP — hanya sumber tepercaya.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
@@ -178,13 +191,24 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                                 className="cursor-pointer"
                                             />
                                         </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="plugin-signature" className="text-sm font-medium">Signature File (.sig.json)</Label>
+                                            <Input
+                                                id="plugin-signature"
+                                                type="file"
+                                                accept=".json,.sig.json,application/json,text/plain"
+                                                ref={signatureInputRef}
+                                                onChange={handleSignatureChange}
+                                                className="cursor-pointer"
+                                            />
+                                        </div>
                                     </div>
                                     <DialogFooter className="gap-2">
                                         <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
                                             Cancel
                                         </Button>
-                                        <Button onClick={handleUpload} disabled={!selectedFile} className="min-w-[100px]">
-                                            {selectedFile ? 'Upload' : 'Select File'}
+                                        <Button onClick={handleUpload} disabled={!selectedFile || !signatureFile} className="min-w-[100px]">
+                                            {selectedFile && signatureFile ? 'Upload' : 'Select Files'}
                                         </Button>
                                     </DialogFooter>
                                 </DialogContent>

@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\UploadScanner;
+use App\Exceptions\PackageVerificationException;
 use App\Exceptions\UploadScanException;
+use App\Exceptions\UploadSignatureException;
 use App\Http\Controllers\Controller;
 use App\Models\Theme;
 use App\Services\PackageInstaller;
+use App\Services\PackageVerifier;
 use App\Services\ThemeRequirementChecker;
 use App\Support\InertiaUploadSecurity;
+use App\Support\PackageUploadSignature;
 use App\Support\ThemeHooks;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -144,18 +148,24 @@ class ThemeController extends Controller
                 continue;
             }
 
-            $model = Theme::updateOrCreate(
-                ['folder_name' => $folderName],
-                [
-                    'name' => $config['name'],
-                    'slug' => $config['slug'],
-                    'description' => $config['description'] ?? null,
-                    'version' => $config['version'],
-                    'author' => $config['author'] ?? null,
-                    'settings' => $config['settings'] ?? null,
-                    'preview' => $config['preview'] ?? null,
-                ]
-            );
+            $model = Theme::firstOrNew(['folder_name' => $folderName]);
+
+            $model->fill([
+                'name' => $config['name'],
+                'slug' => $config['slug'],
+                'description' => $config['description'] ?? null,
+                'version' => $config['version'],
+                'author' => $config['author'] ?? null,
+                'preview' => $config['preview'] ?? null,
+            ]);
+
+            // Settings are admin-managed state: seed them only on first
+            // registration, never overwrite them on a later scan.
+            if (! $model->exists) {
+                $model->settings = $config['settings'] ?? null;
+            }
+
+            $model->save();
 
             if (! $this->requirementChecker->check($model)['ok']) {
                 $incompatible++;
@@ -238,6 +248,7 @@ class ThemeController extends Controller
 
         $request->validate([
             'theme' => ['required', 'file', 'mimes:zip', 'max:'.$maxZipKb],
+            'signature' => ['required', 'file', 'mimes:json,txt', 'max:64'],
         ]);
 
         $file = $request->file('theme');
@@ -249,7 +260,23 @@ class ThemeController extends Controller
         }
 
         try {
-            $this->installer->installThemeZip($file->getRealPath());
+            $signature = PackageUploadSignature::parse($request->file('signature'));
+            PackageUploadSignature::assertType($signature, 'theme');
+
+            // Trust check happens before the installer touches the filesystem.
+            app(PackageVerifier::class)->verify(
+                $file->getRealPath(),
+                $signature,
+                $signature['signature'],
+                $signature['key_id'] ?? null,
+            );
+        } catch (UploadSignatureException|PackageVerificationException $e) {
+            return redirect()->back()->with('error', 'Package verification failed: '.$e->getMessage());
+        }
+
+        try {
+            // Bind the signed slug to the archive's own theme.json.
+            $this->installer->installThemeZip($file->getRealPath(), (string) $signature['slug']);
         } catch (\InvalidArgumentException $e) {
             return redirect()->back()->with('error', __('Invalid ZIP: :msg', ['msg' => $e->getMessage()]));
         } catch (\Throwable $e) {
