@@ -46,7 +46,13 @@ npm run build
 ```
 
 Database-specific behaviour (full-text search, JSON columns) is only covered by the MySQL
-job, so mention in the PR when a change depends on the database driver.
+job, so mention in the PR when a change depends on the database driver. Full-text search has
+a dedicated suite that needs a MySQL connection:
+
+```bash
+DB_CONNECTION=mysql DB_HOST=127.0.0.1 DB_PORT=3306 DB_DATABASE=nebula_test \
+DB_USERNAME=root DB_PASSWORD=root php vendor/bin/pest -c phpunit.integration.xml
+```
 
 ### 5. Commit Guidelines
 Format commit message:

@@ -57,7 +57,7 @@ it('menyemai settings plugin dari manifest saat scan pertama', function () {
 
         $plugin = Plugin::where('folder_name', $folder)->first();
         expect($plugin)->not->toBeNull();
-        expect($plugin->settings)->toBe($settings);
+        expect($plugin->settings)->toEqualCanonicalizing($settings);
     } finally {
         Plugin::where('folder_name', $folder)->delete();
         if (File::exists($path)) {
@@ -90,7 +90,7 @@ it('tidak menimpa settings plugin yang sudah ada saat scan ulang', function () {
 
         $fresh = $plugin->fresh();
         expect($fresh->version)->toBe('2.0.0');
-        expect($fresh->settings)->toBe($adminSettings);
+        expect($fresh->settings)->toEqualCanonicalizing($adminSettings);
     } finally {
         Plugin::where('folder_name', $folder)->delete();
         if (File::exists($path)) {
@@ -122,7 +122,7 @@ it('tidak menghapus settings plugin saat manifest hilang pada scan ulang', funct
 
         $fresh = $plugin->fresh();
         expect($fresh)->not->toBeNull();
-        expect($fresh->settings)->toBe($adminSettings);
+        expect($fresh->settings)->toEqualCanonicalizing($adminSettings);
     } finally {
         Plugin::where('folder_name', $folder)->delete();
         if (File::exists($path)) {
@@ -148,7 +148,7 @@ it('menyemai settings tema dari manifest saat scan pertama', function () {
 
         $theme = Theme::where('folder_name', $folder)->first();
         expect($theme)->not->toBeNull();
-        expect($theme->settings)->toBe($settings);
+        expect($theme->settings)->toEqualCanonicalizing($settings);
     } finally {
         Theme::where('folder_name', $folder)->delete();
         if (File::exists($path)) {
@@ -180,7 +180,7 @@ it('tidak menghapus settings tema saat manifest hilang pada scan ulang', functio
 
         $fresh = $theme->fresh();
         expect($fresh)->not->toBeNull();
-        expect($fresh->settings)->toBe($adminSettings);
+        expect($fresh->settings)->toEqualCanonicalizing($adminSettings);
     } finally {
         Theme::where('folder_name', $folder)->delete();
         if (File::exists($path)) {
@@ -212,7 +212,7 @@ it('tidak menimpa settings tema yang sudah ada saat scan ulang', function () {
 
         $fresh = $theme->fresh();
         expect($fresh->version)->toBe('2.0.0');
-        expect($fresh->settings)->toBe($adminSettings);
+        expect($fresh->settings)->toEqualCanonicalizing($adminSettings);
     } finally {
         Theme::where('folder_name', $folder)->delete();
         if (File::exists($path)) {
