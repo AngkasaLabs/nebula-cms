@@ -9,7 +9,13 @@ permissions:
   contents: write
 
 jobs:
+  tests:
+    name: Tests
+    uses: ./.github/workflows/tests.yml
+
   release:
+    name: Build draft release
+    needs: tests
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +27,7 @@ jobs:
         with:
           php-version: '8.4'
           tools: composer:v2
-          extensions: mbstring, xml, ctype, json, bcmath, curl, gd, fileinfo
+          extensions: mbstring, xml, ctype, json, bcmath, curl, gd, fileinfo, zip, intl
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -40,7 +46,16 @@ jobs:
 
       - name: Extract Version
         id: version
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          echo "version=$(php -r 'require "vendor/autoload.php"; $config = require "config/nebula.php"; echo $config["version"];')" >> "$GITHUB_OUTPUT"
+
+      - name: Verify Tag Matches Config Version
+        run: |
+          if [ "v${{ steps.version.outputs.version }}" != "${{ steps.version.outputs.tag }}" ]; then
+            echo "::error::Tag ${{ steps.version.outputs.tag }} does not match config/nebula.php version ${{ steps.version.outputs.version }}."
+            exit 1
+          fi
 
       - name: Create Release Archive
         run: |
@@ -55,6 +70,8 @@ jobs:
             -x "storage/framework/cache/data/*" \
             -x "storage/app/public/*" \
             -x "phpunit.xml" \
+            -x "phpstan.neon" \
+            -x "phpstan-baseline.neon" \
             -x "vite.config.ts" \
             -x "tsconfig*.json" \
             -x "eslint.config.js" \
@@ -63,10 +80,26 @@ jobs:
             -x ".prettierrc" \
             -x ".editorconfig"
 
-      - name: Create GitHub Release
+      - name: Create Draft GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: nebulacms-${{ steps.version.outputs.tag }}.zip
           generate_release_notes: true
-          draft: false
+          draft: true
           prerelease: ${{ contains(github.ref, '-beta') || contains(github.ref, '-alpha') || contains(github.ref, '-rc') }}
+
+      - name: Signing Instructions
+        run: |
+          cat <<'EOF'
+          Draft release created. Before publishing:
+
+            1. Download nebulacms-${{ steps.version.outputs.tag }}.zip from the draft release
+               (or reuse the workflow artifact) to the machine that holds ~/.nebula/keys.
+            2. php tools/nebula-pack.php sign-file nebulacms-${{ steps.version.outputs.tag }}.zip \
+                 --type=core --version=${{ steps.version.outputs.version }} --out=dist
+            3. gh release upload ${{ steps.version.outputs.tag }} \
+                 dist/nebulacms-${{ steps.version.outputs.tag }}.zip.sig.json
+            4. gh release edit ${{ steps.version.outputs.tag }} --draft=false
+
+          Updates are only trusted once the .sig.json is attached and verifies.
+          EOF
