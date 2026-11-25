@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { sanitizeLinkHref } from '@/utils/urlValidator';
+import { useEffect, useState } from 'react';
 
 type Props = {
     open: boolean;
@@ -51,7 +51,7 @@ export default function LinkDialog({ open, onOpenChange, initialHref, onSubmit, 
                         placeholder="https://example.com atau /halaman"
                         autoFocus
                     />
-                    {error && <div className="text-sm text-destructive">{error}</div>}
+                    {error && <div className="text-destructive text-sm">{error}</div>}
                 </div>
 
                 <DialogFooter className="gap-2 sm:gap-0">
@@ -78,4 +78,3 @@ export default function LinkDialog({ open, onOpenChange, initialHref, onSubmit, 
         </Dialog>
     );
 }
-

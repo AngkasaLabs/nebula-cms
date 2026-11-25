@@ -1,14 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { router } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -42,25 +34,17 @@ export function ThemeCard({ theme }: ThemeCardProps) {
     return (
         <>
             <Card className="overflow-hidden">
-                <div className="aspect-video w-full bg-muted">
+                <div className="bg-muted aspect-video w-full">
                     {theme.preview_url ? (
-                        <img
-                            src={theme.preview_url}
-                            alt={`${theme.name} screenshot`}
-                            className="h-[250px] w-full object-contain"
-                        />
+                        <img src={theme.preview_url} alt={`${theme.name} screenshot`} className="h-[250px] w-full object-contain" />
                     ) : (
-                        <div className="flex h-full items-center justify-center text-muted-foreground">
-                            No preview available
-                        </div>
+                        <div className="text-muted-foreground flex h-full items-center justify-center">No preview available</div>
                     )}
                 </div>
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                         {theme.name}
-                        {theme.is_active && (
-                            <span className="text-xs font-normal text-green-500">Active</span>
-                        )}
+                        {theme.is_active && <span className="text-xs font-normal text-green-500">Active</span>}
                     </CardTitle>
                     <CardDescription>
                         Version {theme.version}
@@ -68,9 +52,7 @@ export function ThemeCard({ theme }: ThemeCardProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                        {theme.description || 'No description available'}
-                    </p>
+                    <p className="text-muted-foreground text-sm">{theme.description || 'No description available'}</p>
                 </CardContent>
                 <CardFooter className="flex gap-2">
                     <Button
@@ -92,8 +74,8 @@ export function ThemeCard({ theme }: ThemeCardProps) {
                                 <DialogHeader>
                                     <DialogTitle>Delete Theme</DialogTitle>
                                     <DialogDescription>
-                                        Are you sure you want to delete "{theme.name}"? This action cannot be undone.
-                                        The theme files will be permanently removed from the server.
+                                        Are you sure you want to delete "{theme.name}"? This action cannot be undone. The theme files will be
+                                        permanently removed from the server.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <DialogFooter>

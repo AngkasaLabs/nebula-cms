@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\HookService;
 use Illuminate\Support\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
@@ -13,7 +14,7 @@ class HookServiceProvider extends ServiceProvider
     {
         // Registering HookService as a singleton
         $this->app->singleton('hook', function ($app) {
-            return new \App\Services\HookService();
+            return new HookService;
         });
 
         // Loading helper functions

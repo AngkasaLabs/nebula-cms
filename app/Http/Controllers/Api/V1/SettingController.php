@@ -19,4 +19,3 @@ class SettingController extends Controller
         return SettingResource::collection($settings);
     }
 }
-

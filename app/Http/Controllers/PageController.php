@@ -28,8 +28,8 @@ class PageController extends Controller
 
         // Filter by search term
         if ($request->has('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%')
-                ->orWhere('content', 'like', '%' . $request->search . '%');
+            $query->where('title', 'like', '%'.$request->search.'%')
+                ->orWhere('content', 'like', '%'.$request->search.'%');
         }
 
         // Filter by status
@@ -43,8 +43,8 @@ class PageController extends Controller
             'pages' => $pages,
             'filters' => [
                 'search' => $request->input('search', ''),
-                'status' => $request->input('status', 'all')
-            ]
+                'status' => $request->input('status', 'all'),
+            ],
         ]);
     }
 
@@ -93,7 +93,7 @@ class PageController extends Controller
         $page->load(['user']);
 
         return Inertia::render('Admin/Pages/Show', [
-            'page' => $page
+            'page' => $page,
         ]);
     }
 
@@ -103,7 +103,7 @@ class PageController extends Controller
     public function edit(Page $page)
     {
         return Inertia::render('Admin/Pages/Edit', [
-            'page' => $page
+            'page' => $page,
         ]);
     }
 
@@ -155,7 +155,7 @@ class PageController extends Controller
     public function publish(Page $page)
     {
         $page->update([
-            'status' => 'published'
+            'status' => 'published',
         ]);
 
         return back()->with('message', 'Halaman berhasil dipublikasikan.');
@@ -164,7 +164,7 @@ class PageController extends Controller
     public function unpublish(Page $page)
     {
         $page->update([
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
 
         return back()->with('message', 'Halaman berhasil dijadikan draft.');

@@ -1,6 +1,6 @@
-import { Loader2, Check, AlertCircle, Cloud } from 'lucide-react';
 import { SaveStatus } from '@/hooks/useAutoSave';
 import { cn } from '@/lib/utils';
+import { AlertCircle, Check, Cloud, Loader2 } from 'lucide-react';
 
 interface SaveIndicatorProps {
     status: SaveStatus;
@@ -22,10 +22,8 @@ export function SaveIndicator({ status, lastSavedAt, error, className }: SaveInd
         <div className={cn('flex items-center gap-2 text-sm', className)}>
             {status === 'idle' && lastSavedAt && (
                 <>
-                    <Cloud className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                        Saved at {formatTime(lastSavedAt)}
-                    </span>
+                    <Cloud className="text-muted-foreground h-4 w-4" />
+                    <span className="text-muted-foreground">Saved at {formatTime(lastSavedAt)}</span>
                 </>
             )}
 
@@ -45,7 +43,7 @@ export function SaveIndicator({ status, lastSavedAt, error, className }: SaveInd
 
             {status === 'error' && (
                 <>
-                    <AlertCircle className="h-4 w-4 text-destructive" />
+                    <AlertCircle className="text-destructive h-4 w-4" />
                     <span className="text-destructive" title={error || undefined}>
                         Save failed
                     </span>

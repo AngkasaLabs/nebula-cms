@@ -25,4 +25,3 @@ class TagController extends Controller
         return TagResource::collection($tags);
     }
 }
-

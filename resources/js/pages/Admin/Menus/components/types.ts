@@ -19,9 +19,7 @@ export interface Menu {
 }
 
 /** Partial update payload for menu items (form fields + optional nested children from drag-and-drop). */
-export type MenuItemUpdatePayload = Partial<
-    Pick<MenuItemData, 'title' | 'url' | 'target' | 'type' | 'order' | 'parent_id'>
-> & {
+export type MenuItemUpdatePayload = Partial<Pick<MenuItemData, 'title' | 'url' | 'target' | 'type' | 'order' | 'parent_id'>> & {
     children?: MenuItemData[];
 };
 

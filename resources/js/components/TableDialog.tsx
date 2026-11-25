@@ -1,15 +1,8 @@
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface TableDialogProps {
     open: boolean;
@@ -74,7 +67,7 @@ export default function TableDialog({ open, onOpenChange, onInsert }: TableDialo
                                 type="checkbox"
                                 checked={withHeaderRow}
                                 onChange={(e) => setWithHeaderRow(e.target.checked)}
-                                className="h-4 w-4 rounded border-border"
+                                className="border-border h-4 w-4 rounded"
                             />
                             Include header row
                         </label>

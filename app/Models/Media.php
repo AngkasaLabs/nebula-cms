@@ -3,15 +3,15 @@
 namespace App\Models;
 
 use App\Services\Media\MediaVariantService;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Intervention\Image\ImageManager;
 
 class Media extends Model
 {
@@ -46,7 +46,7 @@ class Media extends Model
 
     protected static function imageManager()
     {
-        return new ImageManager(new Driver());
+        return new ImageManager(new Driver);
     }
 
     public function user(): BelongsTo
@@ -97,11 +97,12 @@ class Media extends Model
 
     public function getDimensionsAttribute(): ?array
     {
-        if (!Str::startsWith($this->mime_type, 'image/')) {
+        if (! Str::startsWith($this->mime_type, 'image/')) {
             return null;
         }
 
         $image = self::imageManager()->read(Storage::disk($this->disk)->path($this->path));
+
         return [
             'width' => $image->width(),
             'height' => $image->height(),
@@ -111,13 +112,15 @@ class Media extends Model
     public function getHumanReadableSizeAttribute(): string
     {
         $bytes = (int) $this->size;
-        if ($bytes <= 0) return '0 B';
+        if ($bytes <= 0) {
+            return '0 B';
+        }
 
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $i = floor(log($bytes, 1024));
         $size = round($bytes / pow(1024, $i), 2);
 
-        return $size . ' ' . $units[$i];
+        return $size.' '.$units[$i];
     }
 
     public function delete()
@@ -143,15 +146,15 @@ class Media extends Model
             $existingMedia = static::where('file_hash', $hash)->first();
             if ($existingMedia) {
                 // Generate new unique hash by combining original hash with timestamp
-                $hash = md5($hash . time());
+                $hash = md5($hash.time());
             }
 
             // Generate unique filename
             $baseFileName = pathinfo($originalName, PATHINFO_FILENAME);
             $counter = 1;
             do {
-                $fileName = Str::random(40) . '.' . $extension;
-                $path = $directory . '/' . $fileName;
+                $fileName = Str::random(40).'.'.$extension;
+                $path = $directory.'/'.$fileName;
             } while (Storage::disk($disk)->exists($path));
 
             // Handle file upload based on type
@@ -165,7 +168,7 @@ class Media extends Model
             }
 
             // Verify file was uploaded
-            if (!Storage::disk($disk)->exists($path)) {
+            if (! Storage::disk($disk)->exists($path)) {
                 throw new \Exception('Failed to upload file');
             }
 
@@ -178,7 +181,7 @@ class Media extends Model
                 $pathInfo = pathinfo($originalName);
                 $counter = 1;
                 do {
-                    $finalName = $pathInfo['filename'] . ' (' . $counter . ').' . $pathInfo['extension'];
+                    $finalName = $pathInfo['filename'].' ('.$counter.').'.$pathInfo['extension'];
                     $counter++;
                 } while (static::where('name', $finalName)->exists());
             }
@@ -221,12 +224,12 @@ class Media extends Model
 
     public function optimize()
     {
-        if (!Str::startsWith($this->mime_type, 'image/')) {
+        if (! Str::startsWith($this->mime_type, 'image/')) {
             return $this;
         }
 
         $path = Storage::disk($this->disk)->path($this->path);
-        
+
         $image = self::imageManager()->read($path);
 
         // Resize if width is greater than 2000px

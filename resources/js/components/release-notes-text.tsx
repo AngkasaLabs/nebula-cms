@@ -13,7 +13,7 @@ export function ReleaseNotesText({ text, className }: { text: string; className?
                         href={part}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-medium text-primary underline underline-offset-2 hover:underline"
+                        className="text-primary font-medium underline underline-offset-2 hover:underline"
                     >
                         {part}
                     </a>

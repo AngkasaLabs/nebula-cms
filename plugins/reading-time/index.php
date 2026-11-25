@@ -28,13 +28,13 @@ function reading_time_format($minutes)
     } elseif ($minutes == 1) {
         return '1 min read';
     } else {
-        return $minutes . ' min read';
+        return $minutes.' min read';
     }
 }
 
 // Add reading time to post meta (in header next to date)
 add_filter('post.meta', function ($meta, $post = null) {
-    if (!$post || empty($post->content)) {
+    if (! $post || empty($post->content)) {
         return $meta;
     }
 
@@ -53,7 +53,7 @@ add_filter('post.meta', function ($meta, $post = null) {
         $time_string
     );
 
-    return $meta . $badge;
+    return $meta.$badge;
 }, 10);
 
 // Fire action when plugin loads

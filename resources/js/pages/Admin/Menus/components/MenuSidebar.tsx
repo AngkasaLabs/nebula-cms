@@ -1,12 +1,12 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Search } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Search } from 'lucide-react';
+import { useState } from 'react';
 
 interface Page {
     id: string | number;
@@ -61,45 +61,37 @@ export default function MenuSidebar({
     onCreateMenu,
     menuData,
     setMenuData,
-    isProcessing
+    isProcessing,
 }: MenuSidebarProps) {
-    const [selectedPages, setSelectedPages] = useState<string[]>([])
-    const [selectedPosts, setSelectedPosts] = useState<string[]>([])
-    const [pageSearch, setPageSearch] = useState("")
-    const [postSearch, setPostSearch] = useState("")
-    const [customLink, setCustomLink] = useState({ title: '', url: '' })
+    const [selectedPages, setSelectedPages] = useState<string[]>([]);
+    const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
+    const [pageSearch, setPageSearch] = useState('');
+    const [postSearch, setPostSearch] = useState('');
+    const [customLink, setCustomLink] = useState({ title: '', url: '' });
 
-    const filteredPages = pages.filter(page =>
-        page.title.toLowerCase().includes(pageSearch.toLowerCase())
-    )
+    const filteredPages = pages.filter((page) => page.title.toLowerCase().includes(pageSearch.toLowerCase()));
 
-    const filteredPosts = posts.filter(post =>
-        post.title.toLowerCase().includes(postSearch.toLowerCase())
-    )
+    const filteredPosts = posts.filter((post) => post.title.toLowerCase().includes(postSearch.toLowerCase()));
 
     const handleSelectPage = (id: string) => {
-        setSelectedPages(prev =>
-            prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-        )
-    }
+        setSelectedPages((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
+    };
 
     const handleSelectPost = (id: string) => {
-        setSelectedPosts(prev =>
-            prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-        )
-    }
+        setSelectedPosts((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
+    };
 
     const handleAddPages = () => {
-        const itemsToAdd = pages.filter(p => selectedPages.includes(p.id.toString()))
-        onAddItems('page', itemsToAdd)
-        setSelectedPages([])
-    }
+        const itemsToAdd = pages.filter((p) => selectedPages.includes(p.id.toString()));
+        onAddItems('page', itemsToAdd);
+        setSelectedPages([]);
+    };
 
     const handleAddPosts = () => {
-        const itemsToAdd = posts.filter(p => selectedPosts.includes(p.id.toString()))
-        onAddItems('post', itemsToAdd)
-        setSelectedPosts([])
-    }
+        const itemsToAdd = posts.filter((p) => selectedPosts.includes(p.id.toString()));
+        onAddItems('post', itemsToAdd);
+        setSelectedPosts([]);
+    };
 
     return (
         <div className="space-y-6">
@@ -126,19 +118,12 @@ export default function MenuSidebar({
 
                     <div className="space-y-2">
                         <Label htmlFor="menu-name">Menu Name</Label>
-                        <Input
-                            id="menu-name"
-                            value={menuData.name}
-                            onChange={e => setMenuData('name', e.target.value)}
-                        />
+                        <Input id="menu-name" value={menuData.name} onChange={(e) => setMenuData('name', e.target.value)} />
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="menu-location">Menu Location</Label>
-                        <Select
-                            value={menuData.location}
-                            onValueChange={(value) => setMenuData('location', value)}
-                        >
+                        <Select value={menuData.location} onValueChange={(value) => setMenuData('location', value)}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select location" />
                             </SelectTrigger>
@@ -150,12 +135,7 @@ export default function MenuSidebar({
                     </div>
 
                     <div className="pt-2">
-                        <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={onCreateMenu}
-                            disabled={isProcessing}
-                        >
+                        <Button variant="outline" className="w-full" onClick={onCreateMenu} disabled={isProcessing}>
                             <Plus className="mr-2 h-4 w-4" />
                             Create New Menu
                         </Button>
@@ -170,105 +150,71 @@ export default function MenuSidebar({
                     <TabsTrigger value="custom">Custom</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="pages" className="border rounded-md mt-2 bg-card">
-                    <div className="p-4 space-y-4">
+                <TabsContent value="pages" className="bg-card mt-2 rounded-md border">
+                    <div className="space-y-4 p-4">
                         <div className="relative">
-                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search page..."
-                                className="pl-8"
-                                value={pageSearch}
-                                onChange={(e) => setPageSearch(e.target.value)}
-                            />
+                            <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
+                            <Input placeholder="Search page..." className="pl-8" value={pageSearch} onChange={(e) => setPageSearch(e.target.value)} />
                         </div>
-                        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                        <div className="max-h-[300px] space-y-2 overflow-y-auto pr-1">
                             {filteredPages.map((page) => (
-                                <div key={page.id} className="flex items-center space-x-2 p-1 hover:bg-accent rounded-sm">
+                                <div key={page.id} className="hover:bg-accent flex items-center space-x-2 rounded-sm p-1">
                                     <Checkbox
                                         id={`page-${page.id}`}
                                         checked={selectedPages.includes(page.id.toString())}
                                         onCheckedChange={() => handleSelectPage(page.id.toString())}
                                     />
-                                    <Label
-                                        htmlFor={`page-${page.id}`}
-                                        className="flex-1 cursor-pointer py-1 font-normal"
-                                    >
+                                    <Label htmlFor={`page-${page.id}`} className="flex-1 cursor-pointer py-1 font-normal">
                                         {page.title}
                                     </Label>
                                 </div>
                             ))}
-                            {filteredPages.length === 0 && (
-                                <p className="text-sm text-center text-muted-foreground py-4">
-                                    No pages found
-                                </p>
-                            )}
+                            {filteredPages.length === 0 && <p className="text-muted-foreground py-4 text-center text-sm">No pages found</p>}
                         </div>
-                        <Button
-                            className="w-full"
-                            size="sm"
-                            disabled={selectedPages.length === 0 || isProcessing}
-                            onClick={handleAddPages}
-                        >
+                        <Button className="w-full" size="sm" disabled={selectedPages.length === 0 || isProcessing} onClick={handleAddPages}>
                             <Plus className="mr-2 h-4 w-4" />
                             Add to Menu ({selectedPages.length})
                         </Button>
                     </div>
                 </TabsContent>
 
-                <TabsContent value="posts" className="border rounded-md mt-2 bg-card">
-                    <div className="p-4 space-y-4">
+                <TabsContent value="posts" className="bg-card mt-2 rounded-md border">
+                    <div className="space-y-4 p-4">
                         <div className="relative">
-                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search post..."
-                                className="pl-8"
-                                value={postSearch}
-                                onChange={(e) => setPostSearch(e.target.value)}
-                            />
+                            <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
+                            <Input placeholder="Search post..." className="pl-8" value={postSearch} onChange={(e) => setPostSearch(e.target.value)} />
                         </div>
-                        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                        <div className="max-h-[300px] space-y-2 overflow-y-auto pr-1">
                             {filteredPosts.map((post) => (
-                                <div key={post.id} className="flex items-center space-x-2 p-1 hover:bg-accent rounded-sm">
+                                <div key={post.id} className="hover:bg-accent flex items-center space-x-2 rounded-sm p-1">
                                     <Checkbox
                                         id={`post-${post.id}`}
                                         checked={selectedPosts.includes(post.id.toString())}
                                         onCheckedChange={() => handleSelectPost(post.id.toString())}
                                     />
-                                    <Label
-                                        htmlFor={`post-${post.id}`}
-                                        className="flex-1 cursor-pointer py-1 font-normal"
-                                    >
+                                    <Label htmlFor={`post-${post.id}`} className="flex-1 cursor-pointer py-1 font-normal">
                                         {post.title}
                                     </Label>
                                 </div>
                             ))}
-                            {filteredPosts.length === 0 && (
-                                <p className="text-sm text-center text-muted-foreground py-4">
-                                    No posts found
-                                </p>
-                            )}
+                            {filteredPosts.length === 0 && <p className="text-muted-foreground py-4 text-center text-sm">No posts found</p>}
                         </div>
-                        <Button
-                            className="w-full"
-                            size="sm"
-                            disabled={selectedPosts.length === 0 || isProcessing}
-                            onClick={handleAddPosts}
-                        >
+                        <Button className="w-full" size="sm" disabled={selectedPosts.length === 0 || isProcessing} onClick={handleAddPosts}>
                             <Plus className="mr-2 h-4 w-4" />
                             Add to Menu ({selectedPosts.length})
                         </Button>
                     </div>
                 </TabsContent>
 
-                <TabsContent value="custom" className="border rounded-md mt-2 bg-card">
-                    <div className="p-4 space-y-4">
+                <TabsContent value="custom" className="bg-card mt-2 rounded-md border">
+                    <div className="space-y-4 p-4">
                         <div className="space-y-2">
                             <Label htmlFor="link-text">Link Text</Label>
                             <Input
                                 id="link-text"
                                 placeholder="Menu Item Text"
                                 value={customLink.title}
-                                onChange={(e) => setCustomLink(prev => ({ ...prev, title: e.target.value }))}
+                                onChange={(e) => setCustomLink((prev) => ({ ...prev, title: e.target.value }))}
                             />
                         </div>
                         <div className="space-y-2">
@@ -277,14 +223,14 @@ export default function MenuSidebar({
                                 id="link-url"
                                 placeholder="https://example.com"
                                 value={customLink.url}
-                                onChange={(e) => setCustomLink(prev => ({ ...prev, url: e.target.value }))}
+                                onChange={(e) => setCustomLink((prev) => ({ ...prev, url: e.target.value }))}
                             />
                         </div>
                         <Button
                             className="w-full"
                             onClick={() => {
-                                onAddItems("custom", [customLink])
-                                setCustomLink({ title: '', url: '' })
+                                onAddItems('custom', [customLink]);
+                                setCustomLink({ title: '', url: '' });
                             }}
                             disabled={!customLink.title || !customLink.url || isProcessing}
                         >
@@ -295,5 +241,5 @@ export default function MenuSidebar({
                 </TabsContent>
             </Tabs>
         </div>
-    )
+    );
 }

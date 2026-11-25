@@ -3,8 +3,9 @@
 use App\Models\Plugin;
 use App\Services\PluginRequirementChecker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 function starter_inertia_prebuilt_plugin_model(): Plugin
 {

@@ -38,6 +38,7 @@ class PostRevision extends Model
     public static function getNextRevisionNumber(int $postId): int
     {
         $maxRevision = static::where('post_id', $postId)->max('revision_number');
+
         return ($maxRevision ?? 0) + 1;
     }
 }

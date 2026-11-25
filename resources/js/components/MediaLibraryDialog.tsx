@@ -1,12 +1,12 @@
-import axios from 'axios';
-import { useEffect, useMemo, useState } from 'react';
-import { Image as ImageIcon, Upload as UploadIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { sanitizeUrl } from '@/utils/urlValidator';
+import axios from 'axios';
+import { Image as ImageIcon, Upload as UploadIcon } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 type PickerFolder = {
     id: number;
@@ -60,13 +60,7 @@ type Props = {
     enableUpload?: boolean;
 };
 
-export default function MediaLibraryDialog({
-    open,
-    onOpenChange,
-    onSelectUrl,
-    type = 'image',
-    enableUpload = true,
-}: Props) {
+export default function MediaLibraryDialog({ open, onOpenChange, onSelectUrl, type = 'image', enableUpload = true }: Props) {
     const [activeTab, setActiveTab] = useState(enableUpload ? 'upload' : 'media');
     const [isLoadingLibrary, setIsLoadingLibrary] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -86,7 +80,7 @@ export default function MediaLibraryDialog({
         try {
             const response = await axios.get<PickerResponse>(route('admin.media.picker'), {
                 params: {
-                    folder_id: (params?.folderId ?? folderId) ?? undefined,
+                    folder_id: params?.folderId ?? folderId ?? undefined,
                     type,
                     search: (params?.search ?? search) || undefined,
                     page: params?.page ?? page,
@@ -163,12 +157,12 @@ export default function MediaLibraryDialog({
                     <TabsList className="w-full">
                         {enableUpload && (
                             <TabsTrigger value="upload" className="w-full">
-                                <UploadIcon className="w-4 h-4 mr-2" />
+                                <UploadIcon className="mr-2 h-4 w-4" />
                                 Upload
                             </TabsTrigger>
                         )}
                         <TabsTrigger value="media" className="w-full">
-                            <ImageIcon className="w-4 h-4 mr-2" />
+                            <ImageIcon className="mr-2 h-4 w-4" />
                             Media Library
                         </TabsTrigger>
                     </TabsList>
@@ -176,15 +170,11 @@ export default function MediaLibraryDialog({
                     {enableUpload && (
                         <TabsContent value="upload" className="mt-4">
                             <div className="space-y-3">
-                                <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                                <div className="rounded-lg border-2 border-dashed p-8 text-center">
                                     <Label htmlFor="media-upload" className="cursor-pointer">
                                         <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
-                                        <span className="mt-2 block text-sm font-medium">
-                                            Click to upload or drag & drop
-                                        </span>
-                                        <span className="mt-1 block text-xs text-gray-400">
-                                            {type.toUpperCase()} files
-                                        </span>
+                                        <span className="mt-2 block text-sm font-medium">Click to upload or drag & drop</span>
+                                        <span className="mt-1 block text-xs text-gray-400">{type.toUpperCase()} files</span>
                                     </Label>
                                     <Input
                                         id="media-upload"
@@ -202,7 +192,7 @@ export default function MediaLibraryDialog({
                                     />
                                 </div>
 
-                                {error && <div className="text-sm text-destructive">{error}</div>}
+                                {error && <div className="text-destructive text-sm">{error}</div>}
                             </div>
                         </TabsContent>
                     )}
@@ -210,11 +200,7 @@ export default function MediaLibraryDialog({
                     <TabsContent value="media" className="mt-4">
                         <div className="space-y-3">
                             <div className="flex gap-2">
-                                <Input
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Cari media..."
-                                />
+                                <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari media..." />
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -229,7 +215,7 @@ export default function MediaLibraryDialog({
                             </div>
 
                             {data?.breadcrumbs && data.breadcrumbs.length > 0 && (
-                                <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                                <div className="text-muted-foreground flex flex-wrap gap-2 text-sm">
                                     <button
                                         type="button"
                                         className="underline"
@@ -258,7 +244,7 @@ export default function MediaLibraryDialog({
                                 </div>
                             )}
 
-                            {error && <div className="text-sm text-destructive">{error}</div>}
+                            {error && <div className="text-destructive text-sm">{error}</div>}
 
                             <div className="grid grid-cols-4 gap-4">
                                 {data?.folders?.map((folder) => (
@@ -273,12 +259,12 @@ export default function MediaLibraryDialog({
                                         }}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <div className="w-10 h-10 bg-gray-800 rounded flex items-center justify-center">
-                                                <ImageIcon className="w-5 h-5 text-gray-400" />
+                                            <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-800">
+                                                <ImageIcon className="h-5 w-5 text-gray-400" />
                                             </div>
                                             <div className="min-w-0">
-                                                <div className="font-medium truncate">{folder.name}</div>
-                                                <div className="text-xs text-muted-foreground">Folder</div>
+                                                <div className="truncate font-medium">{folder.name}</div>
+                                                <div className="text-muted-foreground text-xs">Folder</div>
                                             </div>
                                         </div>
                                     </button>
@@ -288,28 +274,22 @@ export default function MediaLibraryDialog({
                                     <button
                                         key={item.id}
                                         type="button"
-                                        className="relative group cursor-pointer rounded-lg overflow-hidden"
+                                        className="group relative cursor-pointer overflow-hidden rounded-lg"
                                         onClick={() => {
                                             onSelectUrl(sanitizeUrl(item.url));
                                             onOpenChange(false);
                                         }}
                                     >
-                                        <img
-                                            src={sanitizeUrl(item.url)}
-                                            alt={item.name}
-                                            className="w-full h-28 object-cover"
-                                        />
-                                        <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span className="text-white text-sm px-2 text-center line-clamp-2">
-                                                {item.name}
-                                            </span>
+                                        <img src={sanitizeUrl(item.url)} alt={item.name} className="h-28 w-full object-cover" />
+                                        <div className="bg-opacity-50 absolute inset-0 flex items-center justify-center bg-black opacity-0 transition-opacity group-hover:opacity-100">
+                                            <span className="line-clamp-2 px-2 text-center text-sm text-white">{item.name}</span>
                                         </div>
                                     </button>
                                 ))}
                             </div>
 
                             {data && (
-                                <div className="flex justify-between items-center pt-2">
+                                <div className="flex items-center justify-between pt-2">
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -322,7 +302,7 @@ export default function MediaLibraryDialog({
                                     >
                                         Prev
                                     </Button>
-                                    <div className="text-sm text-muted-foreground">
+                                    <div className="text-muted-foreground text-sm">
                                         Page {data.media.current_page} / {data.media.last_page}
                                     </div>
                                     <Button
@@ -346,4 +326,3 @@ export default function MediaLibraryDialog({
         </Dialog>
     );
 }
-

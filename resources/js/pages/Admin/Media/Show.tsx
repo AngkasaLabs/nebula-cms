@@ -1,10 +1,10 @@
-import { Head, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, router } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Image as ImageIcon, File, FileText, Film, Music } from 'lucide-react';
+import { File, FileText, Film, Image as ImageIcon, Music } from 'lucide-react';
 
 interface Media {
     id: number;
@@ -36,18 +36,18 @@ const breadcrumbs = [
         href: route('admin.media.index'),
     },
     {
-        title: 'View'
+        title: 'View',
     },
 ];
 
 export default function Show({ media }: Props) {
     const getFileIcon = (mimeType: string | null) => {
-        if (!mimeType) return <File className="w-6 h-6" />;
-        if (mimeType.startsWith('image/')) return <ImageIcon className="w-6 h-6" />;
-        if (mimeType.startsWith('video/')) return <Film className="w-6 h-6" />;
-        if (mimeType.startsWith('audio/')) return <Music className="w-6 h-6" />;
-        if (mimeType.startsWith('application/pdf')) return <FileText className="w-6 h-6" />;
-        return <File className="w-6 h-6" />;
+        if (!mimeType) return <File className="h-6 w-6" />;
+        if (mimeType.startsWith('image/')) return <ImageIcon className="h-6 w-6" />;
+        if (mimeType.startsWith('video/')) return <Film className="h-6 w-6" />;
+        if (mimeType.startsWith('audio/')) return <Music className="h-6 w-6" />;
+        if (mimeType.startsWith('application/pdf')) return <FileText className="h-6 w-6" />;
+        return <File className="h-6 w-6" />;
     };
 
     const getFileType = (mimeType: string | null) => {
@@ -67,13 +67,10 @@ export default function Show({ media }: Props) {
             <Head title={`Media: ${media.name}`} />
 
             <div className="p-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">{media.name}</h1>
                     <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => window.open(route('admin.media.download', { media: media.id }))}
-                        >
+                        <Button variant="outline" onClick={() => window.open(route('admin.media.download', { media: media.id }))}>
                             Download
                         </Button>
                         <Button variant="destructive" onClick={handleDelete}>
@@ -89,13 +86,9 @@ export default function Show({ media }: Props) {
                         </CardHeader>
                         <CardContent>
                             {media.mime_type?.startsWith('image/') ? (
-                                <img
-                                    src={media.url}
-                                    alt={media.name}
-                                    className="w-full rounded-lg"
-                                />
+                                <img src={media.url} alt={media.name} className="w-full rounded-lg" />
                             ) : (
-                                <div className="w-full aspect-square flex items-center justify-center bg-gray-100 rounded-lg">
+                                <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-gray-100">
                                     {getFileIcon(media.mime_type)}
                                 </div>
                             )}
@@ -122,7 +115,9 @@ export default function Show({ media }: Props) {
                             {media.dimensions && (
                                 <div>
                                     <h3 className="font-medium">Dimensions</h3>
-                                    <p>{media.dimensions.width} × {media.dimensions.height} pixels</p>
+                                    <p>
+                                        {media.dimensions.width} × {media.dimensions.height} pixels
+                                    </p>
                                 </div>
                             )}
                             <div>

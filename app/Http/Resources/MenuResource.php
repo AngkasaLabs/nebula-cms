@@ -19,4 +19,3 @@ class MenuResource extends JsonResource
         ];
     }
 }
-

@@ -1,13 +1,13 @@
-import { Head, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import HeadingSmall from '@/components/heading-small';
-import SettingsLayout from '@/layouts/settings/layout';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
+import { Head, useForm } from '@inertiajs/react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -46,10 +46,7 @@ export default function SeoSettings({ settings }: SeoSettingsProps) {
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall
-                        title="SEO Settings"
-                        description="Search Engine Optimization settings for better visibility"
-                    />
+                    <HeadingSmall title="SEO Settings" description="Search Engine Optimization settings for better visibility" />
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid gap-2">
@@ -67,9 +64,7 @@ export default function SeoSettings({ settings }: SeoSettingsProps) {
                                 className="mt-1 block w-full"
                                 placeholder="Meta Title"
                             />
-                            <p className="text-sm text-muted-foreground">
-                                Title that appears in Google search results (50-60 characters)
-                            </p>
+                            <p className="text-muted-foreground text-sm">Title that appears in Google search results (50-60 characters)</p>
                         </div>
 
                         <div className="grid gap-2">
@@ -86,9 +81,7 @@ export default function SeoSettings({ settings }: SeoSettingsProps) {
                                 className="mt-1 block w-full"
                                 placeholder="Meta Description"
                             />
-                            <p className="text-sm text-muted-foreground">
-                                Description that appears in Google search results (150-160 characters)
-                            </p>
+                            <p className="text-muted-foreground text-sm">Description that appears in Google search results (150-160 characters)</p>
                         </div>
 
                         <div className="grid gap-2">
@@ -106,9 +99,7 @@ export default function SeoSettings({ settings }: SeoSettingsProps) {
                                 className="mt-1 block w-full"
                                 placeholder="keyword-1, keyword-2, keyword-3"
                             />
-                            <p className="text-sm text-muted-foreground">
-                                Keywords relevant to your website (separate with commas)
-                            </p>
+                            <p className="text-muted-foreground text-sm">Keywords relevant to your website (separate with commas)</p>
                         </div>
 
                         <div className="flex items-center gap-4">

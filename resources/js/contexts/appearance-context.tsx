@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState, type Context, type ReactNode } from 'react';
 import { type Appearance } from '@/types/appearance';
+import { createContext, useContext, useEffect, useState, type Context, type ReactNode } from 'react';
 
 interface AppearanceContextType {
     appearance: Appearance;
@@ -95,11 +95,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
         return null;
     }
 
-    return (
-        <AppearanceContext.Provider value={{ appearance, updateAppearance }}>
-            {children}
-        </AppearanceContext.Provider>
-    );
+    return <AppearanceContext.Provider value={{ appearance, updateAppearance }}>{children}</AppearanceContext.Provider>;
 }
 
 export function useAppearance() {

@@ -30,4 +30,3 @@ class MenuController extends Controller
         return new MenuResource($menu);
     }
 }
-

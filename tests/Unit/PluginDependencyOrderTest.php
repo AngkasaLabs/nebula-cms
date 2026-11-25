@@ -2,8 +2,9 @@
 
 use App\Models\Plugin;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 it('orders plugins so dependencies load first', function () {
     $b = Plugin::create([

@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Plugin;
 use App\Models\Theme;
 use Composer\Semver\Semver;
-use InvalidArgumentException;
 
 class ThemeRequirementChecker
 {
@@ -50,11 +50,13 @@ class ThemeRequirementChecker
             foreach ($depSlugs as $slug) {
                 if (! is_string($slug) || $slug === '') {
                     $warnings[] = 'Invalid entry in requires.plugins; expected non-empty strings.';
+
                     continue;
                 }
-                $other = \App\Models\Plugin::query()->where('slug', $slug)->first();
+                $other = Plugin::query()->where('slug', $slug)->first();
                 if (! $other) {
                     $errors[] = "Required plugin \"{$slug}\" is not installed.";
+
                     continue;
                 }
                 if (! $other->is_active) {
@@ -96,7 +98,7 @@ class ThemeRequirementChecker
         }
 
         $content = file_get_contents($path);
-        
+
         if ($content === false) {
             return [];
         }

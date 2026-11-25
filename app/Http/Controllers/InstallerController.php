@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Installer\EnvWriter;
 use App\Installer\InstallerWizardStore;
+use App\Models\User;
 use Database\Seeders\ContentSampleSeeder;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Encryption\Encrypter;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Spatie\Permission\PermissionRegistrar;
 
 class InstallerController extends Controller
 {
@@ -503,15 +505,15 @@ class InstallerController extends Controller
         }
 
         // Re-initialize Spatie's PermissionRegistrar to clear its cached connection reference
-        if (app()->bound(\Spatie\Permission\PermissionRegistrar::class)) {
-            app(\Spatie\Permission\PermissionRegistrar::class)->initializeCache();
+        if (app()->bound(PermissionRegistrar::class)) {
+            app(PermissionRegistrar::class)->initializeCache();
         }
     }
 
     private function createAdminUser(array $account): void
     {
         // Match RoleAndPermissionSeeder: role name is "Super Admin", guard web
-        $user = \App\Models\User::updateOrCreate(
+        $user = User::updateOrCreate(
             ['email' => $account['email']],
             [
                 'name' => $account['name'],

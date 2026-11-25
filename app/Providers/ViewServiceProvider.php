@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
 use App\Helpers\MenuHelper;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -25,7 +25,7 @@ class ViewServiceProvider extends ServiceProvider
         View::composer('theme::*', function ($view) {
             $view->with([
                 'headerMenu' => MenuHelper::render('header'),
-                'footerMenu' => MenuHelper::render('footer')
+                'footerMenu' => MenuHelper::render('footer'),
             ]);
         });
     }

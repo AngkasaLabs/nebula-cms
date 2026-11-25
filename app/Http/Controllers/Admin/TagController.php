@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class TagController extends Controller
 {
@@ -28,7 +28,7 @@ class TagController extends Controller
             ->paginate(10);
 
         return Inertia::render('Admin/Tags/Index', [
-            'tags' => $tags
+            'tags' => $tags,
         ]);
     }
 
@@ -48,7 +48,7 @@ class TagController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'color' => 'nullable|string|max:7'
+            'color' => 'nullable|string|max:7',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
@@ -69,7 +69,7 @@ class TagController extends Controller
         }]);
 
         return Inertia::render('Admin/Tags/Show', [
-            'tag' => $tag
+            'tag' => $tag,
         ]);
     }
 
@@ -79,7 +79,7 @@ class TagController extends Controller
     public function edit(Tag $tag)
     {
         return Inertia::render('Admin/Tags/Edit', [
-            'tag' => $tag
+            'tag' => $tag,
         ]);
     }
 
@@ -91,7 +91,7 @@ class TagController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'color' => 'nullable|string|max:7'
+            'color' => 'nullable|string|max:7',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);

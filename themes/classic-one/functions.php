@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Category;
+use App\Models\Post;
+use App\Models\Tag;
+
 /**
  * File functions.php for Classic One theme
  *
@@ -18,16 +22,16 @@ add_action('theme.loaded', function ($theme) {
 // Filter to modify home page data
 add_filter('home_page_data', function ($data) {
     // Add featured posts to home page data
-    if (!isset($data['featured_posts'])) {
-        $data['featured_posts'] = \App\Models\Post::where('status', 'published')
+    if (! isset($data['featured_posts'])) {
+        $data['featured_posts'] = Post::where('status', 'published')
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get();
     }
 
     // Add recent posts for sidebar
-    if (!isset($data['recentPosts'])) {
-        $data['recentPosts'] = \App\Models\Post::where('status', 'published')
+    if (! isset($data['recentPosts'])) {
+        $data['recentPosts'] = Post::where('status', 'published')
             ->orderBy('published_at', 'desc')
             ->limit(5)
             ->get();
@@ -51,16 +55,16 @@ add_filter('blog_posts_query', function ($query, $request) {
 // Filter to modify blog page data
 add_filter('blog_page_data', function ($data, $request) {
     // Add popular posts to sidebar
-    if (!isset($data['popular_posts'])) {
-        $data['popular_posts'] = \App\Models\Post::where('status', 'published')
+    if (! isset($data['popular_posts'])) {
+        $data['popular_posts'] = Post::where('status', 'published')
             ->orderBy('views', 'desc')
             ->limit(5)
             ->get();
     }
 
     // Add recent posts for sidebar
-    if (!isset($data['recentPosts'])) {
-        $data['recentPosts'] = \App\Models\Post::where('status', 'published')
+    if (! isset($data['recentPosts'])) {
+        $data['recentPosts'] = Post::where('status', 'published')
             ->orderBy('published_at', 'desc')
             ->limit(5)
             ->get();
@@ -100,34 +104,34 @@ add_filter('related_posts_count', function ($count) {
 add_filter('single_post_data', function ($data) {
     // Add author info to single post data
     if (isset($data['post']) && isset($data['post']->author)) {
-        $data['author_posts_count'] = \App\Models\Post::where('author_id', $data['post']->author_id)
+        $data['author_posts_count'] = Post::where('author_id', $data['post']->author_id)
             ->where('status', 'published')
             ->count();
     }
 
     // Add recent posts for sidebar
-    if (!isset($data['recentPosts'])) {
-        $data['recentPosts'] = \App\Models\Post::where('status', 'published')
+    if (! isset($data['recentPosts'])) {
+        $data['recentPosts'] = Post::where('status', 'published')
             ->orderBy('published_at', 'desc')
             ->limit(5)
             ->get();
     }
 
     // Add categories for sidebar
-    if (!isset($data['categories'])) {
-        $data['categories'] = \App\Models\Category::withCount([
+    if (! isset($data['categories'])) {
+        $data['categories'] = Category::withCount([
             'posts' => function ($query) {
                 $query->where('status', 'published');
-            }
+            },
         ])->get();
     }
 
     // Add tags for sidebar
-    if (!isset($data['tags'])) {
-        $data['tags'] = \App\Models\Tag::withCount([
+    if (! isset($data['tags'])) {
+        $data['tags'] = Tag::withCount([
             'posts' => function ($query) {
                 $query->where('status', 'published');
-            }
+            },
         ])->get();
     }
 
@@ -142,26 +146,26 @@ add_action('page_found', function ($page) {
 // Filter to modify page data
 add_filter('page_data', function ($data) {
     // Add categories for sidebar
-    if (!isset($data['categories'])) {
-        $data['categories'] = \App\Models\Category::withCount([
+    if (! isset($data['categories'])) {
+        $data['categories'] = Category::withCount([
             'posts' => function ($query) {
                 $query->where('status', 'published');
-            }
+            },
         ])->get();
     }
 
     // Add tags for sidebar
-    if (!isset($data['tags'])) {
-        $data['tags'] = \App\Models\Tag::withCount([
+    if (! isset($data['tags'])) {
+        $data['tags'] = Tag::withCount([
             'posts' => function ($query) {
                 $query->where('status', 'published');
-            }
+            },
         ])->get();
     }
 
     // Add recent posts for sidebar
-    if (!isset($data['recentPosts'])) {
-        $data['recentPosts'] = \App\Models\Post::where('status', 'published')
+    if (! isset($data['recentPosts'])) {
+        $data['recentPosts'] = Post::where('status', 'published')
             ->orderBy('published_at', 'desc')
             ->limit(5)
             ->get();
@@ -178,7 +182,7 @@ add_filter('template_hierarchy', function ($templates, $theme) {
             // Check if template starts with 'templates.'
             if (strpos($template, 'templates.') !== 0) {
                 // Add templates directory
-                $templates[$key] = 'templates.' . $template;
+                $templates[$key] = 'templates.'.$template;
             }
         }
     }
@@ -209,11 +213,11 @@ function enqueue_theme_assets()
 {
     // Register and enqueue theme stylesheet
     add_action('theme.styles', function () {
-        echo '<link rel="stylesheet" href="' . theme_asset('css/style.css') . '">';
+        echo '<link rel="stylesheet" href="'.theme_asset('css/style.css').'">';
     });
 
     // Register and enqueue theme JavaScript
     add_action('theme.scripts', function () {
-        echo '<script src="' . theme_asset('js/main.js') . '"></script>';
+        echo '<script src="'.theme_asset('js/main.js').'"></script>';
     });
 }

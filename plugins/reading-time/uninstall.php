@@ -8,7 +8,6 @@
  *
  * Use this to clean up any plugin-specific data, files, or configurations.
  */
-
 if (getenv('NEBULA_PLUGIN_UNINSTALL') !== '1') {
     exit;
 }

@@ -38,4 +38,3 @@ class PageController extends Controller
         return new PageResource($page);
     }
 }
-

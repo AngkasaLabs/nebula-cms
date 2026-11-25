@@ -384,6 +384,7 @@ class PostController extends Controller
         $message = match ($action) {
             'delete' => (function () use ($ids, $count) {
                 Post::whereIn('id', $ids)->delete();
+
                 return "$count post(s) deleted successfully.";
             })(),
             'publish' => (function () use ($ids, $count) {
@@ -391,10 +392,12 @@ class PostController extends Controller
                     'status' => 'published',
                     'published_at' => now(),
                 ]);
+
                 return "$count post(s) published successfully.";
             })(),
             'draft' => (function () use ($ids, $count) {
                 Post::whereIn('id', $ids)->update(['status' => 'draft']);
+
                 return "$count post(s) moved to draft successfully.";
             })(),
         };
