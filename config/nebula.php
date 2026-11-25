@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\PackageSigningKeys;
+
 return [
 
     /*
@@ -66,13 +68,24 @@ return [
     | Package Signing Keys
     |--------------------------------------------------------------------------
     |
-    | Ed25519 public keys used to verify plugin/theme packages downloaded from
-    | the store. Keys are stored as a JSON map of key_id => base64 public key,
-    | which allows key rotation without a code change. The matching private key
-    | must never be placed on the server; packages are signed offline.
+    | Ed25519 public keys used to verify plugin/theme packages from the store
+    | and the admin upload form. Keys are stored as a JSON map of
+    | key_id => base64 public key.
+    |
+    | The built-in keys below are the trust anchor of every install. Keys from
+    | NEBULA_PACKAGE_SIGNING_KEYS are added on top of them, so you can trust
+    | your own team's signing key without copying the official key into .env.
+    | Set NEBULA_PACKAGE_SIGNING_KEYS_REPLACE=true to trust only the env keys.
+    |
+    | The matching private key must never be placed on the server; packages are
+    | signed offline with tools/nebula-pack.php.
     |
     */
-    'package_signing_keys' => json_decode((string) env('NEBULA_PACKAGE_SIGNING_KEYS', '{"official":"34BVMN/vudFGIXCtDE7HCfmt7LpTeFQZCcLVtC+qb2w="}'), true) ?: [],
+    'package_signing_keys' => PackageSigningKeys::resolve(
+        ['official' => '34BVMN/vudFGIXCtDE7HCfmt7LpTeFQZCcLVtC+qb2w='],
+        env('NEBULA_PACKAGE_SIGNING_KEYS'),
+        filter_var(env('NEBULA_PACKAGE_SIGNING_KEYS_REPLACE', false), FILTER_VALIDATE_BOOL),
+    ),
 
     'package_signing_key_id' => env('NEBULA_PACKAGE_SIGNING_KEY_ID', 'official'),
 
