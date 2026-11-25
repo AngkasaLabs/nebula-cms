@@ -65,6 +65,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Content Search
+    |--------------------------------------------------------------------------
+    |
+    | Full-text indexes power post/page search on MySQL, MariaDB and PostgreSQL.
+    | Disable to force the LIKE fallback, for example when the index cannot be
+    | created on a restricted shared host.
+    |
+    */
+    'content_search_fulltext' => filter_var(env('NEBULA_CONTENT_SEARCH_FULLTEXT', true), FILTER_VALIDATE_BOOLEAN),
+
+    /*
+    |--------------------------------------------------------------------------
     | Package Signing Keys
     |--------------------------------------------------------------------------
     |

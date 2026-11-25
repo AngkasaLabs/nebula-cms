@@ -44,6 +44,10 @@ class ContentSearch
 
     public static function shouldUseFullText(?string $normalizedTerm): bool
     {
+        if (! config('nebula.content_search_fulltext', true)) {
+            return false;
+        }
+
         if ($normalizedTerm === null || ! self::supportsFullText()) {
             return false;
         }
