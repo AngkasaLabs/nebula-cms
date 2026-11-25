@@ -32,11 +32,21 @@ git checkout -b fix-issue
 - Use TypeScript for frontend code
 - Ensure the code is formatted with Prettier
 - Write tests for new features
-- Ensure all tests pass
+
+Run the same gates as CI before opening a pull request:
+
 ```bash
-php artisan test
-npm run test
+php artisan test            # SQLite locally; CI also runs MySQL 8.4
+composer analyse            # Larastan level 5 (baseline tracked in phpstan-baseline.neon)
+php vendor/bin/pint --test  # PHP formatting; use `php vendor/bin/pint` to fix
+npm run types               # tsc --noEmit
+npm run format:check        # Prettier check; use `npm run format` to fix
+npm run lint                # ESLint check; use `npm run lint:fix` to fix
+npm run build
 ```
+
+Database-specific behaviour (full-text search, JSON columns) is only covered by the MySQL
+job, so mention in the PR when a change depends on the database driver.
 
 ### 5. Commit Guidelines
 Format commit message:
