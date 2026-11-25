@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { ThemeCard } from '@/components/theme-card';
@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState, useRef } from 'react';
 import { UploadSecurityExtensionCallout, type ExtensionUploadSecurity } from '@/components/upload-security-callout';
+import FlashMessages from '@/components/flash-messages';
+import InputError from '@/components/input-error';
 
 interface Theme {
     id: number;
@@ -37,9 +39,13 @@ const breadcrumbs = [
 ];
 
 export default function Index({ themes, uploadSecurity }: Props) {
+    const page = usePage();
+    const errors = (page.props.errors ?? {}) as Record<string, string>;
+
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [signatureFile, setSignatureFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const signatureInputRef = useRef<HTMLInputElement>(null);
     const signatureEmptyInputRef = useRef<HTMLInputElement>(null);
@@ -61,27 +67,32 @@ export default function Index({ themes, uploadSecurity }: Props) {
     };
 
     const handleUpload = () => {
-        if (selectedFile && signatureFile) {
-            const formData = new FormData();
-            formData.append('theme', selectedFile);
-            formData.append('signature', signatureFile);
-            router.post(route('admin.themes.upload'), formData, {
-                forceFormData: true,
-                preserveScroll: true,
-            });
-            setIsUploadDialogOpen(false);
-            setSelectedFile(null);
-            setSignatureFile(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-            if (signatureInputRef.current) {
-                signatureInputRef.current.value = '';
-            }
-            if (signatureEmptyInputRef.current) {
-                signatureEmptyInputRef.current.value = '';
-            }
-        }
+        if (!selectedFile || !signatureFile) return;
+
+        const formData = new FormData();
+        formData.append('theme', selectedFile);
+        formData.append('signature', signatureFile);
+
+        router.post(route('admin.themes.upload'), formData, {
+            forceFormData: true,
+            preserveScroll: true,
+            onStart: () => setIsUploading(true),
+            onFinish: () => setIsUploading(false),
+            onSuccess: () => {
+                setIsUploadDialogOpen(false);
+                setSelectedFile(null);
+                setSignatureFile(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+                if (signatureInputRef.current) {
+                    signatureInputRef.current.value = '';
+                }
+                if (signatureEmptyInputRef.current) {
+                    signatureEmptyInputRef.current.value = '';
+                }
+            },
+        });
     };
 
     return (
@@ -89,6 +100,8 @@ export default function Index({ themes, uploadSecurity }: Props) {
             <Head title="Themes" />
 
             <div className="p-6">
+                <FlashMessages className="mb-6" />
+
                 {/* Header Section */}
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-2">
@@ -125,6 +138,7 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                 onChange={handleFileChange}
                                                 className="cursor-pointer"
                                             />
+                                            <InputError message={errors.theme} />
                                         </div>
                                         <div className="grid gap-2">
                                             <Label htmlFor="theme-signature" className="text-sm font-medium">Signature File (.sig.json)</Label>
@@ -136,14 +150,19 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                 onChange={handleSignatureChange}
                                                 className="cursor-pointer"
                                             />
+                                            <InputError message={errors.signature} />
                                         </div>
                                     </div>
                                     <DialogFooter className="gap-2">
                                         <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
                                             Batal
                                         </Button>
-                                        <Button onClick={handleUpload} disabled={!selectedFile || !signatureFile} className="min-w-[100px]">
-                                            {selectedFile && signatureFile ? 'Upload' : 'Pilih File'}
+                                        <Button
+                                            onClick={handleUpload}
+                                            disabled={!selectedFile || !signatureFile || isUploading}
+                                            className="min-w-[100px]"
+                                        >
+                                            {isUploading ? 'Uploading…' : selectedFile && signatureFile ? 'Upload' : 'Pilih File'}
                                         </Button>
                                     </DialogFooter>
                                 </DialogContent>
@@ -200,6 +219,7 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                     onChange={handleFileChange}
                                                     className="cursor-pointer"
                                                 />
+                                                <InputError message={errors.theme} />
                                             </div>
                                             <div className="grid gap-2">
                                                 <Label htmlFor="theme-empty-signature" className="text-sm font-medium">Signature File (.sig.json)</Label>
@@ -211,14 +231,19 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                     onChange={handleSignatureChange}
                                                     className="cursor-pointer"
                                                 />
+                                                <InputError message={errors.signature} />
                                             </div>
                                         </div>
                                         <DialogFooter className="gap-2">
                                             <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
                                                 Cancel
                                             </Button>
-                                            <Button onClick={handleUpload} disabled={!selectedFile || !signatureFile} className="min-w-[100px]">
-                                                {selectedFile && signatureFile ? 'Upload' : 'Select Files'}
+                                            <Button
+                                                onClick={handleUpload}
+                                                disabled={!selectedFile || !signatureFile || isUploading}
+                                                className="min-w-[100px]"
+                                            >
+                                                {isUploading ? 'Uploading…' : selectedFile && signatureFile ? 'Upload' : 'Select Files'}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>

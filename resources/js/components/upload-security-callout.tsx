@@ -46,6 +46,10 @@ export function UploadSecurityExtensionCallout({ data }: { data: ExtensionUpload
                         ZIP divalidasi: struktur, path traversal, maks. {data.zipMaxMb}&nbsp;MB per berkas, {data.zipMaxEntries} entri, ~
                         {data.zipMaxUncompressedMb}&nbsp;MB total tidak terkompresi.
                     </p>
+                    <p>
+                        Signature wajib: unggahan plugin/tema harus menyertakan file <code>.sig.json</code> dan diverifikasi Ed25519 + SHA-256 sebelum
+                        dipasang. Unggahan tanpa signature valid ditolak.
+                    </p>
                     <p className="text-muted-foreground/90">
                         Pemindaian: {data.scanEnabled ? 'ClamAV aktif (server).' : 'ClamAV nonaktif — atur di .env jika perlu.'}
                     </p>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\PackageSlugMismatchException;
 use App\Models\Plugin;
 use App\Models\Theme;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -239,7 +240,9 @@ class PackageInstaller
         }
 
         if ($expectedSlug !== null && $slug !== $expectedSlug) {
-            throw new \InvalidArgumentException("Package slug [{$slug}] does not match expected [{$expectedSlug}]");
+            throw new PackageSlugMismatchException(
+                "Signature declares package [{$expectedSlug}], but the archive contains [{$slug}]."
+            );
         }
 
         return $slug;

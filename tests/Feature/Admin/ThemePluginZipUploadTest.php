@@ -375,9 +375,60 @@ describe('verifikasi signature upload Admin', function () {
             $this->actingAs($user)
                 ->post(route('admin.plugins.upload'), ['plugin' => $upload, 'signature' => $signature])
                 ->assertRedirect()
-                ->assertSessionHas('error');
+                ->assertSessionHas('error', fn ($message) => str_contains($message, 'Signature declares package'));
 
             expect(Plugin::where('folder_name', $slug)->exists())->toBeFalse();
+            expect(File::exists(base_path("plugins/{$slug}")))->toBeFalse();
+        } finally {
+            @unlink($zipPath);
+            @unlink($signaturePath);
+            $pluginDir = base_path("plugins/{$slug}");
+            if (File::exists($pluginDir)) {
+                File::deleteDirectory($pluginDir);
+            }
+            Plugin::where('folder_name', $slug)->delete();
+        }
+    });
+
+    it('menolak signature dengan key_id yang tidak dikenal', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Admin');
+
+        $slug = 'zip-unknown-key-'.uniqid();
+        $zipPath = ZipTestHelper::createZipFile([
+            'plugin.json' => json_encode([
+                'name' => 'Unknown Key Plugin',
+                'slug' => $slug,
+                'version' => '1.0.0',
+            ]),
+            'index.php' => "<?php\n",
+        ]);
+
+        // Valid signature bytes, but the manifest names a key the CMS does not trust.
+        $manifest = [
+            'slug' => $slug,
+            'type' => 'plugin',
+            'version' => '1.0.0',
+            'sha256' => hash('sha256', (string) file_get_contents($zipPath)),
+            'size' => filesize($zipPath),
+            'key_id' => 'unknown-key',
+        ];
+
+        $signed = base64_encode(sodium_crypto_sign_detached(
+            PackageSignature::canonicalJson(PackageSignature::payload($manifest)),
+            sodium_crypto_sign_secretkey($GLOBALS['d1_test_keypair'])
+        ));
+
+        [$signature, $signaturePath] = d1_signature_upload(json_encode($manifest + ['signature' => $signed]));
+
+        try {
+            $upload = new UploadedFile($zipPath, 'plugin.zip', 'application/zip', null, true);
+
+            $this->actingAs($user)
+                ->post(route('admin.plugins.upload'), ['plugin' => $upload, 'signature' => $signature])
+                ->assertRedirect()
+                ->assertSessionHas('error', fn ($message) => str_contains($message, 'Unknown package signing key'));
+
             expect(File::exists(base_path("plugins/{$slug}")))->toBeFalse();
         } finally {
             @unlink($zipPath);

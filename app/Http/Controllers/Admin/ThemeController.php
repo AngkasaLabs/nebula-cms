@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Contracts\UploadScanner;
+use App\Exceptions\PackageSlugMismatchException;
 use App\Exceptions\PackageVerificationException;
 use App\Exceptions\UploadScanException;
 use App\Exceptions\UploadSignatureException;
@@ -277,6 +278,8 @@ class ThemeController extends Controller
         try {
             // Bind the signed slug to the archive's own theme.json.
             $this->installer->installThemeZip($file->getRealPath(), (string) $signature['slug']);
+        } catch (PackageSlugMismatchException $e) {
+            return redirect()->back()->with('error', 'Package verification failed: '.$e->getMessage());
         } catch (\InvalidArgumentException $e) {
             return redirect()->back()->with('error', __('Invalid ZIP: :msg', ['msg' => $e->getMessage()]));
         } catch (\Throwable $e) {
