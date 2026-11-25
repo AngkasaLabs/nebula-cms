@@ -17,6 +17,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Release tags create a **draft** release. The archive is signed offline with
   `nebula-pack sign-file` before publishing.
 - `CHANGELOG.md`.
+- `NEBULA_CONTENT_SEARCH_FULLTEXT=false` forces the LIKE search fallback on hosts that
+  cannot create full-text indexes.
+- MySQL-only integration suite (`tests/Integration`) for full-text search.
 
 ### Changed
 
@@ -30,6 +33,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - Media breadcrumb for the open folder used a raw `#` href, which failed type checking.
+- Search and scan-settings tests are deterministic on MySQL: the blog search test asserts
+  the matched title, and settings comparisons ignore JSON key order.
 
 ## [1.12.0] - 2026-11-25
 
