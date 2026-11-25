@@ -234,17 +234,21 @@ it('menyusun admin navigation plugin dari manifest untuk inertia shared props', 
                 'icon' => 'ScrollText',
                 'items' => [],
                 'match_paths' => ['/admin/changelog', '/admin/changelog/*'],
+                'order' => 100,
+                'permission' => null,
             ],
             [
                 'title' => 'Releases',
                 'href' => '/admin/changelog/releases',
-                'group' => 'admin',
+                'group' => 'extensions',
                 'badge' => null,
                 'icon' => null,
                 'items' => [
                     ['title' => 'All Releases', 'href' => '/admin/changelog/releases'],
                 ],
                 'match_paths' => [],
+                'order' => 100,
+                'permission' => null,
             ],
         ]);
     } finally {

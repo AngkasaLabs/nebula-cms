@@ -6,6 +6,7 @@ use App\Models\Plugin;
 use App\Services\PluginFrontendAssetRegistry;
 use App\Services\StoreUpdates;
 use App\Services\UpdateService;
+use App\Support\AdminNavigation;
 use App\Support\AuthRedirect;
 use App\Support\PluginHooks;
 use Illuminate\Foundation\Inspiring;
@@ -83,6 +84,9 @@ class HandleInertiaRequests extends Middleware
             'adminNavigation' => fn (): array => $isAdminUser
                 ? $this->buildAdminNavigation($request)
                 : [],
+            'adminNavigationSections' => fn (): array => $isAdminUser
+                ? AdminNavigation::sections()
+                : [],
             'storeUpdates' => fn (): ?array => $isAdminUser
                 ? app(StoreUpdates::class)->summary()
                 : null,
@@ -109,61 +113,6 @@ class HandleInertiaRequests extends Middleware
             return [];
         }
 
-        return array_values(array_filter(
-            array_map([$this, 'normalizeAdminNavigationItem'], $items),
-            fn (?array $item) => $item !== null
-        ));
-    }
-
-    /**
-     * @param  array<string, mixed>  $item
-     * @return array<string, mixed>|null
-     */
-    protected function normalizeAdminNavigationItem(array $item): ?array
-    {
-        $title = $item['title'] ?? null;
-        $href = $item['href'] ?? null;
-
-        if (! is_string($title) || $title === '' || ! is_string($href) || $href === '') {
-            return null;
-        }
-
-        $group = $item['group'] ?? 'admin';
-        if (! is_string($group) || ! in_array($group, ['main', 'content', 'admin'], true)) {
-            $group = 'admin';
-        }
-
-        $children = [];
-        foreach ($item['items'] ?? [] as $child) {
-            if (! is_array($child)) {
-                continue;
-            }
-
-            $childTitle = $child['title'] ?? null;
-            $childHref = $child['href'] ?? null;
-            if (! is_string($childTitle) || $childTitle === '' || ! is_string($childHref) || $childHref === '') {
-                continue;
-            }
-
-            $children[] = [
-                'title' => $childTitle,
-                'href' => $childHref,
-            ];
-        }
-
-        $matchPaths = array_values(array_filter(
-            is_array($item['match_paths'] ?? null) ? $item['match_paths'] : [],
-            fn ($path) => is_string($path) && $path !== ''
-        ));
-
-        return [
-            'title' => $title,
-            'href' => $href,
-            'group' => $group,
-            'badge' => is_string($item['badge'] ?? null) || is_bool($item['badge'] ?? null) ? $item['badge'] : null,
-            'icon' => is_string($item['icon'] ?? null) ? $item['icon'] : null,
-            'items' => $children,
-            'match_paths' => $matchPaths,
-        ];
+        return AdminNavigation::normalizeItems($items, $request->user());
     }
 }

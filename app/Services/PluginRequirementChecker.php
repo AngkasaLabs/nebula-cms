@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Plugin;
+use App\Support\AdminNavigation;
 use Composer\Semver\Semver;
 use InvalidArgumentException;
 
@@ -21,6 +22,7 @@ class PluginRequirementChecker
         $requires = $plugin->requires;
         if (! is_array($requires) || $requires === []) {
             $this->checkFrontendRuntime($plugin, $errors);
+            $this->checkAdminNavigation($plugin, $warnings);
 
             return ['ok' => count($errors) === 0, 'errors' => $errors, 'warnings' => $warnings];
         }
@@ -66,8 +68,44 @@ class PluginRequirementChecker
         }
 
         $this->checkFrontendRuntime($plugin, $errors);
+        $this->checkAdminNavigation($plugin, $warnings);
 
         return ['ok' => count($errors) === 0, 'errors' => $errors, 'warnings' => $warnings];
+    }
+
+    /**
+     * Warn about admin navigation metadata the sidebar cannot render.
+     *
+     * @param  array<int, string>  $warnings
+     */
+    protected function checkAdminNavigation(Plugin $plugin, array &$warnings): void
+    {
+        $items = $plugin->getAdminNavigationFromDisk();
+
+        if ($items === []) {
+            return;
+        }
+
+        $knownSections = array_keys(AdminNavigation::SECTIONS);
+        $legacySections = array_keys(AdminNavigation::LEGACY_SECTIONS);
+
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $group = $item['group'] ?? null;
+            if (is_string($group) && $group !== ''
+                && ! in_array(strtolower($group), $knownSections, true)
+                && ! in_array(strtolower($group), $legacySections, true)) {
+                $warnings[] = "Unknown admin_navigation group \"{$group}\"; the sidebar shows it under \"Extensions\".";
+            }
+
+            $icon = $item['icon'] ?? null;
+            if (is_string($icon) && $icon !== '' && ! in_array($icon, AdminNavigation::ICONS, true)) {
+                $warnings[] = "Unknown admin_navigation icon \"{$icon}\"; the sidebar uses the default icon.";
+            }
+        }
     }
 
     /**

@@ -4,8 +4,9 @@ use App\Models\Plugin;
 use App\Services\PluginRequirementChecker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 it('passes when requires is empty', function () {
     config(['nebula.version' => '1.2.0']);
@@ -125,5 +126,44 @@ it('fails when inertia-prebuilt frontend manifest is missing', function () {
         if (File::exists($path)) {
             File::deleteDirectory($path);
         }
+    }
+});
+
+it('warns about admin navigation metadata the sidebar cannot render', function () {
+    $folder = '__pl_nav_warn_'.uniqid();
+    $path = base_path("plugins/{$folder}");
+    File::makeDirectory($path, 0755, true);
+
+    File::put($path.'/plugin.json', json_encode([
+        'name' => 'Nav Warnings',
+        'slug' => $folder,
+        'version' => '1.0.0',
+        'admin_navigation' => [
+            ['title' => 'Bad Icon', 'href' => '/admin/bad-icon', 'group' => 'tools', 'icon' => 'NotARealIcon'],
+            ['title' => 'Bad Group', 'href' => '/admin/bad-group', 'group' => 'marketing'],
+            ['title' => 'Fine', 'href' => '/admin/fine', 'group' => 'system', 'icon' => 'Settings'],
+            ['title' => 'Legacy', 'href' => '/admin/legacy', 'group' => 'admin'],
+        ],
+    ]));
+    File::put($path.'/index.php', "<?php\n");
+
+    $plugin = new Plugin([
+        'name' => 'Nav Warnings',
+        'slug' => $folder,
+        'folder_name' => $folder,
+        'version' => '1.0.0',
+    ]);
+
+    try {
+        $result = app(PluginRequirementChecker::class)->check($plugin);
+
+        expect($result['ok'])->toBeTrue();
+        expect(implode(' ', $result['warnings']))
+            ->toContain('Unknown admin_navigation icon "NotARealIcon"')
+            ->toContain('Unknown admin_navigation group "marketing"')
+            ->not->toContain('"admin"');
+        expect($result['warnings'])->toHaveCount(2);
+    } finally {
+        File::deleteDirectory($path);
     }
 });

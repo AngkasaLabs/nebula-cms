@@ -28,11 +28,19 @@ export interface NavItem {
 export interface AdminNavigationItem {
     title: string;
     href: string;
-    group: 'main' | 'content' | 'admin';
+    group: string;
     icon?: string | null;
     items?: { title: string; href: string }[];
     badge?: boolean | string | null;
     match_paths?: string[];
+    order?: number;
+    permission?: string | null;
+}
+
+export interface AdminNavigationSection {
+    key: string;
+    label: string | null;
+    order: number;
 }
 
 /** Result shape from UpdateService::checkForUpdate(), also cached under `update_available`. */
@@ -65,6 +73,7 @@ export interface SharedData {
     sidebarOpen: boolean;
     updateAvailable: UpdateCheckResult | null;
     adminNavigation: AdminNavigationItem[];
+    adminNavigationSections: AdminNavigationSection[];
     storeUpdates?: {
         count: number;
         items: Array<{ slug: string; type: string; latest: string | null }>;

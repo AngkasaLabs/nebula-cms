@@ -37,11 +37,22 @@ export interface NavItem {
 export interface AdminNavigationItem {
     title: string;
     href: string;
-    group: 'main' | 'content' | 'admin';
+    /** Section key declared by the plugin (main, content, commerce, tools, system, extensions). */
+    group: string;
     icon?: string | null;
     items?: NavSubItem[];
     badge?: boolean | string | null;
     match_paths?: string[];
+    /** Sort weight inside its section; lower comes first. Defaults to 100. */
+    order?: number;
+    /** Permission required for the item to be shared with the current user. */
+    permission?: string | null;
+}
+
+export interface AdminNavigationSection {
+    key: string;
+    label: string | null;
+    order: number;
 }
 
 export interface BreadcrumbItem {
@@ -89,6 +100,7 @@ export interface SharedData {
     sidebarOpen: boolean;
     updateAvailable: UpdateCheckResult | null;
     adminNavigation: AdminNavigationItem[];
+    adminNavigationSections: AdminNavigationSection[];
     storeUpdates?: {
         count: number;
         items: Array<{ slug: string; type: string; latest: string | null }>;

@@ -10,9 +10,47 @@ import {
     SidebarMenuItem,
     SidebarRail,
 } from '@/components/ui/sidebar';
-import { type AdminNavigationItem, type NavItem, type SharedData } from '@/types';
+import { type AdminNavigationItem, type AdminNavigationSection, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { AlignJustify, File, FileText, Image, LayoutGrid, Paintbrush, Puzzle, ScrollText, Settings, Shield, Store, Users } from 'lucide-react';
+import {
+    AlignJustify,
+    BarChart3,
+    BookOpen,
+    Boxes,
+    Calendar,
+    Code,
+    CreditCard,
+    Database,
+    Download,
+    File,
+    FileText,
+    Flag,
+    Folder,
+    Globe,
+    Image,
+    Languages,
+    LayoutGrid,
+    LifeBuoy,
+    Mail,
+    Megaphone,
+    MessageSquare,
+    Package,
+    Paintbrush,
+    Puzzle,
+    Receipt,
+    Route,
+    ScrollText,
+    Settings,
+    Shield,
+    ShoppingCart,
+    Store,
+    Tag,
+    Ticket,
+    Truck,
+    Users,
+    Wrench,
+    Zap,
+} from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
@@ -20,20 +58,65 @@ function can(permissions: string[], name: string): boolean {
     return permissions.includes(name);
 }
 
+/**
+ * Icon names accepted from plugin manifests. Keep in sync with
+ * App\Support\AdminNavigation::ICONS (enforced by a PHP test).
+ */
 const iconMap = {
     AlignJustify,
+    BarChart3,
+    BookOpen,
+    Boxes,
+    Calendar,
+    Code,
+    CreditCard,
+    Database,
+    Download,
     File,
     FileText,
+    Flag,
+    Folder,
+    Globe,
     Image,
+    Languages,
     LayoutGrid,
+    LifeBuoy,
+    Mail,
+    Megaphone,
+    MessageSquare,
+    Package,
     Paintbrush,
     Puzzle,
+    Receipt,
+    Route,
     ScrollText,
     Settings,
     Shield,
+    ShoppingCart,
     Store,
+    Tag,
+    Ticket,
+    Truck,
     Users,
+    Wrench,
+    Zap,
 } as const;
+
+/**
+ * Mirrors App\Support\AdminNavigation::SECTIONS. The shared payload wins when
+ * present; this list only keeps the sidebar working with a stale payload.
+ */
+const FALLBACK_SECTIONS: AdminNavigationSection[] = [
+    { key: 'main', label: null, order: 10 },
+    { key: 'content', label: 'Content Management', order: 20 },
+    { key: 'commerce', label: 'Commerce', order: 30 },
+    { key: 'tools', label: 'Tools', order: 40 },
+    { key: 'system', label: 'System', order: 80 },
+    { key: 'extensions', label: 'Extensions', order: 90 },
+];
+
+/** Above this many links, the Extensions section collapses into one item. */
+const EXTENSIONS_COLLAPSE_AFTER = 6;
 
 function toNavItem(item: AdminNavigationItem): NavItem {
     const icon = item.icon ? iconMap[item.icon as keyof typeof iconMap] : undefined;
@@ -41,7 +124,7 @@ function toNavItem(item: AdminNavigationItem): NavItem {
     return {
         title: item.title,
         href: item.href,
-        icon,
+        icon: icon ?? Puzzle,
         badge: item.badge ?? undefined,
         matchPaths: item.match_paths,
         items: item.items,
@@ -49,22 +132,29 @@ function toNavItem(item: AdminNavigationItem): NavItem {
 }
 
 export function AppSidebar() {
-    const { auth, updateAvailable, adminNavigation, storeUpdates } = usePage<SharedData>().props;
+    const { auth, updateAvailable, adminNavigation, adminNavigationSections, storeUpdates } = usePage<SharedData>().props;
     const permissions = useMemo(() => auth.permissions ?? [], [auth.permissions]);
 
-    const { mainNavItems, contentNavItems, adminNavItems } = useMemo(() => {
-        const main: NavItem[] = [];
+    const sections = useMemo(() => {
+        const meta = (adminNavigationSections?.length ? adminNavigationSections : FALLBACK_SECTIONS).slice().sort((a, b) => a.order - b.order);
+
+        const grouped = new Map<string, NavItem[]>();
+        const push = (section: string, item: NavItem) => {
+            const items = grouped.get(section) ?? [];
+            items.push(item);
+            grouped.set(section, items);
+        };
+
         if (can(permissions, 'view dashboard')) {
-            main.push({
+            push('main', {
                 title: 'Dashboard',
                 href: route('admin.dashboard'),
                 icon: LayoutGrid,
             });
         }
 
-        const content: NavItem[] = [];
         if (can(permissions, 'view content')) {
-            content.push({
+            push('content', {
                 title: 'Pages',
                 href: route('admin.pages.index'),
                 icon: File,
@@ -80,7 +170,7 @@ export function AppSidebar() {
             postSubs.push({ title: 'Tags', href: route('admin.tags.index') });
         }
         if (postSubs.length > 0) {
-            content.push({
+            push('content', {
                 title: 'Posts',
                 icon: FileText,
                 items: postSubs,
@@ -88,7 +178,7 @@ export function AppSidebar() {
         }
 
         if (can(permissions, 'view media')) {
-            content.push({
+            push('content', {
                 title: 'Media',
                 href: route('admin.media.index'),
                 icon: Image,
@@ -96,51 +186,50 @@ export function AppSidebar() {
         }
 
         if (can(permissions, 'manage menus')) {
-            content.push({
+            push('content', {
                 title: 'Menus',
                 href: route('admin.menus.index'),
                 icon: AlignJustify,
             });
         }
 
-        const admin: NavItem[] = [];
         if (can(permissions, 'view users')) {
-            admin.push({
+            push('system', {
                 title: 'Users',
                 href: route('admin.users.index'),
                 icon: Users,
             });
         }
         if (can(permissions, 'manage roles')) {
-            admin.push({
+            push('system', {
                 title: 'Roles',
                 href: route('admin.roles.index'),
                 icon: Shield,
             });
         }
         if (can(permissions, 'view audit log')) {
-            admin.push({
+            push('system', {
                 title: 'Audit log',
                 href: route('admin.audit-log.index'),
                 icon: ScrollText,
             });
         }
         if (can(permissions, 'manage themes')) {
-            admin.push({
+            push('system', {
                 title: 'Themes',
                 href: route('admin.themes.index'),
                 icon: Paintbrush,
             });
         }
         if (can(permissions, 'manage plugins')) {
-            admin.push({
+            push('system', {
                 title: 'Plugins',
                 href: route('admin.plugins.index'),
                 icon: Puzzle,
             });
         }
         if (can(permissions, 'store.install')) {
-            admin.push({
+            push('system', {
                 title: 'Marketplace',
                 href: '/admin/marketplace',
                 icon: Store,
@@ -148,7 +237,7 @@ export function AppSidebar() {
             });
         }
         if (can(permissions, 'manage settings')) {
-            admin.push({
+            push('system', {
                 title: 'Settings',
                 href: route('admin.settings.general'),
                 icon: Settings,
@@ -157,23 +246,36 @@ export function AppSidebar() {
         }
 
         for (const item of adminNavigation ?? []) {
-            const navItem = toNavItem(item);
-
-            if (item.group === 'main') {
-                main.push(navItem);
-                continue;
-            }
-
-            if (item.group === 'content') {
-                content.push(navItem);
-                continue;
-            }
-
-            admin.push(navItem);
+            push(item.group, toNavItem(item));
         }
 
-        return { mainNavItems: main, contentNavItems: content, adminNavItems: admin };
-    }, [permissions, updateAvailable, adminNavigation, storeUpdates]);
+        return meta
+            .map((section) => ({ ...section, items: grouped.get(section.key) ?? [] }))
+            .filter((section) => section.items.length > 0)
+            .map((section) => {
+                if (section.key !== 'extensions' || section.items.length <= EXTENSIONS_COLLAPSE_AFTER) {
+                    return section;
+                }
+
+                // Only collapse flat lists: nested plugin menus stay visible.
+                if (section.items.some((item) => item.items && item.items.length > 0)) {
+                    return section;
+                }
+
+                const links: { title: string; href: string }[] = [];
+                for (const item of section.items) {
+                    if (item.href) {
+                        links.push({ title: item.title, href: item.href });
+                    }
+                }
+
+                return {
+                    ...section,
+                    label: null,
+                    items: [{ title: 'Extensions', icon: Puzzle, items: links }],
+                };
+            });
+    }, [permissions, updateAvailable, adminNavigation, adminNavigationSections, storeUpdates]);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -190,9 +292,9 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                {mainNavItems.length > 0 && <NavMain items={mainNavItems} />}
-                {contentNavItems.length > 0 && <NavMain items={contentNavItems} label="Content Management" />}
-                {adminNavItems.length > 0 && <NavMain items={adminNavItems} />}
+                {sections.map((section) => (
+                    <NavMain key={section.key} items={section.items} label={section.label ?? undefined} />
+                ))}
             </SidebarContent>
 
             <SidebarFooter>

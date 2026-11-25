@@ -1,4 +1,4 @@
-import type { AdminNavigationItem, Auth } from './index';
+import type { AdminNavigationItem, AdminNavigationSection, Auth } from './index';
 
 interface ZiggyConfigLike {
     location: string;
@@ -17,6 +17,7 @@ declare interface SharedData {
     ziggy: ZiggyConfigLike;
     sidebarOpen: boolean;
     adminNavigation: AdminNavigationItem[];
+    adminNavigationSections: AdminNavigationSection[];
     storeUpdates?: {
         count: number;
         items: Array<{ slug: string; type: string; latest: string | null }>;
