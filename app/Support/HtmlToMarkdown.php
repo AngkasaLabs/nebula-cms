@@ -6,17 +6,14 @@ class HtmlToMarkdown
 {
     /**
      * Convert HTML to Markdown, removing layout/visual noise.
-     *
-     * @param string $html
-     * @return string
      */
     public static function convert(string $html): string
     {
         // Suppress HTML5 parsing warnings
         libxml_use_internal_errors(true);
-        $doc = new \DOMDocument();
+        $doc = new \DOMDocument;
         // Load with UTF-8 encoding
-        $doc->loadHTML('<?xml encoding="utf-8" ?>' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $doc->loadHTML('<?xml encoding="utf-8" ?>'.$html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         // 1. Remove unwanted elements (visual headers, footers, navs, scripts, styles, forms, etc.)
@@ -35,11 +32,11 @@ class HtmlToMarkdown
                 break;
             }
         }
-        if (!$contentNode) {
+        if (! $contentNode) {
             $contentNode = $doc->documentElement;
         }
 
-        if (!$contentNode) {
+        if (! $contentNode) {
             return '';
         }
 
@@ -48,6 +45,7 @@ class HtmlToMarkdown
 
         // Clean up excessive whitespace and newlines
         $markdown = preg_replace("/\n{3,}/", "\n\n", $markdown);
+
         return trim($markdown);
     }
 
@@ -63,6 +61,7 @@ class HtmlToMarkdown
             }
             // Collapse multiple spaces/tabs into one
             $text = preg_replace('/\s+/', ' ', $text);
+
             return $text;
         }
 
@@ -78,37 +77,40 @@ class HtmlToMarkdown
 
         switch ($tagName) {
             case 'h1':
-                return "\n# " . trim($childrenMarkdown) . "\n\n";
+                return "\n# ".trim($childrenMarkdown)."\n\n";
             case 'h2':
-                return "\n## " . trim($childrenMarkdown) . "\n\n";
+                return "\n## ".trim($childrenMarkdown)."\n\n";
             case 'h3':
-                return "\n### " . trim($childrenMarkdown) . "\n\n";
+                return "\n### ".trim($childrenMarkdown)."\n\n";
             case 'h4':
-                return "\n#### " . trim($childrenMarkdown) . "\n\n";
+                return "\n#### ".trim($childrenMarkdown)."\n\n";
             case 'h5':
-                return "\n##### " . trim($childrenMarkdown) . "\n\n";
+                return "\n##### ".trim($childrenMarkdown)."\n\n";
             case 'h6':
-                return "\n###### " . trim($childrenMarkdown) . "\n\n";
+                return "\n###### ".trim($childrenMarkdown)."\n\n";
             case 'p':
-                return "\n" . trim($childrenMarkdown) . "\n\n";
+                return "\n".trim($childrenMarkdown)."\n\n";
             case 'br':
                 return "\n";
             case 'strong':
             case 'b':
                 $trimmed = trim($childrenMarkdown);
+
                 return $trimmed !== '' ? "**{$trimmed}**" : '';
             case 'em':
             case 'i':
                 $trimmed = trim($childrenMarkdown);
+
                 return $trimmed !== '' ? "*{$trimmed}*" : '';
             case 'code':
                 if (self::isInsidePre($node)) {
                     return $childrenMarkdown;
                 }
                 $trimmed = trim($childrenMarkdown);
+
                 return $trimmed !== '' ? "`{$trimmed}`" : '';
             case 'pre':
-                return "\n```\n" . $childrenMarkdown . "\n```\n\n";
+                return "\n```\n".$childrenMarkdown."\n```\n\n";
             case 'a':
                 $href = $node->getAttribute('href');
                 $text = trim($childrenMarkdown);
@@ -118,6 +120,7 @@ class HtmlToMarkdown
                 if ($text === '') {
                     $text = $href;
                 }
+
                 return "[{$text}]({$href})";
             case 'img':
                 $src = $node->getAttribute('src');
@@ -125,24 +128,26 @@ class HtmlToMarkdown
                 if (empty($src)) {
                     return '';
                 }
+
                 return "![{$alt}]({$src})";
             case 'ul':
-                return "\n" . self::processList($node, false) . "\n";
+                return "\n".self::processList($node, false)."\n";
             case 'ol':
-                return "\n" . self::processList($node, true) . "\n";
+                return "\n".self::processList($node, true)."\n";
             case 'li':
-                return trim($childrenMarkdown) . "\n";
+                return trim($childrenMarkdown)."\n";
             case 'blockquote':
                 $lines = explode("\n", trim($childrenMarkdown));
-                $quoted = array_map(fn($line) => '> ' . $line, $lines);
-                return "\n" . implode("\n", $quoted) . "\n\n";
+                $quoted = array_map(fn ($line) => '> '.$line, $lines);
+
+                return "\n".implode("\n", $quoted)."\n\n";
             case 'table':
-                return "\n" . self::processTable($node) . "\n\n";
+                return "\n".self::processTable($node)."\n\n";
             case 'div':
             case 'section':
             case 'article':
             case 'main':
-                return "\n" . $childrenMarkdown . "\n";
+                return "\n".$childrenMarkdown."\n";
             default:
                 return $childrenMarkdown;
         }
@@ -160,6 +165,7 @@ class HtmlToMarkdown
             }
             $current = $current->parentNode;
         }
+
         return false;
     }
 
@@ -178,12 +184,13 @@ class HtmlToMarkdown
                 }
                 $itemText = trim($itemText);
                 if ($itemText !== '') {
-                    $prefix = $ordered ? "{$index}. " : "* ";
+                    $prefix = $ordered ? "{$index}. " : '* ';
                     $markdown .= "{$prefix}{$itemText}\n";
                     $index++;
                 }
             }
         }
+
         return $markdown;
     }
 
@@ -194,7 +201,7 @@ class HtmlToMarkdown
     {
         $rows = [];
         $hasHeaders = false;
-        
+
         foreach ($tableNode->childNodes as $child) {
             if ($child->nodeType === XML_ELEMENT_NODE) {
                 $name = strtolower($child->nodeName);
@@ -216,16 +223,16 @@ class HtmlToMarkdown
 
         $markdown = '';
         $headerRow = $rows[0];
-        $markdown .= '| ' . implode(' | ', $headerRow) . " |\n";
-        
+        $markdown .= '| '.implode(' | ', $headerRow)." |\n";
+
         $separator = [];
         foreach ($headerRow as $cell) {
             $separator[] = '---';
         }
-        $markdown .= '| ' . implode(' | ', $separator) . " |\n";
+        $markdown .= '| '.implode(' | ', $separator)." |\n";
 
         for ($i = 1; $i < count($rows); $i++) {
-            $markdown .= '| ' . implode(' | ', $rows[$i]) . " |\n";
+            $markdown .= '| '.implode(' | ', $rows[$i])." |\n";
         }
 
         return $markdown;
@@ -252,6 +259,7 @@ class HtmlToMarkdown
                 }
             }
         }
+
         return $cells;
     }
 }

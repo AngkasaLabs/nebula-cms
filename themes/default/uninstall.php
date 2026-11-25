@@ -2,13 +2,12 @@
 
 /**
  * Uninstall script for Default Theme
- * 
+ *
  * This script is executed when the theme is deleted via the admin panel.
  * The environment variable NEBULA_THEME_UNINSTALL=1 is set when this script runs.
- * 
+ *
  * Use this to clean up any theme-specific data, files, or configurations.
  */
-
 if (getenv('NEBULA_THEME_UNINSTALL') !== '1') {
     exit;
 }

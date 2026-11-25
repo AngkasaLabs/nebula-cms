@@ -17,7 +17,7 @@ class MenuHelper
             }])
             ->first();
 
-        if (!$menu) {
+        if (! $menu) {
             return null;
         }
 
@@ -47,7 +47,7 @@ class MenuHelper
             'target' => $item->target,
             'type' => $item->type,
             'order' => $item->order,
-            'child' => []
+            'child' => [],
         ];
 
         if ($item->children->isNotEmpty()) {

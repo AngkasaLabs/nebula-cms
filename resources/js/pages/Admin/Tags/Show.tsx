@@ -1,8 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
@@ -30,7 +30,7 @@ const breadcrumbs = [
         href: route('admin.tags.index'),
     },
     {
-        title: 'Show'
+        title: 'Show',
     },
 ];
 
@@ -40,7 +40,7 @@ export default function Show({ tag }: Props) {
             <Head title={`Tag: ${tag.name}`} />
 
             <div className="p-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">{tag.name}</h1>
                     <div className="flex space-x-2">
                         <Link href={route('admin.tags.edit', tag.id)}>

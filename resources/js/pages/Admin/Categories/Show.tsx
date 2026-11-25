@@ -1,7 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
@@ -38,7 +38,7 @@ export default function Show({ category }: Props) {
             <Head title={`Category: ${category.name}`} />
 
             <div className="p-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">{category.name}</h1>
                     <div className="flex space-x-2">
                         <Link href={route('admin.categories.edit', category.id)}>

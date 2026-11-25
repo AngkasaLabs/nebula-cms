@@ -1,7 +1,7 @@
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { FormEventHandler, useMemo } from 'react';
 import { Copy, LoaderCircle, Shield } from 'lucide-react';
+import { FormEventHandler, useMemo } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -33,13 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Security({
-    twoFactorEnabled,
-    awaitingConfirmation,
-    recoveryCodesRemaining,
-    twoFactorSetup,
-    recoveryCodesFlash,
-}: Props) {
+export default function Security({ twoFactorEnabled, awaitingConfirmation, recoveryCodesRemaining, twoFactorSetup, recoveryCodesFlash }: Props) {
     const confirmForm = useForm({ code: '' });
     const disableForm = useForm({ password: '' });
     const recoveryForm = useForm({ password: '' });
@@ -92,7 +86,7 @@ export default function Security({
                             <AlertTitle>Save your recovery codes</AlertTitle>
                             <AlertDescription className="space-y-3">
                                 <p className="text-sm">Each code works once. Store them in a safe place.</p>
-                                <ul className="rounded-md bg-muted/50 p-3 font-mono text-sm">
+                                <ul className="bg-muted/50 rounded-md p-3 font-mono text-sm">
                                     {recoveryCodesFlash.map((c) => (
                                         <li key={c}>{c}</li>
                                     ))}
@@ -107,11 +101,11 @@ export default function Security({
 
                     {twoFactorEnabled ? (
                         <div className="space-y-4 rounded-lg border p-4">
-                            <p className="text-sm text-muted-foreground">
-                                Two-factor authentication is <strong>enabled</strong>. You have{' '}
-                                <strong>{recoveryCodesRemaining}</strong> recovery codes remaining.
+                            <p className="text-muted-foreground text-sm">
+                                Two-factor authentication is <strong>enabled</strong>. You have <strong>{recoveryCodesRemaining}</strong> recovery
+                                codes remaining.
                             </p>
-                            <form onSubmit={onRegenerateRecovery} className="space-y-3 max-w-md">
+                            <form onSubmit={onRegenerateRecovery} className="max-w-md space-y-3">
                                 <div className="grid gap-2">
                                     <Label htmlFor="recovery-password">Current password</Label>
                                     <Input
@@ -130,8 +124,8 @@ export default function Security({
                                 </Button>
                             </form>
 
-                            <form onSubmit={onDisable} className="space-y-3 max-w-md border-t pt-4">
-                                <p className="text-sm font-medium text-destructive">Disable 2FA</p>
+                            <form onSubmit={onDisable} className="max-w-md space-y-3 border-t pt-4">
+                                <p className="text-destructive text-sm font-medium">Disable 2FA</p>
                                 <div className="grid gap-2">
                                     <Label htmlFor="disable-password">Current password</Label>
                                     <Input
@@ -154,10 +148,7 @@ export default function Security({
                         <div className="space-y-6">
                             {!awaitingConfirmation && !twoFactorSetup && (
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <Button
-                                        type="button"
-                                        onClick={() => router.post(route('admin.settings.two-factor.start'))}
-                                    >
+                                    <Button type="button" onClick={() => router.post(route('admin.settings.two-factor.start'))}>
                                         Enable two-factor authentication
                                     </Button>
                                 </div>
@@ -165,7 +156,7 @@ export default function Security({
 
                             {(awaitingConfirmation || twoFactorSetup) && (
                                 <div className="space-y-4 rounded-lg border p-4">
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         Scan the QR code with your app, then enter the 6-digit code to confirm.
                                     </p>
                                     {twoFactorSetup?.qrSvg && (
@@ -175,7 +166,7 @@ export default function Security({
                                         />
                                     )}
                                     {twoFactorSetup?.secret && (
-                                        <p className="text-xs text-muted-foreground break-all">
+                                        <p className="text-muted-foreground text-xs break-all">
                                             Manual entry: <span className="font-mono">{twoFactorSetup.secret}</span>
                                         </p>
                                     )}
@@ -194,9 +185,7 @@ export default function Security({
                                         </div>
                                         <div className="flex flex-wrap gap-2">
                                             <Button type="submit" disabled={confirmForm.processing}>
-                                                {confirmForm.processing && (
-                                                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                                                )}
+                                                {confirmForm.processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                                                 Confirm and enable
                                             </Button>
                                             <Button

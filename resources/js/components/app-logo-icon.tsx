@@ -5,10 +5,7 @@ import { type ComponentPropsWithoutRef } from 'react';
 export default function AppLogoIcon({ className, ...props }: ComponentPropsWithoutRef<'span'>) {
     return (
         <span
-            className={cn(
-                'inline-flex shrink-0 items-center justify-center font-semibold leading-none tracking-tight',
-                className,
-            )}
+            className={cn('inline-flex shrink-0 items-center justify-center leading-none font-semibold tracking-tight', className)}
             aria-hidden
             {...props}
         >

@@ -1,15 +1,15 @@
-import { Head, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
+import FlashMessages from '@/components/flash-messages';
+import InputError from '@/components/input-error';
 import { ThemeCard } from '@/components/theme-card';
-import { FileText, Plus, Upload, Palette } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState, useRef } from 'react';
 import { UploadSecurityExtensionCallout, type ExtensionUploadSecurity } from '@/components/upload-security-callout';
-import FlashMessages from '@/components/flash-messages';
-import InputError from '@/components/input-error';
+import AppLayout from '@/layouts/app-layout';
+import { Head, router, usePage } from '@inertiajs/react';
+import { FileText, Palette, Plus, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 interface Theme {
     id: number;
@@ -104,9 +104,9 @@ export default function Index({ themes, uploadSecurity }: Props) {
 
                 {/* Header Section */}
                 <div className="mb-8">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <Palette className="h-8 w-8 text-primary" />
+                            <Palette className="text-primary h-8 w-8" />
                             <h1 className="text-3xl font-bold tracking-tight">Themes</h1>
                         </div>
                         <div className="flex gap-3">
@@ -123,13 +123,17 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                             <Upload className="h-5 w-5" />
                                             Upload Theme
                                         </DialogTitle>
-                                        <DialogDescription className="text-sm text-muted-foreground pt-2">
-                                            ZIP maks. {uploadSecurity.zipMaxMb} MB, berisi <code className="text-xs">theme.json</code> di root atau satu subfolder, plus signature <code className="text-xs">.sig.json</code> dari <code className="text-xs">nebula-pack</code>. Paket tanpa signature valid ditolak.
+                                        <DialogDescription className="text-muted-foreground pt-2 text-sm">
+                                            ZIP maks. {uploadSecurity.zipMaxMb} MB, berisi <code className="text-xs">theme.json</code> di root atau
+                                            satu subfolder, plus signature <code className="text-xs">.sig.json</code> dari{' '}
+                                            <code className="text-xs">nebula-pack</code>. Paket tanpa signature valid ditolak.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
                                         <div className="grid gap-2">
-                                            <Label htmlFor="theme" className="text-sm font-medium">Theme File (ZIP)</Label>
+                                            <Label htmlFor="theme" className="text-sm font-medium">
+                                                Theme File (ZIP)
+                                            </Label>
                                             <Input
                                                 id="theme"
                                                 type="file"
@@ -141,7 +145,9 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                             <InputError message={errors.theme} />
                                         </div>
                                         <div className="grid gap-2">
-                                            <Label htmlFor="theme-signature" className="text-sm font-medium">Signature File (.sig.json)</Label>
+                                            <Label htmlFor="theme-signature" className="text-sm font-medium">
+                                                Signature File (.sig.json)
+                                            </Label>
                                             <Input
                                                 id="theme-signature"
                                                 type="file"
@@ -180,14 +186,14 @@ export default function Index({ themes, uploadSecurity }: Props) {
                 </div>
 
                 {/* Content Section */}
-                <div className="rounded-xl border-0 bg-card">
+                <div className="bg-card rounded-xl border-0">
                     {themes.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-16 px-6">
-                            <div className="rounded-full bg-muted p-4 mb-4">
-                                <FileText className="h-8 w-8 text-muted-foreground" />
+                        <div className="flex flex-col items-center justify-center px-6 py-16">
+                            <div className="bg-muted mb-4 rounded-full p-4">
+                                <FileText className="text-muted-foreground h-8 w-8" />
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">No themes found</h3>
-                            <p className="text-muted-foreground text-center max-w-md mb-6">
+                            <h3 className="mb-2 text-xl font-semibold">No themes found</h3>
+                            <p className="text-muted-foreground mb-6 max-w-md text-center">
                                 Add a new theme by uploading a ZIP file or placing it directly in the theme directory
                             </p>
                             <div className="flex gap-3">
@@ -204,13 +210,16 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                 <Upload className="h-5 w-5" />
                                                 Upload Theme
                                             </DialogTitle>
-                                            <DialogDescription className="text-sm text-muted-foreground pt-2">
-                                                ZIP maks. {uploadSecurity.zipMaxMb} MB, berisi theme.json, plus signature .sig.json dari nebula-pack. Paket tanpa signature valid ditolak.
+                                            <DialogDescription className="text-muted-foreground pt-2 text-sm">
+                                                ZIP maks. {uploadSecurity.zipMaxMb} MB, berisi theme.json, plus signature .sig.json dari nebula-pack.
+                                                Paket tanpa signature valid ditolak.
                                             </DialogDescription>
                                         </DialogHeader>
                                         <div className="grid gap-4 py-4">
                                             <div className="grid gap-2">
-                                                <Label htmlFor="theme-empty" className="text-sm font-medium">Theme File (ZIP)</Label>
+                                                <Label htmlFor="theme-empty" className="text-sm font-medium">
+                                                    Theme File (ZIP)
+                                                </Label>
                                                 <Input
                                                     id="theme-empty"
                                                     type="file"
@@ -222,7 +231,9 @@ export default function Index({ themes, uploadSecurity }: Props) {
                                                 <InputError message={errors.theme} />
                                             </div>
                                             <div className="grid gap-2">
-                                                <Label htmlFor="theme-empty-signature" className="text-sm font-medium">Signature File (.sig.json)</Label>
+                                                <Label htmlFor="theme-empty-signature" className="text-sm font-medium">
+                                                    Signature File (.sig.json)
+                                                </Label>
                                                 <Input
                                                     id="theme-empty-signature"
                                                     type="file"
@@ -255,7 +266,7 @@ export default function Index({ themes, uploadSecurity }: Props) {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-6">
+                        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
                             {themes.map((theme) => (
                                 <ThemeCard key={theme.id} theme={theme} />
                             ))}

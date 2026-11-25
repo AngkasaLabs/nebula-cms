@@ -33,7 +33,7 @@ return new class extends Migration
                 'facebook_url',
                 'twitter_url',
                 'instagram_url',
-                'linkedin_url'
+                'linkedin_url',
             ]);
         });
     }

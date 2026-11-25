@@ -1,12 +1,14 @@
 <?php
 
 use App\Models\Theme;
+use App\Providers\PluginServiceProvider;
+use App\Providers\ThemeServiceProvider;
 
 it('memuat PluginServiceProvider sebelum ThemeServiceProvider', function () {
     $providers = require base_path('bootstrap/providers.php');
 
-    $pluginIdx = array_search(\App\Providers\PluginServiceProvider::class, $providers, true);
-    $themeIdx = array_search(\App\Providers\ThemeServiceProvider::class, $providers, true);
+    $pluginIdx = array_search(PluginServiceProvider::class, $providers, true);
+    $themeIdx = array_search(ThemeServiceProvider::class, $providers, true);
 
     expect($pluginIdx)->not->toBeFalse();
     expect($themeIdx)->not->toBeFalse();

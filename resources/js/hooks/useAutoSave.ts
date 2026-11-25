@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -49,10 +49,7 @@ interface UseAutoSaveReturn {
     reset: () => void;
 }
 
-export function useAutoSave(
-    initialPostId: number | null = null,
-    options: AutoSaveOptions = {}
-): UseAutoSaveReturn {
+export function useAutoSave(initialPostId: number | null = null, options: AutoSaveOptions = {}): UseAutoSaveReturn {
     const { debounceMs = 3000, onSuccess, onError } = options;
 
     const [status, setStatus] = useState<SaveStatus>('idle');
@@ -66,85 +63,89 @@ export function useAutoSave(
     const isSavingRef = useRef(false);
     const abortControllerRef = useRef<AbortController | null>(null);
 
-    const performSave = useCallback(async (data: AutoSaveData) => {
-        if (isSavingRef.current) {
-            // Queue this data for next save
-            pendingDataRef.current = data;
-            return;
-        }
-
-        isSavingRef.current = true;
-        setStatus('saving');
-        setError(null);
-
-        try {
-            const url = postId
-                ? route('admin.posts.autosave.update', { post: postId })
-                : route('admin.posts.autosave');
-
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
+    const performSave = useCallback(
+        async (data: AutoSaveData) => {
+            if (isSavingRef.current) {
+                // Queue this data for next save
+                pendingDataRef.current = data;
+                return;
             }
-            const abortController = new AbortController();
-            abortControllerRef.current = abortController;
 
-            const response = await axios.post<AutoSaveResponse>(url, data, {
-                signal: abortController.signal,
-            });
+            isSavingRef.current = true;
+            setStatus('saving');
+            setError(null);
 
-            if (response.data.success) {
-                setPostId(response.data.post_id);
-                setLastSavedAt(response.data.saved_at);
-                setStatus('saved');
-                onSuccess?.(response.data.post_id, response.data.saved_at, response.data.preview);
+            try {
+                const url = postId ? route('admin.posts.autosave.update', { post: postId }) : route('admin.posts.autosave');
 
-                // Reset to idle after 2 seconds
-                if (resetStatusTimeoutRef.current) {
-                    clearTimeout(resetStatusTimeoutRef.current);
+                if (abortControllerRef.current) {
+                    abortControllerRef.current.abort();
                 }
-                resetStatusTimeoutRef.current = setTimeout(() => {
-                    setStatus((prev) => (prev === 'saved' ? 'idle' : prev));
-                }, 2000);
-            } else {
-                throw new Error(response.data.message || 'Failed to save');
+                const abortController = new AbortController();
+                abortControllerRef.current = abortController;
+
+                const response = await axios.post<AutoSaveResponse>(url, data, {
+                    signal: abortController.signal,
+                });
+
+                if (response.data.success) {
+                    setPostId(response.data.post_id);
+                    setLastSavedAt(response.data.saved_at);
+                    setStatus('saved');
+                    onSuccess?.(response.data.post_id, response.data.saved_at, response.data.preview);
+
+                    // Reset to idle after 2 seconds
+                    if (resetStatusTimeoutRef.current) {
+                        clearTimeout(resetStatusTimeoutRef.current);
+                    }
+                    resetStatusTimeoutRef.current = setTimeout(() => {
+                        setStatus((prev) => (prev === 'saved' ? 'idle' : prev));
+                    }, 2000);
+                } else {
+                    throw new Error(response.data.message || 'Failed to save');
+                }
+            } catch (err) {
+                if (axios.isCancel(err)) {
+                    return;
+                }
+
+                if (err instanceof Error && err.name === 'CanceledError') {
+                    return;
+                }
+
+                const errorMessage = err instanceof Error ? err.message : 'Failed to save draft';
+                setError(errorMessage);
+                setStatus('error');
+                onError?.(errorMessage);
+            } finally {
+                isSavingRef.current = false;
+                abortControllerRef.current = null;
+
+                // If there's pending data, save it
+                if (pendingDataRef.current) {
+                    const pendingData = pendingDataRef.current;
+                    pendingDataRef.current = null;
+                    performSave(pendingData);
+                }
             }
-        } catch (err) {
-            if (axios.isCancel(err)) {
-                return;
+        },
+        [postId, onSuccess, onError],
+    );
+
+    const triggerSave = useCallback(
+        (data: AutoSaveData) => {
+            // Clear existing timeout
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
             }
 
-            if (err instanceof Error && err.name === 'CanceledError') {
-                return;
-            }
-
-            const errorMessage = err instanceof Error ? err.message : 'Failed to save draft';
-            setError(errorMessage);
-            setStatus('error');
-            onError?.(errorMessage);
-        } finally {
-            isSavingRef.current = false;
-            abortControllerRef.current = null;
-
-            // If there's pending data, save it
-            if (pendingDataRef.current) {
-                const pendingData = pendingDataRef.current;
-                pendingDataRef.current = null;
-                performSave(pendingData);
-            }
-        }
-    }, [postId, onSuccess, onError]);
-
-    const triggerSave = useCallback((data: AutoSaveData) => {
-        // Clear existing timeout
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
-
-        // Set new timeout for debounced save
-        timeoutRef.current = setTimeout(() => {
-            performSave(data);
-        }, debounceMs);
-    }, [debounceMs, performSave]);
+            // Set new timeout for debounced save
+            timeoutRef.current = setTimeout(() => {
+                performSave(data);
+            }, debounceMs);
+        },
+        [debounceMs, performSave],
+    );
 
     const reset = useCallback(() => {
         if (timeoutRef.current) {

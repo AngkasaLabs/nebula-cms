@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
@@ -29,7 +29,7 @@ class CategoryController extends Controller
             ->toTree();
 
         return Inertia::render('Admin/Categories/Index', [
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -41,7 +41,7 @@ class CategoryController extends Controller
         $categories = Category::defaultOrder()->get()->toTree();
 
         return Inertia::render('Admin/Categories/Create', [
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -54,7 +54,7 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'color' => 'nullable|string|max:7',
-            'parent_id' => 'nullable|exists:categories,id'
+            'parent_id' => 'nullable|exists:categories,id',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
@@ -75,7 +75,7 @@ class CategoryController extends Controller
         }]);
 
         return Inertia::render('Admin/Categories/Show', [
-            'category' => $category
+            'category' => $category,
         ]);
     }
 
@@ -91,7 +91,7 @@ class CategoryController extends Controller
 
         return Inertia::render('Admin/Categories/Edit', [
             'category' => $category,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -111,8 +111,8 @@ class CategoryController extends Controller
                     if ($value == $category->id) {
                         $fail('A category cannot be its own parent.');
                     }
-                }
-            ]
+                },
+            ],
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);

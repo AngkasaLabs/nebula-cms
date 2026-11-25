@@ -1,25 +1,12 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Search, ShieldPlus, Users2, Shield, Trash2, Edit2, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit2, Lock, MoreHorizontal, Search, Shield, ShieldPlus, Trash2, Users2 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 interface Permission {
@@ -92,7 +79,7 @@ export default function Index({ roles, filters }: Props) {
             <div className="flex flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold mb-1">Roles</h1>
+                        <h1 className="mb-1 text-2xl font-bold">Roles</h1>
                         <p>Manage roles and permissions</p>
                     </div>
                     <Link href={route('admin.roles.create')}>
@@ -103,11 +90,11 @@ export default function Index({ roles, filters }: Props) {
                     </Link>
                 </div>
 
-                <div className="rounded-lg shadow border">
+                <div className="rounded-lg border shadow">
                     <div className="p-4">
                         <div className="flex items-center gap-2">
-                            <div className="relative flex-1 max-w-sm">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+                            <div className="relative max-w-sm flex-1">
+                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                                 <Input
                                     type="text"
                                     placeholder="Search role..."
@@ -120,13 +107,11 @@ export default function Index({ roles, filters }: Props) {
                     </div>
 
                     {roles.data.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 px-4">
-                            <Shield className="h-12 w-12 text-gray-400 mb-4" />
-                            <h3 className="text-lg font-medium mb-1">No roles found</h3>
-                            <p className="text-center mb-4">
-                                {search
-                                    ? 'No roles found matching your search'
-                                    : 'Start by creating a new role to manage user access'}
+                        <div className="flex flex-col items-center justify-center px-4 py-12">
+                            <Shield className="mb-4 h-12 w-12 text-gray-400" />
+                            <h3 className="mb-1 text-lg font-medium">No roles found</h3>
+                            <p className="mb-4 text-center">
+                                {search ? 'No roles found matching your search' : 'Start by creating a new role to manage user access'}
                             </p>
                             <Link href={route('admin.roles.create')}>
                                 <Button>
@@ -156,10 +141,11 @@ export default function Index({ roles, filters }: Props) {
                                                 <div>
                                                     <div className="font-medium">{role.name}</div>
                                                     <div className="text-sm">
-                                                        Created {new Date(role.created_at).toLocaleDateString('id-ID', {
+                                                        Created{' '}
+                                                        {new Date(role.created_at).toLocaleDateString('id-ID', {
                                                             day: 'numeric',
                                                             month: 'long',
-                                                            year: 'numeric'
+                                                            year: 'numeric',
                                                         })}
                                                     </div>
                                                 </div>
@@ -168,21 +154,12 @@ export default function Index({ roles, filters }: Props) {
                                         <TableCell>
                                             <div className="flex flex-wrap gap-1">
                                                 {role.permissions.slice(0, 3).map((permission) => (
-                                                    <Badge
-                                                        key={permission.id}
-                                                        variant="secondary"
-                                                    >
-                                                        <Lock className="h-3 w-3 mr-1" />
+                                                    <Badge key={permission.id} variant="secondary">
+                                                        <Lock className="mr-1 h-3 w-3" />
                                                         {permission.name}
                                                     </Badge>
                                                 ))}
-                                                {role.permissions.length > 3 && (
-                                                    <Badge
-                                                        variant="secondary"
-                                                    >
-                                                        +{role.permissions.length - 3}
-                                                    </Badge>
-                                                )}
+                                                {role.permissions.length > 3 && <Badge variant="secondary">+{role.permissions.length - 3}</Badge>}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -194,19 +171,13 @@ export default function Index({ roles, filters }: Props) {
                                         <TableCell>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-200"
-                                                    >
+                                                    <Button variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:text-gray-200">
                                                         <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-40">
                                                     <DropdownMenuItem asChild>
-                                                        <Link
-                                                            href={route('admin.roles.edit', role.id)}
-                                                            className="flex w-full items-center"
-                                                        >
+                                                        <Link href={route('admin.roles.edit', role.id)} className="flex w-full items-center">
                                                             <Edit2 className="mr-2 h-4 w-4" />
                                                             Edit
                                                         </Link>
@@ -232,27 +203,24 @@ export default function Index({ roles, filters }: Props) {
                 {roles.last_page > 1 && (
                     <div className="mt-4 flex justify-center">
                         <div className="flex space-x-2">
-                            {Array.from({ length: roles.last_page }, (_, i) => i + 1).map(
-                                (page) => {
-                                    const queryParams = new URLSearchParams({
-                                        page: page.toString(),
-                                        search,
-                                    }).toString();
+                            {Array.from({ length: roles.last_page }, (_, i) => i + 1).map((page) => {
+                                const queryParams = new URLSearchParams({
+                                    page: page.toString(),
+                                    search,
+                                }).toString();
 
-                                    return (
-                                        <Link
-                                            key={`page-${page}`}
-                                            href={`${route('admin.roles.index')}?${queryParams}`}
-                                            className={`px-3 py-1 rounded ${page === roles.current_page
-                                                    ? 'bg-white text-black'
-                                                    : 'bg-gray-800 text-gray-200 hover:bg-[#0c1015]'
-                                                }`}
-                                        >
-                                            {page}
-                                        </Link>
-                                    );
-                                }
-                            )}
+                                return (
+                                    <Link
+                                        key={`page-${page}`}
+                                        href={`${route('admin.roles.index')}?${queryParams}`}
+                                        className={`rounded px-3 py-1 ${
+                                            page === roles.current_page ? 'bg-white text-black' : 'bg-gray-800 text-gray-200 hover:bg-[#0c1015]'
+                                        }`}
+                                    >
+                                        {page}
+                                    </Link>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

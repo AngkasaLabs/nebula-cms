@@ -1,11 +1,17 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\HookServiceProvider;
+use App\Providers\PluginServiceProvider;
+use App\Providers\ThemeServiceProvider;
+use App\Providers\ViewServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
+    AppServiceProvider::class,
     // Plugin harus sebelum Theme agar add_action('theme.loaded') di plugins/*/index.php
     // terdaftar sebelum do_action('theme.loaded') di ThemeServiceProvider::boot().
-    App\Providers\PluginServiceProvider::class,
-    App\Providers\ThemeServiceProvider::class,
-    App\Providers\ViewServiceProvider::class,
-    App\Providers\HookServiceProvider::class,
+    PluginServiceProvider::class,
+    ThemeServiceProvider::class,
+    ViewServiceProvider::class,
+    HookServiceProvider::class,
 ];

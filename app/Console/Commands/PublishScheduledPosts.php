@@ -32,6 +32,7 @@ class PublishScheduledPosts extends Command
 
         if ($posts->isEmpty()) {
             $this->info('No scheduled posts to publish.');
+
             return 0;
         }
 
@@ -43,6 +44,7 @@ class PublishScheduledPosts extends Command
         }
 
         $this->info("Published {$count} scheduled post(s).");
+
         return 0;
     }
 }

@@ -1,18 +1,12 @@
-import { Head, router } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { Head, router } from '@inertiajs/react';
+import { FormEvent, useState } from 'react';
 
 interface Role {
     id: number;
@@ -121,9 +115,7 @@ export default function Edit({ user, roles }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="password">
-                                        Password (leave empty to keep current)
-                                    </Label>
+                                    <Label htmlFor="password">Password (leave empty to keep current)</Label>
                                     <Input
                                         id="password"
                                         type="password"
@@ -137,9 +129,7 @@ export default function Edit({ user, roles }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="password_confirmation">
-                                        Confirm Password
-                                    </Label>
+                                    <Label htmlFor="password_confirmation">Confirm Password</Label>
                                     <Input
                                         id="password_confirmation"
                                         type="password"
@@ -147,8 +137,7 @@ export default function Edit({ user, roles }: Props) {
                                         onChange={(e) =>
                                             setValues({
                                                 ...values,
-                                                password_confirmation:
-                                                    e.target.value,
+                                                password_confirmation: e.target.value,
                                             })
                                         }
                                     />
@@ -169,10 +158,7 @@ export default function Edit({ user, roles }: Props) {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {roles.map((role) => (
-                                                <SelectItem
-                                                    key={role.id}
-                                                    value={role.name}
-                                                >
+                                                <SelectItem key={role.id} value={role.name}>
                                                     {role.name}
                                                 </SelectItem>
                                             ))}
@@ -191,19 +177,10 @@ export default function Edit({ user, roles }: Props) {
                                     <Label htmlFor="avatar">Avatar</Label>
                                     {user.avatar && (
                                         <div className="mb-2">
-                                            <img
-                                                src={`/storage/${user.avatar}`}
-                                                alt={user.name}
-                                                className="h-20 w-20 rounded-full object-cover"
-                                            />
+                                            <img src={`/storage/${user.avatar}`} alt={user.name} className="h-20 w-20 rounded-full object-cover" />
                                         </div>
                                     )}
-                                    <Input
-                                        id="avatar"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                    />
+                                    <Input id="avatar" type="file" accept="image/*" onChange={handleFileChange} />
                                 </div>
                                 <div>
                                     <Label htmlFor="bio">Bio</Label>
@@ -219,9 +196,7 @@ export default function Edit({ user, roles }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="facebook_url">
-                                        Facebook URL
-                                    </Label>
+                                    <Label htmlFor="facebook_url">Facebook URL</Label>
                                     <Input
                                         id="facebook_url"
                                         type="url"
@@ -235,9 +210,7 @@ export default function Edit({ user, roles }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="twitter_url">
-                                        Twitter URL
-                                    </Label>
+                                    <Label htmlFor="twitter_url">Twitter URL</Label>
                                     <Input
                                         id="twitter_url"
                                         type="url"
@@ -251,9 +224,7 @@ export default function Edit({ user, roles }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="instagram_url">
-                                        Instagram URL
-                                    </Label>
+                                    <Label htmlFor="instagram_url">Instagram URL</Label>
                                     <Input
                                         id="instagram_url"
                                         type="url"
@@ -267,9 +238,7 @@ export default function Edit({ user, roles }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="linkedin_url">
-                                        LinkedIn URL
-                                    </Label>
+                                    <Label htmlFor="linkedin_url">LinkedIn URL</Label>
                                     <Input
                                         id="linkedin_url"
                                         type="url"

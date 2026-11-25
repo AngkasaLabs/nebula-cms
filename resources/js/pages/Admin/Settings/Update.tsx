@@ -1,13 +1,13 @@
-import { Head, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import HeadingSmall from '@/components/heading-small';
+import { ReleaseNotesText } from '@/components/release-notes-text';
+import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem, type SharedData, type UpdateCheckResult } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
+import { AlertTriangle, CheckCircle, Download, Eraser, ExternalLink, Loader2, RotateCcw, Shield, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { ReleaseNotesText } from '@/components/release-notes-text';
-import { CheckCircle, Download, AlertTriangle, RotateCcw, Loader2, Shield, ExternalLink, Trash2, Eraser } from 'lucide-react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -49,20 +49,24 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
 
     const handleCheck = () => {
         setStep('checking');
-        router.post(route('admin.system.update.check'), {}, {
-            preserveScroll: true,
-            onSuccess: (page) => {
-                const flash = page.props.flash as { success?: string; error?: string; updateCheck?: UpdateCheckResult } | undefined;
-                if (flash?.updateCheck) {
-                    setCheckResult(flash.updateCheck);
-                    setStep('checked');
-                }
+        router.post(
+            route('admin.system.update.check'),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    const flash = page.props.flash as { success?: string; error?: string; updateCheck?: UpdateCheckResult } | undefined;
+                    if (flash?.updateCheck) {
+                        setCheckResult(flash.updateCheck);
+                        setStep('checked');
+                    }
+                },
+                onError: () => {
+                    setStep('idle');
+                    toast.error('Failed to check for updates');
+                },
             },
-            onError: () => {
-                setStep('idle');
-                toast.error('Failed to check for updates');
-            },
-        });
+        );
     };
 
     const handleApply = () => {
@@ -70,25 +74,29 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
 
         setStep('updating');
 
-        router.post(route('admin.system.update.apply'), {
-            download_url: checkResult.download_url,
-        }, {
-            preserveScroll: true,
-            onSuccess: (page) => {
-                const flash = page.props.flash as { success?: string; error?: string; updateCheck?: UpdateCheckResult } | undefined;
-                if (flash?.success) {
-                    setStep('done');
-                    toast.success(flash.success);
-                } else if (flash?.error) {
+        router.post(
+            route('admin.system.update.apply'),
+            {
+                download_url: checkResult.download_url,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    const flash = page.props.flash as { success?: string; error?: string; updateCheck?: UpdateCheckResult } | undefined;
+                    if (flash?.success) {
+                        setStep('done');
+                        toast.success(flash.success);
+                    } else if (flash?.error) {
+                        setStep('checked');
+                        toast.error(flash.error);
+                    }
+                },
+                onError: () => {
                     setStep('checked');
-                    toast.error(flash.error);
-                }
+                    toast.error('Update failed. You can rollback to a previous version.');
+                },
             },
-            onError: () => {
-                setStep('checked');
-                toast.error('Update failed. You can rollback to a previous version.');
-            },
-        });
+        );
     };
 
     const handleRollback = (backupPath: string) => {
@@ -98,24 +106,28 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
 
         setIsRollingBack(backupPath);
 
-        router.post(route('admin.system.update.rollback'), {
-            backup_path: backupPath,
-        }, {
-            preserveScroll: true,
-            onSuccess: (page) => {
-                const flash = page.props.flash as { success?: string; error?: string; updateCheck?: UpdateCheckResult } | undefined;
-                if (flash?.success) {
-                    toast.success(flash.success);
-                } else if (flash?.error) {
-                    toast.error(flash.error);
-                }
-                setIsRollingBack(null);
+        router.post(
+            route('admin.system.update.rollback'),
+            {
+                backup_path: backupPath,
             },
-            onError: () => {
-                toast.error('Rollback failed');
-                setIsRollingBack(null);
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    const flash = page.props.flash as { success?: string; error?: string; updateCheck?: UpdateCheckResult } | undefined;
+                    if (flash?.success) {
+                        toast.success(flash.success);
+                    } else if (flash?.error) {
+                        toast.error(flash.error);
+                    }
+                    setIsRollingBack(null);
+                },
+                onError: () => {
+                    toast.error('Rollback failed');
+                    setIsRollingBack(null);
+                },
             },
-        });
+        );
     };
 
     const handleDelete = (backupPath: string) => {
@@ -151,22 +163,26 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
 
         setIsPruning(true);
 
-        router.post(route('admin.system.update.backup.prune'), {}, {
-            preserveScroll: true,
-            onSuccess: (page) => {
-                const flash = page.props.flash as { success?: string; error?: string } | undefined;
-                if (flash?.success) {
-                    toast.success(flash.success);
-                } else if (flash?.error) {
-                    toast.error(flash.error);
-                }
-                setIsPruning(false);
+        router.post(
+            route('admin.system.update.backup.prune'),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    const flash = page.props.flash as { success?: string; error?: string } | undefined;
+                    if (flash?.success) {
+                        toast.success(flash.success);
+                    } else if (flash?.error) {
+                        toast.error(flash.error);
+                    }
+                    setIsPruning(false);
+                },
+                onError: () => {
+                    toast.error('Failed to clean up backups');
+                    setIsPruning(false);
+                },
             },
-            onError: () => {
-                toast.error('Failed to clean up backups');
-                setIsPruning(false);
-            },
-        });
+        );
     };
 
     const formatSize = (bytes: number) => {
@@ -182,25 +198,21 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
             <Head title="System Update" />
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall
-                        title="System Update"
-                        description="Check for and apply CMS updates"
-                    />
+                    <HeadingSmall title="System Update" description="Check for and apply CMS updates" />
 
                     {/* Current Version */}
                     <div className="rounded-lg border p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Current Version</p>
+                                <p className="text-muted-foreground text-sm font-medium">Current Version</p>
                                 <p className="text-2xl font-bold tracking-tight">v{currentVersion}</p>
                             </div>
-                            <Button
-                                onClick={handleCheck}
-                                disabled={isProcessing}
-                                variant="outline"
-                            >
+                            <Button onClick={handleCheck} disabled={isProcessing} variant="outline">
                                 {step === 'checking' ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Checking...</>
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Checking...
+                                    </>
                                 ) : (
                                     'Check for updates'
                                 )}
@@ -214,12 +226,10 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
                             <div className="flex items-center gap-3">
                                 <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
                                 <div>
-                                    <p className="font-medium text-blue-900 dark:text-blue-100">
-                                        Updating NebulaCMS…
-                                    </p>
+                                    <p className="font-medium text-blue-900 dark:text-blue-100">Updating NebulaCMS…</p>
                                     <p className="text-sm text-blue-700 dark:text-blue-300">
-                                        Creating a backup, downloading the release, and applying files. This may take several minutes — please
-                                        do not close this page.
+                                        Creating a backup, downloading the release, and applying files. This may take several minutes — please do not
+                                        close this page.
                                     </p>
                                 </div>
                             </div>
@@ -240,33 +250,29 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
                                     </div>
                                 </div>
                             ) : checkResult.available ? (
-                                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                                <div className="border-border bg-card rounded-lg border p-4 shadow-sm">
                                     <div className="flex items-start gap-3">
-                                        <Download className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                                        <Download className="text-primary mt-0.5 h-5 w-5 shrink-0" />
                                         <div className="min-w-0 flex-1 space-y-3">
                                             <div>
-                                                <p className="font-medium text-foreground">
-                                                    Update available — v{checkResult.latest}
-                                                </p>
+                                                <p className="text-foreground font-medium">Update available — v{checkResult.latest}</p>
                                                 {checkResult.published_at && (
-                                                    <p className="text-xs text-muted-foreground">
+                                                    <p className="text-muted-foreground text-xs">
                                                         Released {new Date(checkResult.published_at).toLocaleDateString()}
                                                     </p>
                                                 )}
                                             </div>
 
                                             {(checkResult.release_notes || checkResult.release_url) && (
-                                                <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5">
-                                                    <p className="mb-1.5 text-xs font-medium text-muted-foreground">
-                                                        What&apos;s new
-                                                    </p>
+                                                <div className="border-border bg-muted/40 rounded-md border px-3 py-2.5">
+                                                    <p className="text-muted-foreground mb-1.5 text-xs font-medium">What&apos;s new</p>
                                                     {checkResult.release_notes ? (
                                                         <ReleaseNotesText
                                                             text={checkResult.release_notes}
-                                                            className="text-sm leading-relaxed text-foreground"
+                                                            className="text-foreground text-sm leading-relaxed"
                                                         />
                                                     ) : (
-                                                        <p className="text-sm text-muted-foreground">
+                                                        <p className="text-muted-foreground text-sm">
                                                             See GitHub for a summary of changes in this release.
                                                         </p>
                                                     )}
@@ -275,7 +281,7 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
                                                             href={checkResult.release_url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                                                            className="text-primary mt-2 inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
                                                         >
                                                             <ExternalLink className="h-3.5 w-3.5" />
                                                             Full release notes on GitHub
@@ -289,7 +295,7 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
                                                     <Shield className="mr-2 h-4 w-4" />
                                                     Update to v{checkResult.latest}
                                                 </Button>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-muted-foreground text-xs">
                                                     A backup will be created automatically before updating.
                                                 </p>
                                             </div>
@@ -333,16 +339,17 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
                                     description={`Pre-update backups. You can rollback to any of these. The newest ${backupRetention} are kept automatically.`}
                                 />
                                 {backups.length > backupRetention && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handlePrune}
-                                        disabled={isPruning}
-                                    >
+                                    <Button variant="outline" size="sm" onClick={handlePrune} disabled={isPruning}>
                                         {isPruning ? (
-                                            <><Loader2 className="mr-2 h-3 w-3 animate-spin" />Cleaning up...</>
+                                            <>
+                                                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                                Cleaning up...
+                                            </>
                                         ) : (
-                                            <><Eraser className="mr-2 h-3 w-3" />Delete old backups</>
+                                            <>
+                                                <Eraser className="mr-2 h-3 w-3" />
+                                                Delete old backups
+                                            </>
                                         )}
                                     </Button>
                                 )}
@@ -352,7 +359,7 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
                                     <div key={backup.filename} className="flex items-center justify-between gap-3 p-3">
                                         <div className="min-w-0">
                                             <p className="truncate text-sm font-medium">{backup.filename}</p>
-                                            <p className="text-xs text-muted-foreground">
+                                            <p className="text-muted-foreground text-xs">
                                                 {backup.created_at} · {formatSize(backup.size)}
                                             </p>
                                         </div>
@@ -364,9 +371,15 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
                                                 disabled={isRollingBack !== null || isDeleting !== null}
                                             >
                                                 {isRollingBack === backup.path ? (
-                                                    <><Loader2 className="mr-2 h-3 w-3 animate-spin" />Rolling back...</>
+                                                    <>
+                                                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                                        Rolling back...
+                                                    </>
                                                 ) : (
-                                                    <><RotateCcw className="mr-2 h-3 w-3" />Rollback</>
+                                                    <>
+                                                        <RotateCcw className="mr-2 h-3 w-3" />
+                                                        Rollback
+                                                    </>
                                                 )}
                                             </Button>
                                             <Button
@@ -388,7 +401,6 @@ export default function Update({ currentVersion, backups, backupRetention }: Upd
                             </div>
                         </div>
                     )}
-
                 </div>
             </SettingsLayout>
         </AppLayout>

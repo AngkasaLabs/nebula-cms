@@ -1,9 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, FolderTree, Tag, Image, ArrowUp, ArrowDown, Plus, Calendar, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowDown, ArrowUp, Calendar, Clock, FileText, FolderTree, Image, Plus, Tag } from 'lucide-react';
 
 interface Stats {
     posts: {
@@ -55,15 +55,12 @@ export default function Dashboard({
         posts: { total: 0, published: 0, draft: 0, trend: 0 },
         categories: { total: 0, trend: 0 },
         tags: { total: 0, trend: 0 },
-        media: { total: 0, trend: 0 }
+        media: { total: 0, trend: 0 },
     },
     recentPosts = [],
-    recentMedia = []
+    recentMedia = [],
 }: Props) {
-    const hasNoContent = stats.posts.total === 0 &&
-                        stats.categories.total === 0 &&
-                        stats.tags.total === 0 &&
-                        stats.media.total === 0;
+    const hasNoContent = stats.posts.total === 0 && stats.categories.total === 0 && stats.tags.total === 0 && stats.media.total === 0;
 
     if (hasNoContent) {
         return (
@@ -71,13 +68,13 @@ export default function Dashboard({
                 <Head title="Dashboard" />
 
                 <div className="p-4">
-                    <div className="flex flex-col items-center justify-center py-12 px-4 border rounded-lg">
-                        <FileText className="h-12 w-12 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium mb-1">Welcome to NebulaCMS</h3>
-                        <p className="text-center mb-8 max-w-md">
+                    <div className="flex flex-col items-center justify-center rounded-lg border px-4 py-12">
+                        <FileText className="mb-4 h-12 w-12 text-gray-400" />
+                        <h3 className="mb-1 text-lg font-medium">Welcome to NebulaCMS</h3>
+                        <p className="mb-8 max-w-md text-center">
                             Start with your first content. You can create posts, categories, tags, or upload media.
                         </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                             <Link href="/admin/posts/create">
                                 <Button className="w-full">
                                     <FileText className="mr-2 h-4 w-4" />
@@ -113,23 +110,20 @@ export default function Dashboard({
         <AppLayout>
             <Head title="Dashboard" />
 
-            <div className="p-4 space-y-4">
+            <div className="space-y-4 p-4">
                 {/* Stats Grid */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Posts</CardTitle>
-                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <FileText className="text-muted-foreground h-4 w-4" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.posts.total}</div>
                             <div className="mt-2">
-                                <Progress
-                                    value={(stats.posts.published / stats.posts.total) * 100}
-                                    className="h-2"
-                                />
+                                <Progress value={(stats.posts.published / stats.posts.total) * 100} className="h-2" />
                             </div>
-                            <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div className="mt-2 grid grid-cols-2 gap-2">
                                 <div className="text-xs">
                                     <span className="text-green-500">●</span> Published
                                     <div className="font-semibold">{stats.posts.published}</div>
@@ -155,13 +149,11 @@ export default function Dashboard({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Categories</CardTitle>
-                            <FolderTree className="h-4 w-4 text-muted-foreground" />
+                            <FolderTree className="text-muted-foreground h-4 w-4" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.categories.total}</div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                                Digunakan untuk mengorganisir konten
-                            </div>
+                            <div className="text-muted-foreground mt-1 text-xs">Digunakan untuk mengorganisir konten</div>
                             <div className="mt-3 flex items-center text-xs">
                                 {stats.categories.trend > 0 ? (
                                     <ArrowUp className="h-4 w-4 text-green-500" />
@@ -178,13 +170,11 @@ export default function Dashboard({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Tags</CardTitle>
-                            <Tag className="h-4 w-4 text-muted-foreground" />
+                            <Tag className="text-muted-foreground h-4 w-4" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.tags.total}</div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                                Help in searching content
-                            </div>
+                            <div className="text-muted-foreground mt-1 text-xs">Help in searching content</div>
                             <div className="mt-3 flex items-center text-xs">
                                 {stats.tags.trend > 0 ? (
                                     <ArrowUp className="h-4 w-4 text-green-500" />
@@ -201,13 +191,11 @@ export default function Dashboard({
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Media</CardTitle>
-                            <Image className="h-4 w-4 text-muted-foreground" />
+                            <Image className="text-muted-foreground h-4 w-4" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.media.total}</div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                                Uploaded media files
-                            </div>
+                            <div className="text-muted-foreground mt-1 text-xs">Uploaded media files</div>
                             <div className="mt-3 flex items-center text-xs">
                                 {stats.media.trend > 0 ? (
                                     <ArrowUp className="h-4 w-4 text-green-500" />
@@ -232,8 +220,8 @@ export default function Dashboard({
                         <CardContent>
                             {recentPosts.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-8">
-                                    <FileText className="h-8 w-8 text-gray-400 mb-2" />
-                                    <p className="text-sm text-gray-400 text-center mb-4">No posts yet</p>
+                                    <FileText className="mb-2 h-8 w-8 text-gray-400" />
+                                    <p className="mb-4 text-center text-sm text-gray-400">No posts yet</p>
                                     <Link href="/posts/create">
                                         <Button variant="outline" size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
@@ -242,35 +230,35 @@ export default function Dashboard({
                                     </Link>
                                 </div>
                             ) : (
-                            <div className="space-y-4">
-                                {recentPosts.map(post => (
-                                    <div key={post.id} className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                                        <div className="space-y-1">
-                                            <p className="text-sm font-medium leading-none">{post.title}</p>
-                                            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                                <span className="flex items-center">
-                                                    <Calendar className="h-3 w-3 mr-1" />
-                                                    {new Date(post.created_at).toLocaleDateString('id-ID')}
-                                                </span>
-                                                <span>•</span>
-                                                <span className="flex items-center">
-                                                    <Clock className="h-3 w-3 mr-1" />
-                                                    {new Date(post.created_at).toLocaleTimeString('id-ID')}
+                                <div className="space-y-4">
+                                    {recentPosts.map((post) => (
+                                        <div key={post.id} className="flex items-center rounded-lg p-3 transition-colors hover:bg-gray-50">
+                                            <div className="space-y-1">
+                                                <p className="text-sm leading-none font-medium">{post.title}</p>
+                                                <div className="text-muted-foreground flex items-center space-x-2 text-xs">
+                                                    <span className="flex items-center">
+                                                        <Calendar className="mr-1 h-3 w-3" />
+                                                        {new Date(post.created_at).toLocaleDateString('id-ID')}
+                                                    </span>
+                                                    <span>•</span>
+                                                    <span className="flex items-center">
+                                                        <Clock className="mr-1 h-3 w-3" />
+                                                        {new Date(post.created_at).toLocaleTimeString('id-ID')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="ml-auto flex items-center">
+                                                <span
+                                                    className={`rounded-full px-2 py-1 text-xs ${
+                                                        post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                                                    }`}
+                                                >
+                                                    {post.status === 'published' ? 'Published' : 'Draft'}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="ml-auto flex items-center">
-                                            <span className={`px-2 py-1 rounded-full text-xs ${
-                                                post.status === 'published'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-yellow-100 text-yellow-700'
-                                            }`}>
-                                                {post.status === 'published' ? 'Published' : 'Draft'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
                             )}
                         </CardContent>
                     </Card>
@@ -283,8 +271,8 @@ export default function Dashboard({
                         <CardContent>
                             {recentMedia.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-8">
-                                    <Image className="h-8 w-8 text-gray-400 mb-2" />
-                                    <p className="text-sm text-gray-400 text-center mb-4">No media yet</p>
+                                    <Image className="mb-2 h-8 w-8 text-gray-400" />
+                                    <p className="mb-4 text-center text-sm text-gray-400">No media yet</p>
                                     <Link href="/media">
                                         <Button variant="outline" size="sm">
                                             <Plus className="mr-2 h-4 w-4" />
@@ -293,28 +281,22 @@ export default function Dashboard({
                                     </Link>
                                 </div>
                             ) : (
-                            <div className="grid grid-cols-4 gap-4">
-                                {recentMedia.map(media => (
-                                    <div key={media.id} className="relative aspect-square group">
-                                        {media.mime_type?.startsWith('image/') ? (
-                                            <img
-                                                src={media.url}
-                                                alt={media.name}
-                                                className="w-full h-full object-cover rounded-lg"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
-                                                <FileText className="h-6 w-6 text-gray-400" />
+                                <div className="grid grid-cols-4 gap-4">
+                                    {recentMedia.map((media) => (
+                                        <div key={media.id} className="group relative aspect-square">
+                                            {media.mime_type?.startsWith('image/') ? (
+                                                <img src={media.url} alt={media.name} className="h-full w-full rounded-lg object-cover" />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center rounded-lg bg-gray-100">
+                                                    <FileText className="h-6 w-6 text-gray-400" />
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                                <p className="truncate px-2 text-center text-xs text-white">{media.name}</p>
                                             </div>
-                                        )}
-                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                                            <p className="text-white text-xs text-center px-2 truncate">
-                                                {media.name}
-                                            </p>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
                             )}
                         </CardContent>
                     </Card>

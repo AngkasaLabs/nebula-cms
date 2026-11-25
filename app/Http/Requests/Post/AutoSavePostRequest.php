@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Post;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AutoSavePostRequest extends FormRequest
@@ -15,6 +16,7 @@ class AutoSavePostRequest extends FormRequest
         if ($this->route('post')) {
             return $this->user()->can('edit content');
         }
+
         return $this->user()->can('create content');
     }
 
@@ -22,7 +24,7 @@ class AutoSavePostRequest extends FormRequest
      * Get the validation rules that apply to the request.
      * Validation rules are more lenient for auto-save since content may be incomplete.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

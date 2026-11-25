@@ -1,18 +1,18 @@
-import { Head, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Plus, Upload, Puzzle, Power, PowerOff, Trash2, Settings, AlertCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useState, useRef } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { UploadSecurityExtensionCallout, type ExtensionUploadSecurity } from '@/components/upload-security-callout';
 import FlashMessages from '@/components/flash-messages';
 import InputError from '@/components/input-error';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { UploadSecurityExtensionCallout, type ExtensionUploadSecurity } from '@/components/upload-security-callout';
+import AppLayout from '@/layouts/app-layout';
+import { Head, router, usePage } from '@inertiajs/react';
+import { AlertCircle, FileText, Plus, Power, PowerOff, Puzzle, Settings, Trash2, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
 interface SettingsField {
     key: string;
     label?: string;
@@ -169,9 +169,9 @@ export default function Index({ plugins, uploadSecurity }: Props) {
 
                 {/* Header Section */}
                 <div className="mb-8">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <Puzzle className="h-8 w-8 text-primary" />
+                            <Puzzle className="text-primary h-8 w-8" />
                             <h1 className="text-3xl font-bold tracking-tight">Plugins</h1>
                         </div>
                         <div className="flex gap-3">
@@ -188,13 +188,17 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                             <Upload className="h-5 w-5" />
                                             Upload Plugin
                                         </DialogTitle>
-                                        <DialogDescription className="text-sm text-muted-foreground pt-2">
-                                            ZIP maks. {uploadSecurity.zipMaxMb} MB dengan plugin.json dan index.php, plus signature <code className="text-xs">.sig.json</code> dari <code className="text-xs">nebula-pack</code>. Paket tanpa signature valid ditolak. Plugin menjalankan kode PHP — hanya sumber tepercaya.
+                                        <DialogDescription className="text-muted-foreground pt-2 text-sm">
+                                            ZIP maks. {uploadSecurity.zipMaxMb} MB dengan plugin.json dan index.php, plus signature{' '}
+                                            <code className="text-xs">.sig.json</code> dari <code className="text-xs">nebula-pack</code>. Paket tanpa
+                                            signature valid ditolak. Plugin menjalankan kode PHP — hanya sumber tepercaya.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
                                         <div className="grid gap-2">
-                                            <Label htmlFor="plugin" className="text-sm font-medium">Plugin File (ZIP)</Label>
+                                            <Label htmlFor="plugin" className="text-sm font-medium">
+                                                Plugin File (ZIP)
+                                            </Label>
                                             <Input
                                                 id="plugin"
                                                 type="file"
@@ -206,7 +210,9 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                             <InputError message={errors.plugin} />
                                         </div>
                                         <div className="grid gap-2">
-                                            <Label htmlFor="plugin-signature" className="text-sm font-medium">Signature File (.sig.json)</Label>
+                                            <Label htmlFor="plugin-signature" className="text-sm font-medium">
+                                                Signature File (.sig.json)
+                                            </Label>
                                             <Input
                                                 id="plugin-signature"
                                                 type="file"
@@ -245,14 +251,14 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                 </div>
 
                 {/* Content Section */}
-                <div className="rounded-xl border-0 bg-card">
+                <div className="bg-card rounded-xl border-0">
                     {plugins.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-16 px-6">
-                            <div className="rounded-full bg-muted p-4 mb-4">
-                                <FileText className="h-8 w-8 text-muted-foreground" />
+                        <div className="flex flex-col items-center justify-center px-6 py-16">
+                            <div className="bg-muted mb-4 rounded-full p-4">
+                                <FileText className="text-muted-foreground h-8 w-8" />
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">No plugins found</h3>
-                            <p className="text-muted-foreground text-center max-w-md mb-6">
+                            <h3 className="mb-2 text-xl font-semibold">No plugins found</h3>
+                            <p className="text-muted-foreground mb-6 max-w-md text-center">
                                 Add a new plugin by uploading a ZIP file or placing it directly in the plugins directory
                             </p>
                             <div className="flex gap-3">
@@ -263,16 +269,20 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-6">
+                        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
                             {plugins.map((plugin) => (
                                 <Card key={plugin.id} className="overflow-hidden">
                                     <CardHeader>
                                         <CardTitle className="flex items-center justify-between gap-2">
                                             <span className="truncate">{plugin.name}</span>
                                             {plugin.is_active ? (
-                                                <Badge variant="default" className="bg-green-500 shrink-0">Active</Badge>
+                                                <Badge variant="default" className="shrink-0 bg-green-500">
+                                                    Active
+                                                </Badge>
                                             ) : (
-                                                <Badge variant="secondary" className="shrink-0">Inactive</Badge>
+                                                <Badge variant="secondary" className="shrink-0">
+                                                    Inactive
+                                                </Badge>
                                             )}
                                         </CardTitle>
                                         <CardDescription>
@@ -292,15 +302,13 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-3">
-                                        <p className="text-sm text-muted-foreground">
-                                            {plugin.description || 'No description available'}
-                                        </p>
+                                        <p className="text-muted-foreground text-sm">{plugin.description || 'No description available'}</p>
                                         {!plugin.compatibility.ok && (
                                             <Alert variant="destructive">
                                                 <AlertCircle className="h-4 w-4" />
                                                 <AlertTitle>Requirements not met</AlertTitle>
                                                 <AlertDescription>
-                                                    <ul className="list-disc pl-4 space-y-1">
+                                                    <ul className="list-disc space-y-1 pl-4">
                                                         {plugin.compatibility.errors.map((e) => (
                                                             <li key={e}>{e}</li>
                                                         ))}
@@ -311,9 +319,7 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                         {plugin.compatibility.ok && plugin.compatibility.warnings.length > 0 && (
                                             <Alert>
                                                 <AlertTitle>Notice</AlertTitle>
-                                                <AlertDescription>
-                                                    {plugin.compatibility.warnings.join(' ')}
-                                                </AlertDescription>
+                                                <AlertDescription>{plugin.compatibility.warnings.join(' ')}</AlertDescription>
                                             </Alert>
                                         )}
                                     </CardContent>
@@ -325,11 +331,7 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                             </Button>
                                         ) : null}
                                         {plugin.is_active ? (
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => handleDeactivate(plugin)}
-                                                className="flex-1 min-w-[120px]"
-                                            >
+                                            <Button variant="outline" onClick={() => handleDeactivate(plugin)} className="min-w-[120px] flex-1">
                                                 <PowerOff className="mr-2 h-4 w-4" />
                                                 Deactivate
                                             </Button>
@@ -338,16 +340,19 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                                 <Button
                                                     variant="default"
                                                     onClick={() => handleActivate(plugin)}
-                                                    className="flex-1 min-w-[120px]"
+                                                    className="min-w-[120px] flex-1"
                                                     disabled={!plugin.compatibility.ok}
                                                 >
                                                     <Power className="mr-2 h-4 w-4" />
                                                     Activate
                                                 </Button>
-                                                <Dialog open={isDeleteDialogOpen && selectedPlugin?.id === plugin.id} onOpenChange={(open) => {
-                                                    setIsDeleteDialogOpen(open);
-                                                    if (!open) setSelectedPlugin(null);
-                                                }}>
+                                                <Dialog
+                                                    open={isDeleteDialogOpen && selectedPlugin?.id === plugin.id}
+                                                    onOpenChange={(open) => {
+                                                        setIsDeleteDialogOpen(open);
+                                                        if (!open) setSelectedPlugin(null);
+                                                    }}
+                                                >
                                                     <DialogTrigger asChild>
                                                         <Button variant="destructive" size="icon" onClick={() => setSelectedPlugin(plugin)}>
                                                             <Trash2 className="h-4 w-4" />
@@ -357,8 +362,8 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                                         <DialogHeader>
                                                             <DialogTitle>Delete Plugin</DialogTitle>
                                                             <DialogDescription>
-                                                                Are you sure you want to delete &quot;{plugin.name}&quot;? This action cannot be undone.
-                                                                The plugin files will be permanently removed from the server.
+                                                                Are you sure you want to delete &quot;{plugin.name}&quot;? This action cannot be
+                                                                undone. The plugin files will be permanently removed from the server.
                                                             </DialogDescription>
                                                         </DialogHeader>
                                                         <DialogFooter>
@@ -398,9 +403,7 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                                 <Checkbox
                                                     id={`pf-${settingsPlugin.id}-${field.key}`}
                                                     checked={Boolean(settingsForm[field.key])}
-                                                    onCheckedChange={(c) =>
-                                                        setSettingsForm((s) => ({ ...s, [field.key]: c === true }))
-                                                    }
+                                                    onCheckedChange={(c) => setSettingsForm((s) => ({ ...s, [field.key]: c === true }))}
                                                 />
                                                 <Label htmlFor={`pf-${settingsPlugin.id}-${field.key}`}>{field.label ?? field.key}</Label>
                                             </div>
@@ -418,9 +421,7 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                                     setSettingsForm((s) => ({
                                                         ...s,
                                                         [field.key]:
-                                                            t === 'number' || t === 'integer' || t === 'int'
-                                                                ? v === '' ? '' : Number(v)
-                                                                : v,
+                                                            t === 'number' || t === 'integer' || t === 'int' ? (v === '' ? '' : Number(v)) : v,
                                                     }));
                                                 }}
                                             />
@@ -429,7 +430,9 @@ export default function Index({ plugins, uploadSecurity }: Props) {
                                 })}
                             </div>
                             <DialogFooter>
-                                <Button variant="outline" onClick={() => setSettingsPlugin(null)}>Cancel</Button>
+                                <Button variant="outline" onClick={() => setSettingsPlugin(null)}>
+                                    Cancel
+                                </Button>
                                 <Button onClick={handleSaveSettings}>Save</Button>
                             </DialogFooter>
                         </>

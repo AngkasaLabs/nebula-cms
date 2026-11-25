@@ -2,7 +2,10 @@
 
 namespace App\Support;
 
+use App\Models\Page;
+use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -51,7 +54,7 @@ class ContentSearch
     /**
      * Post search: full-text on title + content (indexed), plus excerpt via LIKE when using full-text.
      *
-     * @param  Builder<\App\Models\Post>  $query
+     * @param  Builder<Post>  $query
      */
     public static function applyToPostQuery(Builder $query, ?string $term): void
     {
@@ -77,7 +80,7 @@ class ContentSearch
     /**
      * Page search: full-text on title + content only (no excerpt column).
      *
-     * @param  Builder<\App\Models\Page>  $query
+     * @param  Builder<Page>  $query
      */
     public static function applyToPageQuery(Builder $query, ?string $term): void
     {
@@ -101,7 +104,7 @@ class ContentSearch
     /**
      * Generic multi-column LIKE search with correct grouping (no accidental OR leakage).
      *
-     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  Builder<Model>  $query
      * @param  array<int, string>  $columns
      */
     public static function applyLikeColumns(Builder $query, ?string $term, array $columns): void

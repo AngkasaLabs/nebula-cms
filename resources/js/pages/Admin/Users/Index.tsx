@@ -1,29 +1,16 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Search, UserPlus2, Mail, Shield, Trash2, Eye, Edit2 } from 'lucide-react';
-import { Pagination } from '@/components/ui/pagination';
-import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useInitials } from '@/hooks/use-initials';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit2, Eye, Mail, MoreHorizontal, Search, Shield, Trash2, UserPlus2 } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 interface User {
     id: number;
     name: string;
@@ -55,7 +42,6 @@ const breadcrumbs = [
     },
 ];
 
-
 export default function Index({ users, filters }: Props) {
     const [search, setSearch] = useState(filters.search);
 
@@ -84,7 +70,6 @@ export default function Index({ users, filters }: Props) {
         }
     };
 
-
     const getInitials = useInitials();
 
     return (
@@ -94,7 +79,7 @@ export default function Index({ users, filters }: Props) {
             <div className="flex flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold mb-1">Users</h1>
+                        <h1 className="mb-1 text-2xl font-bold">Users</h1>
                         <p>Manage users and their access rights</p>
                     </div>
                     <Link href={route('admin.users.create')}>
@@ -105,11 +90,11 @@ export default function Index({ users, filters }: Props) {
                     </Link>
                 </div>
 
-                <div className="rounded-lg shadow border">
+                <div className="rounded-lg border shadow">
                     <div className="p-4">
                         <div className="flex items-center gap-2">
-                            <div className="relative flex-1 max-w-sm">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+                            <div className="relative max-w-sm flex-1">
+                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                                 <Input
                                     type="text"
                                     placeholder="Search user..."
@@ -136,12 +121,19 @@ export default function Index({ users, filters }: Props) {
                                     <TableCell className="font-medium">
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-8 w-8">
-                                                <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                                                <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.name} />
                                                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                                             </Avatar>
                                             <div>
                                                 <div className="font-medium">{user.name}</div>
-                                                <div className="text-sm">Joined {new Date(user.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                                                <div className="text-sm">
+                                                    Joined{' '}
+                                                    {new Date(user.created_at).toLocaleDateString('id-ID', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric',
+                                                    })}
+                                                </div>
                                             </div>
                                         </div>
                                     </TableCell>
@@ -154,11 +146,8 @@ export default function Index({ users, filters }: Props) {
                                     <TableCell>
                                         <div className="flex gap-1">
                                             {user.roles.map((role) => (
-                                                <Badge
-                                                    key={role.name}
-                                                    className={`${role.name.toLowerCase()}`}
-                                                >
-                                                    <Shield className="h-3 w-3 mr-1" />
+                                                <Badge key={role.name} className={`${role.name.toLowerCase()}`}>
+                                                    <Shield className="mr-1 h-3 w-3" />
                                                     {role.name}
                                                 </Badge>
                                             ))}
@@ -167,37 +156,25 @@ export default function Index({ users, filters }: Props) {
                                     <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    className="h-8 w-8 p-0"
-                                                >
+                                                <Button variant="ghost" className="h-8 w-8 p-0">
                                                     <MoreHorizontal className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-40">
                                                 <DropdownMenuItem asChild>
-                                                    <Link
-                                                        href={route('admin.users.show', user.id)}
-                                                        className="flex w-full items-center"
-                                                    >
+                                                    <Link href={route('admin.users.show', user.id)} className="flex w-full items-center">
                                                         <Eye className="mr-2 h-4 w-4" />
                                                         Lihat
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem asChild>
-                                                    <Link
-                                                        href={route('admin.users.edit', user.id)}
-                                                        className="flex w-full items-center"
-                                                    >
+                                                    <Link href={route('admin.users.edit', user.id)} className="flex w-full items-center">
                                                         <Edit2 className="mr-2 h-4 w-4" />
                                                         Edit
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    onClick={() => handleDelete(user.id)}
-                                                    className="flex items-center"
-                                                >
+                                                <DropdownMenuItem onClick={() => handleDelete(user.id)} className="flex items-center">
                                                     <Trash2 className="mr-2 h-4 w-4" />
                                                     Delete
                                                 </DropdownMenuItem>
@@ -210,10 +187,7 @@ export default function Index({ users, filters }: Props) {
                     </Table>
                 </div>
 
-                <Pagination
-                    currentPage={users.current_page}
-                    lastPage={users.last_page}
-                />
+                <Pagination currentPage={users.current_page} lastPage={users.last_page} />
             </div>
         </AppLayout>
     );

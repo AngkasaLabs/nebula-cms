@@ -1,30 +1,17 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Pagination } from '@/components/ui/pagination';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, router } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Plus, ImageIcon, FileText, Trash2, Archive, CheckCircle, X } from 'lucide-react';
+import { Archive, CheckCircle, FileText, ImageIcon, Plus, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { Pagination } from '@/components/ui/pagination';
-import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
 interface Category {
@@ -85,37 +72,21 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
     const [isBulkActing, setIsBulkActing] = useState(false);
 
     // Mendapatkan unique categories dari posts
-    const uniqueCategories = Array.from(
-        new Map(
-            posts.data.map(post => [post.category.id, post.category])
-        ).values()
-    );
+    const uniqueCategories = Array.from(new Map(posts.data.map((post) => [post.category.id, post.category])).values());
 
     const handleSearch = (value: string) => {
         setSearch(value);
-        router.get(
-            route('admin.posts.index'),
-            { search: value, status, category },
-            { preserveState: true }
-        );
+        router.get(route('admin.posts.index'), { search: value, status, category }, { preserveState: true });
     };
 
     const handleStatusChange = (value: string) => {
         setStatus(value);
-        router.get(
-            route('admin.posts.index'),
-            { search, status: value, category },
-            { preserveState: true }
-        );
+        router.get(route('admin.posts.index'), { search, status: value, category }, { preserveState: true });
     };
 
     const handleCategoryChange = (value: string) => {
         setCategory(value);
-        router.get(
-            route('admin.posts.index'),
-            { search, status, category: value },
-            { preserveState: true }
-        );
+        router.get(route('admin.posts.index'), { search, status, category: value }, { preserveState: true });
     };
 
     const toggleSelectAll = (checked: boolean) => {
@@ -153,7 +124,7 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                     toast.error('Failed to perform bulk action');
                     setIsBulkActing(false);
                 },
-            }
+            },
         );
     };
 
@@ -209,7 +180,7 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
             <Head title="Posts" />
 
             <div className="p-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold">Posts</h1>
                         <p className="text-sm text-gray-500">Manage your blog posts here</p>
@@ -223,20 +194,15 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                 </div>
 
                 {selectedIds.length > 0 && (
-                    <div className="bg-primary/10 border border-primary text-primary rounded-lg p-4 mb-4 flex items-center justify-between">
+                    <div className="bg-primary/10 border-primary text-primary mb-4 flex items-center justify-between rounded-lg border p-4">
                         <div className="flex items-center gap-2">
                             <span className="font-medium">{selectedIds.length} selected</span>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedIds([])}
-                                className="h-auto p-0 hover:bg-transparent"
-                            >
-                                <X className="h-4 w-4 ml-1" />
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedIds([])} className="h-auto p-0 hover:bg-transparent">
+                                <X className="ml-1 h-4 w-4" />
                             </Button>
                         </div>
                         <div className="flex items-center gap-2">
-                             <Button
+                            <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleBulkAction('draft')}
@@ -246,22 +212,17 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                                 <Archive className="mr-2 h-4 w-4" />
                                 Mark as Draft
                             </Button>
-                             <Button
+                            <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleBulkAction('publish')}
                                 disabled={isBulkActing}
-                                className="bg-background text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-900/20"
+                                className="bg-background border-green-200 text-green-600 hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-900/20"
                             >
                                 <CheckCircle className="mr-2 h-4 w-4" />
                                 Publish
                             </Button>
-                            <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleBulkAction('delete')}
-                                disabled={isBulkActing}
-                            >
+                            <Button size="sm" variant="destructive" onClick={() => handleBulkAction('delete')} disabled={isBulkActing}>
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete
                             </Button>
@@ -269,15 +230,10 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                     </div>
                 )}
 
-                <div className="rounded-lg shadow border p-4 mb-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="mb-4 rounded-lg border p-4 shadow">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <Input
-                                placeholder="Search post..."
-                                value={search}
-                                onChange={(e) => handleSearch(e.target.value)}
-                                className="w-full"
-                            />
+                            <Input placeholder="Search post..." value={search} onChange={(e) => handleSearch(e.target.value)} className="w-full" />
                         </div>
                         <div>
                             <Select value={status} onValueChange={handleStatusChange}>
@@ -301,10 +257,7 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                                 <SelectContent>
                                     <SelectItem value="all">All Categories</SelectItem>
                                     {uniqueCategories.map((cat) => (
-                                        <SelectItem
-                                            key={`category-${cat.id}`}
-                                            value={cat.id.toString()}
-                                        >
+                                        <SelectItem key={`category-${cat.id}`} value={cat.id.toString()}>
                                             {cat.name}
                                         </SelectItem>
                                     ))}
@@ -314,12 +267,12 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                     </div>
                 </div>
 
-                <div className="rounded-lg shadow border">
+                <div className="rounded-lg border shadow">
                     {posts.data.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 px-4 rounded-lg">
-                            <FileText className="h-12 w-12 text-gray-400 mb-4" />
-                            <h3 className="text-lg font-medium mb-1">No posts found</h3>
-                            <p className="text-center mb-4">
+                        <div className="flex flex-col items-center justify-center rounded-lg px-4 py-12">
+                            <FileText className="mb-4 h-12 w-12 text-gray-400" />
+                            <h3 className="mb-1 text-lg font-medium">No posts found</h3>
+                            <p className="mb-4 text-center">
                                 {(search || status !== 'all' || category !== 'all') && (status || category || search)
                                     ? 'No posts found with your filter'
                                     : 'Start by creating a post for your blog'}
@@ -333,14 +286,11 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                         </div>
                     ) : (
                         <Table containerClassName="overflow-visible">
-                            <TableHeader className="sticky top-[66px] z-10 bg-background/80 backdrop-blur-md shadow-sm">
+                            <TableHeader className="bg-background/80 sticky top-[66px] z-10 shadow-sm backdrop-blur-md">
                                 <TableRow className="hover:bg-transparent">
                                     <TableHead className="w-[50px]">
                                         <Checkbox
-                                            checked={
-                                                posts.data.length > 0 &&
-                                                selectedIds.length === posts.data.length
-                                            }
+                                            checked={posts.data.length > 0 && selectedIds.length === posts.data.length}
                                             onCheckedChange={(checked) => toggleSelectAll(checked as boolean)}
                                         />
                                     </TableHead>
@@ -364,25 +314,23 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-3">
-                                                <div className="flex-shrink-0 w-16 h-12 rounded-md overflow-hidden">
+                                                <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-md">
                                                     {post.featured_image ? (
                                                         <img
                                                             src={getImageUrl(post)}
                                                             alt={post.title}
-                                                            className="w-full h-full object-cover"
+                                                            className="h-full w-full object-cover"
                                                             onError={handleImageError}
                                                         />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center">
-                                                            <ImageIcon className="w-6 h-6" />
+                                                        <div className="flex h-full w-full items-center justify-center">
+                                                            <ImageIcon className="h-6 w-6" />
                                                         </div>
                                                     )}
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-medium">{post.title}</span>
-                                                    <span className="text-sm truncate max-w-[300px]">
-                                                        {post.excerpt}
-                                                    </span>
+                                                    <span className="max-w-[300px] truncate text-sm">{post.excerpt}</span>
                                                 </div>
                                             </div>
                                         </TableCell>
@@ -404,11 +352,7 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                                         </TableCell>
                                         <TableCell>
                                             <Badge
-                                                variant={
-                                                    post.status === 'published'
-                                                        ? 'default'
-                                                        : 'secondary'
-                                                }
+                                                variant={post.status === 'published' ? 'default' : 'secondary'}
                                                 className={postStatusBadgeClass(post.status)}
                                             >
                                                 {postStatusLabel(post.status)}
@@ -429,14 +373,12 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                                         <TableCell>
                                             <div className="flex space-x-2">
                                                 <Link href={route('admin.posts.edit', post.id)}>
-                                                    <Button variant="outline" size="sm"
-                                                        className="hover:bg-[#0c1015] hover:text-white">
+                                                    <Button variant="outline" size="sm" className="hover:bg-[#0c1015] hover:text-white">
                                                         Edit
                                                     </Button>
                                                 </Link>
                                                 <Link href={route('admin.posts.show', post.id)}>
-                                                    <Button variant="outline" size="sm"
-                                                        className="hover:bg-[#0c1015] hover:text-white">
+                                                    <Button variant="outline" size="sm" className="hover:bg-[#0c1015] hover:text-white">
                                                         View
                                                     </Button>
                                                 </Link>
@@ -458,7 +400,7 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
                             queryParams={{
                                 search: search || '',
                                 status,
-                                category
+                                category,
                             }}
                         />
                     </div>
@@ -468,9 +410,7 @@ export default function Index({ posts, filters = { search: '', status: 'all', ca
     );
 }
 
-function postStatusLabel(
-    status: Post['status']
-): string {
+function postStatusLabel(status: Post['status']): string {
     switch (status) {
         case 'published':
             return 'Published';

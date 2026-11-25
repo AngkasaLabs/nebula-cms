@@ -1,19 +1,10 @@
-import { useState } from "react";
-import { ReactSortable } from "react-sortablejs";
-import { type MenuItemData, type MenuItemUpdatePayload, type MenuReorderPayload } from "./types";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    GripVertical,
-    FileText,
-    LinkIcon,
-    Home,
-    ExternalLink,
-    Trash,
-    ChevronDown,
-    ChevronRight
-} from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ChevronDown, ChevronRight, ExternalLink, FileText, GripVertical, Home, LinkIcon, Trash } from 'lucide-react';
+import { useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import { type MenuItemData, type MenuItemUpdatePayload, type MenuReorderPayload } from './types';
 
 interface MenuTreeProps {
     items: MenuItemData[];
@@ -43,7 +34,7 @@ function MenuItem({ item, onUpdate, onRemove, activeMenu, onReorder }: MenuItemP
         const itemsToUpdate = newChildren.map((child, idx) => ({
             id: child.id,
             order: idx,
-            parent_id: item.id
+            parent_id: item.id,
         }));
 
         if (itemsToUpdate.length > 0) {
@@ -52,38 +43,30 @@ function MenuItem({ item, onUpdate, onRemove, activeMenu, onReorder }: MenuItemP
     };
 
     return (
-        <div
-            className="flex flex-col border rounded-md bg-card mb-2 transition-all duration-200 shadow-sm"
-            data-id={item.id.toString()}
-        >
-            <div className={`flex items-center gap-3 p-3 rounded-md hover:bg-accent/50 ${isOpen ? 'bg-accent/30' : ''}`}>
-                <div className="text-muted-foreground cursor-move hover:text-foreground transition-colors">
+        <div className="bg-card mb-2 flex flex-col rounded-md border shadow-sm transition-all duration-200" data-id={item.id.toString()}>
+            <div className={`hover:bg-accent/50 flex items-center gap-3 rounded-md p-3 ${isOpen ? 'bg-accent/30' : ''}`}>
+                <div className="text-muted-foreground hover:text-foreground cursor-move transition-colors">
                     <GripVertical className="h-5 w-5" />
                 </div>
 
-                <div className="flex-1 flex items-center gap-3 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+                <div className="flex flex-1 cursor-pointer items-center gap-3" onClick={() => setIsOpen(!isOpen)}>
                     <div className="flex items-center gap-2">
-                        {item.type === "page" && <FileText className="h-4 w-4 text-blue-500" />}
-                        {item.type === "post" && <FileText className="h-4 w-4 text-green-500" />}
-                        {item.type === "custom" && <LinkIcon className="h-4 w-4 text-orange-500" />}
-                        {item.type === "home" && <Home className="h-4 w-4 text-purple-500" />}
-                        <span className="font-medium text-sm">{item.title}</span>
+                        {item.type === 'page' && <FileText className="h-4 w-4 text-blue-500" />}
+                        {item.type === 'post' && <FileText className="h-4 w-4 text-green-500" />}
+                        {item.type === 'custom' && <LinkIcon className="h-4 w-4 text-orange-500" />}
+                        {item.type === 'home' && <Home className="h-4 w-4 text-purple-500" />}
+                        <span className="text-sm font-medium">{item.title}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground"
-                        onClick={() => setIsOpen(!isOpen)}
-                    >
+                    <Button variant="ghost" size="icon" className="text-muted-foreground h-8 w-8" onClick={() => setIsOpen(!isOpen)}>
                         {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                     </Button>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
                         onClick={() => onRemove(item.id)}
                     >
                         <Trash className="h-4 w-4" />
@@ -92,37 +75,27 @@ function MenuItem({ item, onUpdate, onRemove, activeMenu, onReorder }: MenuItemP
             </div>
 
             {isOpen && (
-                <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2 duration-200">
-                    <div className="pt-4 border-t space-y-4">
+                <div className="animate-in slide-in-from-top-2 px-4 pt-0 pb-4 duration-200">
+                    <div className="space-y-4 border-t pt-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-xs">Navigation Label</Label>
-                                <Input
-                                    value={item.title}
-                                    onChange={(e) => onUpdate(item.id, { title: e.target.value })}
-                                    className="h-8 text-sm"
-                                />
+                                <Input value={item.title} onChange={(e) => onUpdate(item.id, { title: e.target.value })} className="h-8 text-sm" />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs">URL</Label>
-                                <Input
-                                    value={item.url}
-                                    onChange={(e) => onUpdate(item.id, { url: e.target.value })}
-                                    className="h-8 text-sm"
-                                />
+                                <Input value={item.url} onChange={(e) => onUpdate(item.id, { url: e.target.value })} className="h-8 text-sm" />
                             </div>
                         </div>
                         <div className="flex items-center justify-between">
-                            <div className="text-xs text-muted-foreground capitalize">
-                                Type: {item.type}
-                            </div>
+                            <div className="text-muted-foreground text-xs capitalize">Type: {item.type}</div>
                             <Button
-                                variant={item.target === '_blank' ? "secondary" : "outline"}
+                                variant={item.target === '_blank' ? 'secondary' : 'outline'}
                                 size="sm"
                                 onClick={() => onUpdate(item.id, { target: item.target === '_blank' ? '_self' : '_blank' })}
                                 className="h-7 text-xs"
                             >
-                                <ExternalLink className="h-3 w-3 mr-1.5" />
+                                <ExternalLink className="mr-1.5 h-3 w-3" />
                                 {item.target === '_blank' ? 'Opens in new tab' : 'Opens in same tab'}
                             </Button>
                         </div>
@@ -130,7 +103,7 @@ function MenuItem({ item, onUpdate, onRemove, activeMenu, onReorder }: MenuItemP
                 </div>
             )}
 
-            <div className="pl-8 pr-2 pb-2">
+            <div className="pr-2 pb-2 pl-8">
                 <MenuTree
                     items={item.children || []}
                     setItems={handleUpdateChildren}
@@ -139,23 +112,14 @@ function MenuItem({ item, onUpdate, onRemove, activeMenu, onReorder }: MenuItemP
                     onRemoveItem={onRemove}
                     activeMenu={activeMenu}
                     onReorder={onReorder}
-                    className={(!item.children || item.children.length === 0) ? "empty-dropzone" : ""}
+                    className={!item.children || item.children.length === 0 ? 'empty-dropzone' : ''}
                 />
             </div>
         </div>
     );
 }
 
-export default function MenuTree({
-    items,
-    setItems,
-    parentId = null,
-    onUpdateItem,
-    onRemoveItem,
-    activeMenu,
-    onReorder,
-    className
-}: MenuTreeProps) {
+export default function MenuTree({ items, setItems, parentId = null, onUpdateItem, onRemoveItem, activeMenu, onReorder, className }: MenuTreeProps) {
     return (
         <ReactSortable
             list={items}
@@ -168,19 +132,12 @@ export default function MenuTree({
             chosenClass="sortable-chosen"
             dragClass="sortable-drag"
             handle=".cursor-move"
-            className={`space-y-2 min-h-[10px] ${className || ''}`}
+            className={`min-h-[10px] space-y-2 ${className || ''}`}
             data-parent-id={parentId}
             data-list-id={parentId ? `child-${parentId}` : 'main'}
         >
             {items.map((item) => (
-                <MenuItem
-                    key={item.id}
-                    item={item}
-                    onUpdate={onUpdateItem}
-                    onRemove={onRemoveItem}
-                    activeMenu={activeMenu}
-                    onReorder={onReorder}
-                />
+                <MenuItem key={item.id} item={item} onUpdate={onUpdateItem} onRemove={onRemoveItem} activeMenu={activeMenu} onReorder={onReorder} />
             ))}
         </ReactSortable>
     );

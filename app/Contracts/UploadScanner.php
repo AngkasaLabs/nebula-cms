@@ -2,12 +2,14 @@
 
 namespace App\Contracts;
 
+use App\Exceptions\UploadScanException;
+
 interface UploadScanner
 {
     /**
      * Scan a file on disk. Throws if malware is detected or if configured to fail on scanner errors.
      *
-     * @throws \App\Exceptions\UploadScanException
+     * @throws UploadScanException
      */
     public function scanPath(string $absolutePath): void;
 

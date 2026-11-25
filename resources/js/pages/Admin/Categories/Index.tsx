@@ -1,20 +1,12 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useState, type ReactElement } from 'react';
-import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Plus, FolderTree } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, router } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Fragment } from 'react';
+import { FolderTree, Plus } from 'lucide-react';
+import { Fragment, useState, type ReactElement } from 'react';
 
 interface Category {
     id: number;
@@ -40,7 +32,7 @@ const breadcrumbs = [
         href: route('admin.dashboard'),
     },
     {
-        title: 'Categories'
+        title: 'Categories',
     },
 ];
 
@@ -49,11 +41,7 @@ export default function Index({ categories, filters = { search: '' } }: Props) {
 
     const handleSearch = (value: string) => {
         setSearch(value);
-        router.get(
-            route('admin.categories.index'),
-            { search: value },
-            { preserveState: true }
-        );
+        router.get(route('admin.categories.index'), { search: value }, { preserveState: true });
     };
 
     const renderCategories = (categories: Category[]): ReactElement[] => {
@@ -93,7 +81,7 @@ export default function Index({ categories, filters = { search: '' } }: Props) {
             <Head title="Categories" />
 
             <div className="p-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold">Categories</h1>
                         <p className="text-muted-foreground">Manage and create categories for your content</p>
@@ -106,7 +94,7 @@ export default function Index({ categories, filters = { search: '' } }: Props) {
                     </Link>
                 </div>
 
-                <div className="rounded-lg shadow border p-4 mb-4">
+                <div className="mb-4 rounded-lg border p-4 shadow">
                     <div className="grid grid-cols-1 gap-4">
                         <div>
                             <Input
@@ -119,15 +107,13 @@ export default function Index({ categories, filters = { search: '' } }: Props) {
                     </div>
                 </div>
 
-                <div className="rounded-lg shadow border">
+                <div className="rounded-lg border shadow">
                     {categories.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 px-4 rounded-lg">
-                            <FolderTree className="h-12 w-12 text-gray-400 mb-4" />
-                            <h3 className="text-lg font-medium mb-1">No categories found</h3>
-                            <p className="text-center mb-4">
-                                {search
-                                    ? 'No categories found with your search'
-                                    : 'Start by creating a category to organize your content'}
+                        <div className="flex flex-col items-center justify-center rounded-lg px-4 py-12">
+                            <FolderTree className="mb-4 h-12 w-12 text-gray-400" />
+                            <h3 className="mb-1 text-lg font-medium">No categories found</h3>
+                            <p className="mb-4 text-center">
+                                {search ? 'No categories found with your search' : 'Start by creating a category to organize your content'}
                             </p>
                             <Link href={route('admin.categories.create')}>
                                 <Button>
@@ -147,9 +133,7 @@ export default function Index({ categories, filters = { search: '' } }: Props) {
                                     <TableHead>Action</TableHead>
                                 </TableRow>
                             </TableHeader>
-                            <TableBody>
-                                {renderCategories(categories)}
-                            </TableBody>
+                            <TableBody>{renderCategories(categories)}</TableBody>
                         </Table>
                     )}
                 </div>

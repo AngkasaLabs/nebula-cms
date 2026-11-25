@@ -8,15 +8,15 @@ class HookService
      * Array to store all registered hooks
      */
     protected static $actions = [];
+
     protected static $filters = [];
 
     /**
      * Registering action hook
      *
-     * @param string $hook Hook name
-     * @param callable $callback Function to be executed
-     * @param int $priority Execution priority (lower number means higher priority)
-     * @return void
+     * @param  string  $hook  Hook name
+     * @param  callable  $callback  Function to be executed
+     * @param  int  $priority  Execution priority (lower number means higher priority)
      */
     public static function addAction(string $hook, callable $callback, int $priority = 10): void
     {
@@ -27,10 +27,9 @@ class HookService
     /**
      * Registering filter hook
      *
-     * @param string $hook Hook name
-     * @param callable $callback Function to be executed
-     * @param int $priority Execution priority (lower number means higher priority)
-     * @return void
+     * @param  string  $hook  Hook name
+     * @param  callable  $callback  Function to be executed
+     * @param  int  $priority  Execution priority (lower number means higher priority)
      */
     public static function addFilter(string $hook, callable $callback, int $priority = 10): void
     {
@@ -41,13 +40,12 @@ class HookService
     /**
      * Running action hook
      *
-     * @param string $hook Hook name
-     * @param mixed ...$args Arguments to be passed to callback
-     * @return void
+     * @param  string  $hook  Hook name
+     * @param  mixed  ...$args  Arguments to be passed to callback
      */
     public static function doAction(string $hook, ...$args): void
     {
-        if (!isset(self::$actions[$hook])) {
+        if (! isset(self::$actions[$hook])) {
             return;
         }
 
@@ -61,14 +59,14 @@ class HookService
     /**
      * Running filter hook
      *
-     * @param string $hook Hook name
-     * @param mixed $value Value to be filtered
-     * @param mixed ...$args Additional arguments to be passed to callback
+     * @param  string  $hook  Hook name
+     * @param  mixed  $value  Value to be filtered
+     * @param  mixed  ...$args  Additional arguments to be passed to callback
      * @return mixed Filtered value
      */
     public static function applyFilter(string $hook, $value, ...$args): mixed
     {
-        if (!isset(self::$filters[$hook])) {
+        if (! isset(self::$filters[$hook])) {
             return $value;
         }
 
@@ -87,10 +85,9 @@ class HookService
     /**
      * Removing action hook
      *
-     * @param string $hook Hook name
-     * @param callable|null $callback Function to be removed, null to remove all
-     * @param int|null $priority Priority to be removed, null to remove all priorities
-     * @return void
+     * @param  string  $hook  Hook name
+     * @param  callable|null  $callback  Function to be removed, null to remove all
+     * @param  int|null  $priority  Priority to be removed, null to remove all priorities
      */
     public static function removeAction(string $hook, ?callable $callback = null, ?int $priority = null): void
     {
@@ -100,10 +97,9 @@ class HookService
     /**
      * Removing filter hook
      *
-     * @param string $hook Hook name
-     * @param callable|null $callback Function to be removed, null to remove all
-     * @param int|null $priority Priority to be removed, null to remove all priorities
-     * @return void
+     * @param  string  $hook  Hook name
+     * @param  callable|null  $callback  Function to be removed, null to remove all
+     * @param  int|null  $priority  Priority to be removed, null to remove all priorities
      */
     public static function removeFilter(string $hook, ?callable $callback = null, ?int $priority = null): void
     {
@@ -113,24 +109,24 @@ class HookService
     /**
      * Helper for removing hook (action or filter)
      *
-     * @param string $type Hook type ('actions' or 'filters')
-     * @param string $hook Hook name
-     * @param callable|null $callback Function to be removed
-     * @param int|null $priority Priority to be removed
-     * @return void
+     * @param  string  $type  Hook type ('actions' or 'filters')
+     * @param  string  $hook  Hook name
+     * @param  callable|null  $callback  Function to be removed
+     * @param  int|null  $priority  Priority to be removed
      */
     protected static function removeHook(string $type, string $hook, ?callable $callback = null, ?int $priority = null): void
     {
         $storage = $type === 'actions' ? 'actions' : 'filters';
 
         // If hook is not set, do nothing
-        if (!isset(self::${$storage}[$hook])) {
+        if (! isset(self::${$storage}[$hook])) {
             return;
         }
 
         // If callback and priority is null, remove all hook
         if ($callback === null && $priority === null) {
             unset(self::${$storage}[$hook]);
+
             return;
         }
 
@@ -139,6 +135,7 @@ class HookService
             if (isset(self::${$storage}[$hook][$priority])) {
                 unset(self::${$storage}[$hook][$priority]);
             }
+
             return;
         }
 
@@ -155,6 +152,7 @@ class HookService
                     unset(self::${$storage}[$hook][$p]);
                 }
             }
+
             return;
         }
 
@@ -180,13 +178,13 @@ class HookService
     /**
      * Checking if hook has registered callback
      *
-     * @param string $hook Hook name
-     * @param string $type Hook type ('action' or 'filter')
-     * @return bool
+     * @param  string  $hook  Hook name
+     * @param  string  $type  Hook type ('action' or 'filter')
      */
     public static function hasHook(string $hook, string $type = 'action'): bool
     {
         $storage = $type === 'action' ? 'actions' : 'filters';
-        return isset(self::${$storage}[$hook]) && !empty(self::${$storage}[$hook]);
+
+        return isset(self::${$storage}[$hook]) && ! empty(self::${$storage}[$hook]);
     }
 }

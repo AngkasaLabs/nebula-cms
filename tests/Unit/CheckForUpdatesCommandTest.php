@@ -2,8 +2,9 @@
 
 use App\Services\UpdateService;
 use Illuminate\Support\Facades\Cache;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 beforeEach(function () {
     Cache::forget(UpdateService::CACHE_KEY);
@@ -50,7 +51,7 @@ describe('command cms:check-updates', function () {
 
     it('returns a failure code when checkForUpdate throws an exception', function () {
         $this->mock(UpdateService::class, function ($mock) {
-            $mock->shouldReceive('checkForUpdate')->once()->andThrow(new \RuntimeException('API cannot be reached'));
+            $mock->shouldReceive('checkForUpdate')->once()->andThrow(new RuntimeException('API cannot be reached'));
         });
 
         $this->artisan('cms:check-updates')->assertExitCode(1);

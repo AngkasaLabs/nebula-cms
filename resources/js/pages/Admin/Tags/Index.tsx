@@ -1,20 +1,13 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Tags } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, router } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { Plus, Tags } from 'lucide-react';
+import { useState } from 'react';
 
 interface Tag {
     id: number;
@@ -45,7 +38,7 @@ const breadcrumbs = [
         href: route('admin.dashboard'),
     },
     {
-        title: 'Tags'
+        title: 'Tags',
     },
 ];
 
@@ -54,11 +47,7 @@ export default function Index({ tags, filters = { search: '' } }: Props) {
 
     const handleSearch = (value: string) => {
         setSearch(value);
-        router.get(
-            route('admin.tags.index'),
-            { search: value },
-            { preserveState: true }
-        );
+        router.get(route('admin.tags.index'), { search: value }, { preserveState: true });
     };
 
     return (
@@ -66,7 +55,7 @@ export default function Index({ tags, filters = { search: '' } }: Props) {
             <Head title="Tags" />
 
             <div className="p-4">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold">Tags</h1>
                         <p className="text-muted-foreground">Manage and create tags for your content</p>
@@ -79,7 +68,7 @@ export default function Index({ tags, filters = { search: '' } }: Props) {
                     </Link>
                 </div>
 
-                <div className="rounded-lg shadow border p-4 mb-4">
+                <div className="mb-4 rounded-lg border p-4 shadow">
                     <div className="grid grid-cols-1 gap-4">
                         <div>
                             <Input
@@ -92,15 +81,13 @@ export default function Index({ tags, filters = { search: '' } }: Props) {
                     </div>
                 </div>
 
-                <div className="rounded-lg shadow border">
+                <div className="rounded-lg border shadow">
                     {tags.data.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 px-4 rounded-lg">
-                            <Tags className="h-12 w-12 mb-4" />
-                            <h3 className="text-lg font-medium mb-1">No tags found</h3>
-                            <p className="text-center mb-4">
-                                {search
-                                    ? 'No tags found with your search'
-                                    : 'Start by creating a tag to categorize your content'}
+                        <div className="flex flex-col items-center justify-center rounded-lg px-4 py-12">
+                            <Tags className="mb-4 h-12 w-12" />
+                            <h3 className="mb-1 text-lg font-medium">No tags found</h3>
+                            <p className="mb-4 text-center">
+                                {search ? 'No tags found with your search' : 'Start by creating a tag to categorize your content'}
                             </p>
                             <Link href={route('admin.tags.create')}>
                                 <Button>
@@ -167,21 +154,17 @@ export default function Index({ tags, filters = { search: '' } }: Props) {
                 {tags.last_page > 1 && (
                     <div className="mt-4 flex justify-center">
                         <div className="flex space-x-2">
-                            {Array.from({ length: tags.last_page }, (_, i) => i + 1).map(
-                                (page) => (
-                                    <Link
-                                        key={page}
-                                        href={route('admin.tags.index', { page })}
-                                        className={`px-3 py-1 rounded ${
-                                            page === tags.current_page
-                                                ? 'bg-white text-black'
-                                                : 'bg-gray-800 text-gray-200 hover:bg-[#0c1015]'
-                                        }`}
-                                    >
-                                        {page}
-                                    </Link>
-                                ),
-                            )}
+                            {Array.from({ length: tags.last_page }, (_, i) => i + 1).map((page) => (
+                                <Link
+                                    key={page}
+                                    href={route('admin.tags.index', { page })}
+                                    className={`rounded px-3 py-1 ${
+                                        page === tags.current_page ? 'bg-white text-black' : 'bg-gray-800 text-gray-200 hover:bg-[#0c1015]'
+                                    }`}
+                                >
+                                    {page}
+                                </Link>
+                            ))}
                         </div>
                     </div>
                 )}

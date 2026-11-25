@@ -119,9 +119,9 @@ it('serves the well-known api catalog in linkset json format', function () {
                         'href',
                         'type',
                         'title',
-                    ]
-                ]
-            ]
-        ]
+                    ],
+                ],
+            ],
+        ],
     ]);
 });

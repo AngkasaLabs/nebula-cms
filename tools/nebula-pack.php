@@ -12,7 +12,6 @@
  *   php tools/nebula-pack.php pack <path-to-package> [--key=PATH] [--out=DIR]
  *   php tools/nebula-pack.php verify <package.zip> <package.sig.json> --public-key=BASE64
  */
-
 const SIGNED_FIELDS = ['slug', 'type', 'version', 'sha256', 'size', 'requires', 'key_id'];
 
 function fail(string $message): never
@@ -175,7 +174,7 @@ function commandPack(array $argv): void
         unlink($zipPath);
     }
 
-    $zip = new ZipArchive();
+    $zip = new ZipArchive;
 
     if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
         fail("cannot create archive: {$zipPath}");

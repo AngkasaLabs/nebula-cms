@@ -4,15 +4,14 @@ namespace App\Services;
 
 use App\Models\Theme;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\File;
 
 class TemplateHierarchy
 {
     /**
      * Finding template that matches the template hierarchy
      *
-     * @param array $templates Array of templates to search, from most specific to most general
-     * @param Theme $theme Theme to be used
+     * @param  array  $templates  Array of templates to search, from most specific to most general
+     * @param  Theme  $theme  Theme to be used
      * @return string|null Template name found or null if not found
      */
     public static function locateTemplate(array $templates, Theme $theme): ?string
@@ -46,22 +45,18 @@ class TemplateHierarchy
 
     /**
      * Getting template hierarchy for home page
-     *
-     * @return array
      */
     public static function getHomeTemplates(): array
     {
         return [
             'pages.home',
             'pages.index',
-            'index'
+            'index',
         ];
     }
 
     /**
      * Getting template hierarchy for blog page
-     *
-     * @return array
      */
     public static function getBlogTemplates(): array
     {
@@ -69,15 +64,14 @@ class TemplateHierarchy
             'pages.blog',
             'pages.archive',
             'archive',
-            'index'
+            'index',
         ];
     }
 
     /**
      * Getting template hierarchy for category page
      *
-     * @param string $categorySlug Category slug
-     * @return array
+     * @param  string  $categorySlug  Category slug
      */
     public static function getCategoryTemplates(string $categorySlug): array
     {
@@ -86,15 +80,14 @@ class TemplateHierarchy
             'pages.category',
             'pages.archive',
             'archive',
-            'index'
+            'index',
         ];
     }
 
     /**
      * Getting template hierarchy for tag page
      *
-     * @param string $tagSlug Tag slug
-     * @return array
+     * @param  string  $tagSlug  Tag slug
      */
     public static function getTagTemplates(string $tagSlug): array
     {
@@ -103,16 +96,15 @@ class TemplateHierarchy
             'pages.tag',
             'pages.archive',
             'archive',
-            'index'
+            'index',
         ];
     }
 
     /**
      * Getting template hierarchy for single post page
      *
-     * @param string $postSlug Post slug
-     * @param string $postType Post type (default: 'post')
-     * @return array
+     * @param  string  $postSlug  Post slug
+     * @param  string  $postType  Post type (default: 'post')
      */
     public static function getSingleTemplates(string $postSlug, string $postType = 'post'): array
     {
@@ -121,15 +113,14 @@ class TemplateHierarchy
             "pages.{$postType}",
             'pages.single',
             'single',
-            'index'
+            'index',
         ];
     }
 
     /**
      * Getting template hierarchy for static page
      *
-     * @param string $pageSlug Page slug
-     * @return array
+     * @param  string  $pageSlug  Page slug
      */
     public static function getPageTemplates(string $pageSlug): array
     {
@@ -137,35 +128,31 @@ class TemplateHierarchy
             "pages.page-{$pageSlug}",
             'pages.page',
             'page',
-            'index'
+            'index',
         ];
     }
 
     /**
      * Getting template hierarchy for search page
-     *
-     * @return array
      */
     public static function getSearchTemplates(): array
     {
         return [
             'pages.search',
             'search',
-            'index'
+            'index',
         ];
     }
 
     /**
      * Getting template hierarchy for 404 page
-     *
-     * @return array
      */
     public static function get404Templates(): array
     {
         return [
             'pages.404',
             '404',
-            'index'
+            'index',
         ];
     }
 }

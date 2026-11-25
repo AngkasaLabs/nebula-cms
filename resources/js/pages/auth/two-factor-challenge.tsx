@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
 import { LoaderCircle } from 'lucide-react';
+import { FormEventHandler } from 'react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -25,10 +25,7 @@ export default function TwoFactorChallenge() {
     };
 
     return (
-        <AuthLayout
-            title="Two-factor authentication"
-            description="Enter the 6-digit code from your authenticator app or a recovery code."
-        >
+        <AuthLayout title="Two-factor authentication" description="Enter the 6-digit code from your authenticator app or a recovery code.">
             <Head title="Two-factor challenge" />
 
             <form className="flex flex-col gap-6" onSubmit={submit}>

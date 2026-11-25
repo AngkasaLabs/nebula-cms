@@ -183,4 +183,3 @@ it('returns public settings only', function () {
         ->assertJsonPath('data.0.key', 'site_name')
         ->assertJsonMissing(['key' => 'secret_key']);
 });
-

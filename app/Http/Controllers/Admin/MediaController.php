@@ -10,6 +10,7 @@ use App\Models\MediaFolder;
 use App\Support\ContentSearch;
 use App\Support\InertiaUploadSecurity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -30,10 +31,10 @@ class MediaController extends Controller
     {
         try {
             if (! file_exists(public_path('storage'))) {
-                \Illuminate\Support\Facades\Artisan::call('storage:link');
+                Artisan::call('storage:link');
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('Failed to auto-create storage link: ' . $e->getMessage());
+            Log::warning('Failed to auto-create storage link: '.$e->getMessage());
         }
 
         $folderId = $request->query('folder_id');
@@ -111,10 +112,10 @@ class MediaController extends Controller
     {
         try {
             if (! file_exists(public_path('storage'))) {
-                \Illuminate\Support\Facades\Artisan::call('storage:link');
+                Artisan::call('storage:link');
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('Failed to auto-create storage link: ' . $e->getMessage());
+            Log::warning('Failed to auto-create storage link: '.$e->getMessage());
         }
 
         $folderId = $request->query('folder_id');

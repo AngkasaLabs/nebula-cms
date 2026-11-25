@@ -43,13 +43,13 @@ it('fires theme.before_activate and theme.after_activate when activating a theme
     });
 
     $themePath = base_path('themes/next-theme');
-    if (!File::exists($themePath)) {
+    if (! File::exists($themePath)) {
         File::makeDirectory($themePath, 0755, true);
     }
-    File::put($themePath . '/theme.json', json_encode([
+    File::put($themePath.'/theme.json', json_encode([
         'name' => 'Next Theme',
         'slug' => 'next-theme',
-        'version' => '1.0.0'
+        'version' => '1.0.0',
     ]));
 
     try {
@@ -95,13 +95,13 @@ it('fires theme.before_delete and theme.after_delete when deleting an inactive t
     });
 
     $themePath = base_path('themes/trash-theme');
-    if (!File::exists($themePath)) {
+    if (! File::exists($themePath)) {
         File::makeDirectory($themePath, 0755, true);
     }
-    File::put($themePath . '/theme.json', json_encode([
+    File::put($themePath.'/theme.json', json_encode([
         'name' => 'Trash Theme',
         'slug' => 'trash-theme',
-        'version' => '1.0.0'
+        'version' => '1.0.0',
     ]));
 
     try {

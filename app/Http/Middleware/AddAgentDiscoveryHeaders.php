@@ -11,8 +11,7 @@ class AddAgentDiscoveryHeaders
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -23,8 +22,8 @@ class AddAgentDiscoveryHeaders
             $existingLink = $response->headers->get('Link');
 
             if ($existingLink) {
-                if (!str_contains($existingLink, 'rel="api-catalog"')) {
-                    $response->headers->set('Link', $existingLink . ', ' . $newLink);
+                if (! str_contains($existingLink, 'rel="api-catalog"')) {
+                    $response->headers->set('Link', $existingLink.', '.$newLink);
                 }
             } else {
                 $response->headers->set('Link', $newLink);

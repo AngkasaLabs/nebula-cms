@@ -12,17 +12,18 @@ class Setting extends Model
         'value',
         'type',
         'description',
-        'is_public'
+        'is_public',
     ];
 
     protected $casts = [
         'is_public' => 'boolean',
-        'value' => 'json'
+        'value' => 'json',
     ];
 
     public static function get(string $key, $default = null)
     {
         $setting = static::where('key', $key)->first();
+
         return $setting ? $setting->value : $default;
     }
 

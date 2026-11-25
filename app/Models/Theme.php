@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Theme extends Model
 {
@@ -17,34 +16,36 @@ class Theme extends Model
         'author',
         'preview',
         'is_active',
-        'settings'
+        'settings',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'settings' => 'array'
+        'settings' => 'array',
     ];
 
     protected $appends = [
         'preview_url',
-        'has_preview'
+        'has_preview',
     ];
 
     public function getHasPreviewAttribute()
     {
-        if (!$this->preview) {
+        if (! $this->preview) {
             return false;
         }
 
         $previewPath = base_path("themes/{$this->folder_name}/{$this->preview}");
+
         return File::exists($previewPath);
     }
 
     public function getPreviewUrlAttribute()
     {
-        if (!$this->has_preview) {
+        if (! $this->has_preview) {
             return null;
         }
+
         return url("themes/{$this->folder_name}/{$this->preview}");
     }
 
@@ -69,7 +70,7 @@ class Theme extends Model
      * Getting view path for specific template
      * Using hook to allow modification of path
      *
-     * @param string $view
+     * @param  string  $view
      * @return string
      */
     public function getViewPath($view)
@@ -81,7 +82,7 @@ class Theme extends Model
      * Getting asset path for specific file
      * Using hook to allow modification of path
      *
-     * @param string $path
+     * @param  string  $path
      * @return string
      */
     public function getAssetPath($path)
@@ -91,40 +92,37 @@ class Theme extends Model
 
     /**
      * Checking if this theme is a child theme
-     *
-     * @return bool
      */
     public function isChildTheme(): bool
     {
         $settings = $this->settings ?? [];
-        return isset($settings['parent']) && !empty($settings['parent']);
+
+        return isset($settings['parent']) && ! empty($settings['parent']);
     }
 
     /**
      * Getting parent theme if this theme is a child theme
-     *
-     * @return Theme|null
      */
     public function getParentTheme(): ?Theme
     {
-        if (!$this->isChildTheme()) {
+        if (! $this->isChildTheme()) {
             return null;
         }
 
         $parentSlug = $this->settings['parent'];
+
         return static::where('folder_name', $parentSlug)->first();
     }
 
     /**
      * Getting view path from parent theme
      *
-     * @param string $view
-     * @return string|null
+     * @param  string  $view
      */
     public function getParentViewPath($view): ?string
     {
         $parentTheme = $this->getParentTheme();
-        if (!$parentTheme) {
+        if (! $parentTheme) {
             return null;
         }
 
@@ -137,6 +135,7 @@ class Theme extends Model
     public function hasValidStructure(): bool
     {
         $themeJsonPath = base_path("themes/{$this->folder_name}/theme.json");
+
         return File::exists($themeJsonPath);
     }
 

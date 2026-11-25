@@ -9,31 +9,31 @@ import { type PropsWithChildren } from 'react';
 const sidebarNavItems: NavItem[] = [
     {
         title: 'General',
-        href: route('admin.settings.general')
+        href: route('admin.settings.general'),
     },
     {
         title: 'SEO',
-        href: route('admin.settings.seo')
+        href: route('admin.settings.seo'),
     },
     {
         title: 'Profile',
-        href: route('profile.edit')
+        href: route('profile.edit'),
     },
     {
         title: 'Security',
-        href: route('admin.settings.security')
+        href: route('admin.settings.security'),
     },
     {
         title: 'Password',
-        href: route('password.edit')
+        href: route('password.edit'),
     },
     {
         title: 'Appearance',
-        href: route('appearance')
+        href: route('appearance'),
     },
     {
         title: 'Update',
-        href: route('admin.system.update')
+        href: route('admin.system.update'),
     },
 ];
 
@@ -57,7 +57,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                         {sidebarNavItems.map((item, index) => {
                             // Extract the last part of the URL for comparison
                             const itemPath = (item.href || '').split('/').pop() || '';
-                            const isActive = url.endsWith(itemPath) ||
+                            const isActive =
+                                url.endsWith(itemPath) ||
                                 (url.endsWith('settings') && item.title === 'General') ||
                                 (url.endsWith('settings/general') && item.title === 'General') ||
                                 (item.title === 'Security' && url.includes('/settings/security'));

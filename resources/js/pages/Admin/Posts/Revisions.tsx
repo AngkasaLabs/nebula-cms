@@ -1,23 +1,9 @@
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, RotateCcw, Clock } from 'lucide-react';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
+import { ArrowLeft, Clock, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -75,7 +61,7 @@ export default function Revisions({ post, revisions }: Props) {
                     toast.error('Failed to restore revision');
                     setRestoringId(null);
                 },
-            }
+            },
         );
     };
 
@@ -83,10 +69,10 @@ export default function Revisions({ post, revisions }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Revisions - ${post.title}`} />
             <div className="p-4">
-                <div className="flex items-center gap-4 mb-6">
+                <div className="mb-6 flex items-center gap-4">
                     <Link href={route('admin.posts.edit', post.id)}>
                         <Button variant="outline" size="sm">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Edit
                         </Button>
                     </Link>
@@ -101,11 +87,9 @@ export default function Revisions({ post, revisions }: Props) {
                 {revisions.length === 0 ? (
                     <Card>
                         <CardContent className="flex flex-col items-center justify-center py-12">
-                            <Clock className="h-12 w-12 text-muted-foreground mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">No Revisions Yet</h3>
-                            <p className="text-muted-foreground text-center">
-                                Revisions are automatically created when you update a post.
-                            </p>
+                            <Clock className="text-muted-foreground mb-4 h-12 w-12" />
+                            <h3 className="mb-2 text-lg font-semibold">No Revisions Yet</h3>
+                            <p className="text-muted-foreground text-center">Revisions are automatically created when you update a post.</p>
                         </CardContent>
                     </Card>
                 ) : (
@@ -115,9 +99,7 @@ export default function Revisions({ post, revisions }: Props) {
                                 <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between">
                                         <div>
-                                            <CardTitle className="text-lg">
-                                                Revision #{revision.revision_number}
-                                            </CardTitle>
+                                            <CardTitle className="text-lg">Revision #{revision.revision_number}</CardTitle>
                                             <CardDescription>
                                                 {revision.created_at} ({revision.created_at_diff}) by {revision.user}
                                             </CardDescription>
@@ -125,7 +107,7 @@ export default function Revisions({ post, revisions }: Props) {
                                         <Dialog>
                                             <DialogTrigger asChild>
                                                 <Button variant="outline" size="sm">
-                                                    <RotateCcw className="h-4 w-4 mr-2" />
+                                                    <RotateCcw className="mr-2 h-4 w-4" />
                                                     Restore
                                                 </Button>
                                             </DialogTrigger>
@@ -133,15 +115,12 @@ export default function Revisions({ post, revisions }: Props) {
                                                 <DialogHeader>
                                                     <DialogTitle>Restore Revision</DialogTitle>
                                                     <DialogDescription>
-                                                        Are you sure you want to restore to revision #{revision.revision_number}?
-                                                        The current content will be saved as a new revision before restoring.
+                                                        Are you sure you want to restore to revision #{revision.revision_number}? The current content
+                                                        will be saved as a new revision before restoring.
                                                     </DialogDescription>
                                                 </DialogHeader>
                                                 <DialogFooter>
-                                                    <Button
-                                                        onClick={() => handleRestore(revision)}
-                                                        disabled={restoringId === revision.id}
-                                                    >
+                                                    <Button onClick={() => handleRestore(revision)} disabled={restoringId === revision.id}>
                                                         {restoringId === revision.id ? 'Restoring...' : 'Restore'}
                                                     </Button>
                                                 </DialogFooter>
@@ -152,18 +131,18 @@ export default function Revisions({ post, revisions }: Props) {
                                 <CardContent>
                                     <div className="space-y-2">
                                         <div>
-                                            <span className="text-sm font-medium text-muted-foreground">Title:</span>
+                                            <span className="text-muted-foreground text-sm font-medium">Title:</span>
                                             <p className="font-medium">{revision.title}</p>
                                         </div>
                                         {revision.excerpt && (
                                             <div>
-                                                <span className="text-sm font-medium text-muted-foreground">Excerpt:</span>
+                                                <span className="text-muted-foreground text-sm font-medium">Excerpt:</span>
                                                 <p className="text-sm">{revision.excerpt}</p>
                                             </div>
                                         )}
                                         <div>
-                                            <span className="text-sm font-medium text-muted-foreground">Content Preview:</span>
-                                            <p className="text-sm text-muted-foreground">{revision.content_preview}</p>
+                                            <span className="text-muted-foreground text-sm font-medium">Content Preview:</span>
+                                            <p className="text-muted-foreground text-sm">{revision.content_preview}</p>
                                         </div>
                                     </div>
                                 </CardContent>

@@ -1,6 +1,6 @@
-import Form from './Form';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
+import Form from './Form';
 
 const breadcrumbs = [
     {

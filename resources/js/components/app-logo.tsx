@@ -14,9 +14,7 @@ export default function AppLogo() {
             className={cn(
                 'font-semibold tracking-tight',
                 sidebar ? 'text-sidebar-foreground' : 'text-foreground',
-                isCollapsed
-                    ? 'flex size-full items-center justify-center text-lg leading-none'
-                    : 'truncate text-lg',
+                isCollapsed ? 'flex size-full items-center justify-center text-lg leading-none' : 'truncate text-lg',
             )}
             aria-label={isCollapsed ? 'NebulaCMS' : undefined}
         >
