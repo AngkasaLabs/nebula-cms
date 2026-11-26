@@ -16,6 +16,10 @@ const sidebarNavItems: NavItem[] = [
         href: route('admin.settings.seo'),
     },
     {
+        title: 'Email',
+        href: route('admin.settings.email'),
+    },
+    {
         title: 'Profile',
         href: route('profile.edit'),
     },

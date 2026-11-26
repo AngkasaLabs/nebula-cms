@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { Head, useForm } from '@inertiajs/react';
+import { Calendar } from 'lucide-react';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
@@ -31,13 +32,14 @@ export default function Create() {
         meta_description: '',
         meta_keywords: '',
         status: 'draft',
+        published_at: '',
         order: 0,
     });
 
     const handleSubmit = useCallback(
         (e: React.FormEvent) => {
             e.preventDefault();
-            post(route('pages.store'), {
+            post(route('admin.pages.store'), {
                 onSuccess: () => {
                     toast.success('Halaman berhasil dibuat');
                 },
@@ -96,17 +98,49 @@ export default function Create() {
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="status">Status</Label>
-                                        <Select value={data.status} onValueChange={(value) => setData('status', value)}>
+                                        <Select
+                                            value={data.status}
+                                            onValueChange={(value) =>
+                                                setData({
+                                                    ...data,
+                                                    status: value,
+                                                    published_at: value === 'scheduled' ? data.published_at : '',
+                                                })
+                                            }
+                                        >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Pilih status" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="draft">Draft</SelectItem>
+                                                <SelectItem value="pending_review">Pending review</SelectItem>
                                                 <SelectItem value="published">Published</SelectItem>
+                                                <SelectItem value="scheduled">Scheduled</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         {errors.status && <span className="text-sm text-red-500">{errors.status}</span>}
                                     </div>
+
+                                    {data.status === 'scheduled' && (
+                                        <div className="space-y-2">
+                                            <Label htmlFor="published_at" className="flex items-center gap-2">
+                                                <Calendar className="h-4 w-4" />
+                                                Schedule Date & Time
+                                            </Label>
+                                            <Input
+                                                id="published_at"
+                                                type="datetime-local"
+                                                value={data.published_at}
+                                                onChange={(e) => setData('published_at', e.target.value)}
+                                                min={new Date().toISOString().slice(0, 16)}
+                                                required
+                                            />
+                                            {errors.published_at && <span className="text-sm text-red-500">{errors.published_at}</span>}
+                                            <p className="text-muted-foreground text-xs">
+                                                The page will be published automatically at the scheduled time.
+                                            </p>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-2">
                                         <Label htmlFor="order">Order</Label>

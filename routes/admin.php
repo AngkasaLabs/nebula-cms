@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PluginController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\Settings\ContentSafetyController;
+use App\Http\Controllers\Admin\Settings\MailSettingsController;
 use App\Http\Controllers\Admin\Settings\PasswordController;
 use App\Http\Controllers\Admin\Settings\ProfileController;
 use App\Http\Controllers\Admin\Settings\SettingsController;
@@ -118,6 +119,8 @@ Route::middleware(['auth', 'verified', 'permission:access admin'])->prefix('admi
     ]);
     Route::post('pages/{page}/publish', [PageController::class, 'publish'])->name('admin.pages.publish');
     Route::post('pages/{page}/unpublish', [PageController::class, 'unpublish'])->name('admin.pages.unpublish');
+    Route::get('pages/{page}/revisions', [PageController::class, 'revisions'])->name('admin.pages.revisions');
+    Route::post('pages/{page}/revisions/{revision}/restore', [PageController::class, 'restoreRevision'])->name('admin.pages.revisions.restore');
 
     // Theme Management
     Route::prefix('themes')->group(function () {
@@ -172,6 +175,11 @@ Route::middleware(['auth', 'verified', 'permission:access admin'])->prefix('admi
         Route::get('/general', [SettingsController::class, 'general'])->name('admin.settings.general');
         Route::get('/seo', [SettingsController::class, 'seo'])->name('admin.settings.seo');
         Route::post('/cache/clear', [SettingsController::class, 'clearCache'])->name('admin.settings.clear-cache');
+
+        Route::get('/email', [MailSettingsController::class, 'edit'])->name('admin.settings.email');
+        Route::put('/email', [MailSettingsController::class, 'update'])->name('admin.settings.email.update');
+        Route::post('/email/test', [MailSettingsController::class, 'test'])->name('admin.settings.email.test');
+        Route::delete('/email', [MailSettingsController::class, 'reset'])->name('admin.settings.email.reset');
 
         Route::get('/security', [TwoFactorController::class, 'edit'])->name('admin.settings.security');
         Route::post('/two-factor/start', [TwoFactorController::class, 'start'])->name('admin.settings.two-factor.start');
