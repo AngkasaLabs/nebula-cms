@@ -30,6 +30,10 @@ interface Props {
         title: string;
         slug: string;
         excerpt: string;
+        meta_title?: string | null;
+        meta_description?: string | null;
+        canonical_url?: string | null;
+        robots?: string | null;
         content: string;
         featured_image: string;
         status: 'draft' | 'published' | 'scheduled' | 'pending_review';
@@ -54,6 +58,10 @@ export default function Form({ post, categories, tags, media, preview }: Props) 
     const [values, setValues] = useState({
         title: post?.title || '',
         excerpt: post?.excerpt || '',
+        meta_title: post?.meta_title || '',
+        meta_description: post?.meta_description || '',
+        canonical_url: post?.canonical_url || '',
+        robots: post?.robots || 'index,follow',
         content: post?.content || '',
         featured_image: null as File | null,
         status: (post?.status || 'draft') as 'draft' | 'published' | 'scheduled' | 'pending_review',
@@ -231,6 +239,10 @@ export default function Form({ post, categories, tags, media, preview }: Props) 
 
         formData.append('title', values.title);
         formData.append('excerpt', values.excerpt);
+        formData.append('meta_title', values.meta_title);
+        formData.append('meta_description', values.meta_description);
+        formData.append('canonical_url', values.canonical_url);
+        formData.append('robots', values.robots);
         formData.append('content', values.content);
         formData.append('status', values.status);
         formData.append('category_id', values.category_id);
@@ -346,6 +358,58 @@ export default function Form({ post, categories, tags, media, preview }: Props) 
                                 placeholder="Enter post excerpt"
                                 className="min-h-[100px] placeholder:text-gray-500"
                             />
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 rounded-lg border p-4">
+                        <h2 className="text-lg font-semibold">SEO</h2>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="meta_title">Meta title</Label>
+                            <Input
+                                id="meta_title"
+                                type="text"
+                                value={values.meta_title}
+                                onChange={(e) => setValues({ ...values, meta_title: e.target.value })}
+                                placeholder="Defaults to the post title"
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="meta_description">Meta description</Label>
+                            <Textarea
+                                id="meta_description"
+                                value={values.meta_description}
+                                onChange={(e) => setValues({ ...values, meta_description: e.target.value })}
+                                placeholder="Defaults to the first 160 characters of the content"
+                                className="min-h-[80px]"
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="canonical_url">Canonical URL</Label>
+                            <Input
+                                id="canonical_url"
+                                type="url"
+                                value={values.canonical_url}
+                                onChange={(e) => setValues({ ...values, canonical_url: e.target.value })}
+                                placeholder="https://example.com/original-post"
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="robots">Robots</Label>
+                            <Select value={values.robots} onValueChange={(value) => setValues({ ...values, robots: value })}>
+                                <SelectTrigger id="robots">
+                                    <SelectValue placeholder="Robots" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="index,follow">Index, follow</SelectItem>
+                                    <SelectItem value="noindex,follow">No index, follow</SelectItem>
+                                    <SelectItem value="index,nofollow">Index, no follow</SelectItem>
+                                    <SelectItem value="noindex,nofollow">No index, no follow</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </div>

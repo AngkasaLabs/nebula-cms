@@ -4,6 +4,7 @@ namespace App\Http\Requests\Post;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdatePostRequest extends FormRequest
 {
@@ -26,6 +27,10 @@ class UpdatePostRequest extends FormRequest
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'excerpt' => 'nullable|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:255',
+            'canonical_url' => 'nullable|url|max:255',
+            'robots' => ['nullable', Rule::in(['index,follow', 'noindex,follow', 'index,nofollow', 'noindex,nofollow'])],
             'category_id' => 'required|exists:categories,id',
             'featured_image' => 'nullable|file|image|max:10240',
             'featured_image_id' => 'nullable|exists:media,id',

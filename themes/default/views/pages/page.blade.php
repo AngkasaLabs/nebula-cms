@@ -1,5 +1,10 @@
 @extends('theme::layouts.app')
 
+@section('meta_title', $page->title)
+@section('meta_description', $page->meta_description ?: Str::limit(strip_tags($page->content), 160))
+@section('meta_keywords', $page->meta_keywords ?? '')
+@section('meta_robots', 'index,follow')
+
 @section('content')
     @if(!empty($is_preview))
         <div class="bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-100 text-center py-3 px-4 text-sm">

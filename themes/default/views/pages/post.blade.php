@@ -1,8 +1,15 @@
 @extends('theme::layouts.app')
 
-@section('title', $post->title)
-@section('meta_description', Str::limit(strip_tags($post->content), 160))
+@section('meta_title', $post->meta_title ?: $post->title)
+@section('meta_description', $post->meta_description ?: Str::limit(strip_tags($post->content), 160))
 @section('meta_keywords', $post->tags->pluck('name')->join(', '))
+@section('meta_robots', $post->robots ?: 'index,follow')
+@if (! empty($post->canonical_url))
+    @section('canonical', $post->canonical_url)
+@endif
+@if (! empty($post->featured_image_url))
+    @section('og_image', $post->featured_image_url)
+@endif
 
 @section('content')
     @if(!empty($is_preview))
@@ -37,9 +44,9 @@
                 </header>
 
                 <!-- Featured Image -->
-                @if ($post->featured_image)
+                @if ($post->featured_image_url)
                     <figure class="figure mb-4">
-                        <img src="{{ asset('storage/' . $post->featured_image) }}" class="figure-img img-fluid rounded"
+                        <img src="{{ $post->featured_image_url }}" class="figure-img img-fluid rounded"
                             alt="{{ $post->title }}">
                     </figure>
                 @endif
@@ -71,8 +78,8 @@
                             @foreach ($relatedPosts as $relatedPost)
                                 <div class="col-md-4">
                                     <div class="card h-100">
-                                        @if ($relatedPost->featured_image)
-                                            <img src="{{ asset('storage/' . $relatedPost->featured_image) }}" class="card-img-top"
+                                        @if ($relatedPost->featured_image_url)
+                                            <img src="{{ $relatedPost->featured_image_url }}" class="card-img-top"
                                                 alt="{{ $relatedPost->title }}">
                                         @endif
 
