@@ -18,12 +18,21 @@ type TwoFactorSetup = {
     secret: string;
 };
 
+type ContentSafetyReport = {
+    scanned: number;
+    affected: number;
+    samples: { type: string; label: string; id: number; title: string | null }[];
+    truncated: boolean;
+};
+
 interface Props {
     twoFactorEnabled: boolean;
     awaitingConfirmation: boolean;
     recoveryCodesRemaining: number;
     twoFactorSetup: TwoFactorSetup | null;
     recoveryCodesFlash: string[] | null;
+    contentSafetyReport?: ContentSafetyReport | null;
+    contentSafetyApplied?: boolean;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -33,7 +42,15 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Security({ twoFactorEnabled, awaitingConfirmation, recoveryCodesRemaining, twoFactorSetup, recoveryCodesFlash }: Props) {
+export default function Security({
+    twoFactorEnabled,
+    awaitingConfirmation,
+    recoveryCodesRemaining,
+    twoFactorSetup,
+    recoveryCodesFlash,
+    contentSafetyReport,
+    contentSafetyApplied,
+}: Props) {
     const confirmForm = useForm({ code: '' });
     const disableForm = useForm({ password: '' });
     const recoveryForm = useForm({ password: '' });
@@ -201,6 +218,74 @@ export default function Security({ twoFactorEnabled, awaitingConfirmation, recov
                             )}
                         </div>
                     )}
+
+                    <div className="space-y-4">
+                        <HeadingSmall
+                            title="Content HTML safety"
+                            description="Stored post and page HTML can be reviewed and cleaned. Public pages are sanitised on render, so unsafe markup never executes while you review."
+                        />
+
+                        {contentSafetyApplied && (
+                            <Alert className="border-green-600/40 bg-green-50 text-green-900 dark:border-green-500/40 dark:bg-green-950/40 dark:text-green-100">
+                                <Shield className="h-4 w-4" />
+                                <AlertTitle>Content cleaned</AlertTitle>
+                                <AlertDescription>Sanitised content has been written back to the database.</AlertDescription>
+                            </Alert>
+                        )}
+
+                        <div className="space-y-3 rounded-lg border p-4">
+                            <p className="text-muted-foreground text-sm">
+                                Unsafe markup can come from older releases or from users who previously had HTML access. Scan to see how many
+                                items would change, then clean them in one click.
+                            </p>
+
+                            <div className="flex flex-wrap gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => router.post(route('admin.settings.content.scan'), {}, { preserveScroll: true })}
+                                >
+                                    Scan content
+                                </Button>
+
+                                {contentSafetyReport && contentSafetyReport.affected > 0 && (
+                                    <Button
+                                        type="button"
+                                        onClick={() => router.post(route('admin.settings.content.apply'), {}, { preserveScroll: true })}
+                                    >
+                                        Sanitise {contentSafetyReport.affected} item(s)
+                                    </Button>
+                                )}
+                            </div>
+
+                            {contentSafetyReport && (
+                                <div className="text-muted-foreground space-y-2 text-sm">
+                                    <p>
+                                        Scanned {contentSafetyReport.scanned} item(s).{' '}
+                                        {contentSafetyReport.affected === 0
+                                            ? 'No unsafe markup found.'
+                                            : `${contentSafetyReport.affected} item(s) need cleaning.`}
+                                    </p>
+
+                                    {contentSafetyReport.samples.length > 0 && (
+                                        <ul className="list-disc pl-5">
+                                            {contentSafetyReport.samples.map((sample) => (
+                                                <li key={`${sample.type}-${sample.id}`}>
+                                                    {sample.label} #{sample.id}: {sample.title}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+
+                                    {contentSafetyReport.truncated && (
+                                        <p className="text-amber-600 dark:text-amber-400">
+                                            Only the first batch was checked. Run the scan again to continue.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </SettingsLayout>
         </AppLayout>

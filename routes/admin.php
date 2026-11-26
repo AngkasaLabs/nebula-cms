@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PluginController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\Settings\ContentSafetyController;
 use App\Http\Controllers\Admin\Settings\PasswordController;
 use App\Http\Controllers\Admin\Settings\ProfileController;
 use App\Http\Controllers\Admin\Settings\SettingsController;
@@ -177,6 +178,9 @@ Route::middleware(['auth', 'verified', 'permission:access admin'])->prefix('admi
         Route::delete('/two-factor', [TwoFactorController::class, 'destroy'])->name('admin.settings.two-factor.destroy');
         Route::post('/two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('admin.settings.two-factor.recovery');
         Route::post('/two-factor/cancel', [TwoFactorController::class, 'cancelSetup'])->name('admin.settings.two-factor.cancel');
+
+        Route::post('/security/content/scan', [ContentSafetyController::class, 'scan'])->name('admin.settings.content.scan');
+        Route::post('/security/content/apply', [ContentSafetyController::class, 'apply'])->name('admin.settings.content.apply');
 
         // Route::redirect('settings', 'admin/settings/profile');
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
