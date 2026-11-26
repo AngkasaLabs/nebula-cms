@@ -9,7 +9,9 @@
  *
  * Usage:
  *   php tools/nebula-pack.php keygen <key-id>
- *   php tools/nebula-pack.php pack <path-to-package> [--key=PATH] [--out=DIR]
+ *   php tools/nebula-pack.php pack <path-to-package> [--key=PATH] [--key-id=ID] [--out=DIR]
+ *   php tools/nebula-pack.php sign-file <archive.zip> --version=X.Y.Z [--type=core] [--slug=SLUG]
+ *                                        [--key=PATH] [--key-id=ID] [--out=DIR]
  *   php tools/nebula-pack.php verify <package.zip> <package.sig.json> --public-key=BASE64
  */
 const SIGNED_FIELDS = ['slug', 'type', 'version', 'sha256', 'size', 'requires', 'key_id'];
@@ -112,6 +114,40 @@ function commandKeygen(array $argv): void
     fwrite(STDOUT, "NEBULA_PACKAGE_SIGNING_KEY_ID={$keyId}\n");
 }
 
+function resolveKeyPath(array $options): string
+{
+    if (isset($options['key']) && is_string($options['key'])) {
+        return $options['key'];
+    }
+
+    if (isset($options['key-id']) && is_string($options['key-id'])) {
+        return defaultKeyDir().'/'.$options['key-id'].'.key';
+    }
+
+    $availableKeys = glob(defaultKeyDir().'/*.key') ?: [];
+
+    if (count($availableKeys) !== 1) {
+        fail('multiple signing keys found; pass --key=PATH or --key-id=ID');
+    }
+
+    return $availableKeys[0];
+}
+
+function readSecretKey(string $path): string
+{
+    if (! is_file($path)) {
+        fail("private key not found: {$path} (run keygen first)");
+    }
+
+    $secret = base64_decode(trim((string) file_get_contents($path)), true);
+
+    if ($secret === false || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
+        fail('invalid private key file');
+    }
+
+    return $secret;
+}
+
 function commandPack(array $argv): void
 {
     $input = $argv[2] ?? null;
@@ -136,30 +172,9 @@ function commandPack(array $argv): void
         fail("{$manifestName} must contain name, slug and version");
     }
 
-    if (isset($options['key']) && is_string($options['key'])) {
-        $keyPath = $options['key'];
-    } elseif (isset($options['key-id']) && is_string($options['key-id'])) {
-        $keyPath = defaultKeyDir().'/'.$options['key-id'].'.key';
-    } else {
-        $availableKeys = glob(defaultKeyDir().'/*.key') ?: [];
-
-        if (count($availableKeys) !== 1) {
-            fail('multiple signing keys found; pass --key=PATH or --key-id=ID');
-        }
-
-        $keyPath = $availableKeys[0];
-    }
-
-    if (! is_file($keyPath)) {
-        fail("private key not found: {$keyPath} (run keygen first)");
-    }
-
+    $keyPath = resolveKeyPath($options);
     $keyId = basename($keyPath, '.key');
-    $secret = base64_decode(trim((string) file_get_contents($keyPath)), true);
-
-    if ($secret === false || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
-        fail('invalid private key file');
-    }
+    $secret = readSecretKey($keyPath);
 
     $outDir = $options['out'] ?? getcwd().'/dist';
 
@@ -232,6 +247,76 @@ function commandPack(array $argv): void
     fwrite(STDOUT, "Key:      {$keyId}\n");
 }
 
+function commandSignFile(array $argv): void
+{
+    $archive = $argv[2] ?? null;
+
+    if (! is_string($archive) || ! is_file($archive)) {
+        fail('usage: sign-file <archive.zip> --version=X.Y.Z [--type=core] [--slug=SLUG] [--key=PATH] [--key-id=ID] [--out=DIR]');
+    }
+
+    $options = parseOptions($argv, 3);
+
+    $type = $options['type'] ?? 'core';
+
+    if (! is_string($type) || ! in_array($type, ['core', 'plugin', 'theme'], true)) {
+        fail('--type must be one of: core, plugin, theme');
+    }
+
+    $slug = $options['slug'] ?? ($type === 'core' ? 'nebula-cms' : null);
+
+    if (! is_string($slug) || ! preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]*$/', $slug)) {
+        fail('pass --slug for non-core archives (letters, numbers, dot, dash, underscore)');
+    }
+
+    $version = $options['version'] ?? null;
+
+    if (! is_string($version) || ! preg_match('/^\d+\.\d+\.\d+([.-][0-9A-Za-z.-]+)?$/', $version)) {
+        fail('pass --version=X.Y.Z for the archive being signed');
+    }
+
+    $keyPath = resolveKeyPath($options);
+    $keyId = basename($keyPath, '.key');
+    $secret = readSecretKey($keyPath);
+
+    $sha256 = hash_file('sha256', $archive);
+    $size = filesize($archive);
+
+    if (! is_string($sha256) || $size === false) {
+        fail("cannot read archive: {$archive}");
+    }
+
+    $manifest = [
+        'slug' => $slug,
+        'type' => $type,
+        'version' => $version,
+        'sha256' => $sha256,
+        'size' => $size,
+        'key_id' => $keyId,
+    ];
+
+    $signature = sodium_crypto_sign_detached(canonicalJson(payload($manifest)), $secret);
+
+    $manifest['signature'] = base64_encode($signature);
+    $manifest['name'] = $type === 'core' ? 'NebulaCMS' : $slug;
+    $manifest['signed_at'] = gmdate('c');
+
+    $outDir = $options['out'] ?? dirname($archive);
+
+    if (! is_dir($outDir) && ! mkdir($outDir, 0755, true) && ! is_dir($outDir)) {
+        fail("cannot create output directory: {$outDir}");
+    }
+
+    $sigPath = rtrim($outDir, '/').'/'.basename($archive).'.sig.json';
+
+    file_put_contents($sigPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
+
+    fwrite(STDOUT, "Manifest: {$sigPath}\n");
+    fwrite(STDOUT, "SHA-256:  {$sha256}\n");
+    fwrite(STDOUT, "Size:     {$size} bytes\n");
+    fwrite(STDOUT, "Key:      {$keyId}\n");
+}
+
 function commandVerify(array $argv): void
 {
     $zipPath = $argv[2] ?? null;
@@ -289,6 +374,7 @@ $command = $argv[1] ?? null;
 match ($command) {
     'keygen' => commandKeygen($argv),
     'pack' => commandPack($argv),
+    'sign-file' => commandSignFile($argv),
     'verify' => commandVerify($argv),
-    default => fail('usage: nebula-pack <keygen|pack|verify> ...'),
+    default => fail('usage: nebula-pack <keygen|pack|sign-file|verify> ...'),
 };
