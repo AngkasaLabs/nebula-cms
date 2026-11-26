@@ -19,15 +19,15 @@ NebulaCMS is a modern and open-source Content Management System (CMS) built with
 - 🚀 **Modern Stack** - Laravel 12 + React + TypeScript
 - 🎨 **Elegant UI/UX** - With Radix UI, Shadcn UI, and TailwindCSS
 - 📱 **Fully Responsive** - Perfect display on all devices
-- 🔒 **Secure by Default** - Best security practices
-- 🌐 **SEO Friendly** - Built-in search engine optimization
+- 🔒 **Secure by Default** - Signed packages and core updates (Ed25519), server-side HTML sanitisation, security headers and a report-only CSP
+- 🌐 **SEO Friendly** - Per-post meta title, description, canonical URL, robots and Open Graph tags, plus a generated sitemap
 - 🔌 **Extensible** - Modular plugin and theme system
 
 ## 🎯 Main Features
 
 - 📝 **Content Management**
   - Post and Page Management with draft/publish system
-  - WYSIWYG Editor with TinyMCE and TipTap
+  - WYSIWYG editor (TipTap) with media, tables, links and autosave
   - Categories and Tags for content organization
   - Media Manager for file and image management
 
@@ -45,7 +45,7 @@ NebulaCMS is a modern and open-source Content Management System (CMS) built with
   - Email verification
   - Permission management
 
-[See all features in the documentation](https://nebula.angkasalabs.com/docs/features)
+[See the documentation](https://nebula.angkasalabs.com/docs/overview)
 
 ## 🛠️ Tech Stack
 
@@ -61,7 +61,7 @@ NebulaCMS is a modern and open-source Content Management System (CMS) built with
   - Shadcn UI Components
   - Radix UI Components
 
-[Complete tech stack details](https://nebula.angkasalabs.com/docs/tech-stack)
+[Documentation overview](https://nebula.angkasalabs.com/docs/overview)
 
 ## 🚀 Quick Start
 
