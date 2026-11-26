@@ -69,6 +69,14 @@ class UserController extends Controller
         $user = User::create($data);
         $user->syncRoles($request->roles);
 
+        if (function_exists('activity') && auth()->check()) {
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($user)
+                ->withProperties(['roles' => array_values((array) $request->roles)])
+                ->log('user_created');
+        }
+
         return redirect()->route('admin.users.index')
             ->with('message', 'User created successfully');
     }
@@ -122,6 +130,16 @@ class UserController extends Controller
         $user->update($data);
         $user->syncRoles($request->roles);
 
+        if (function_exists('activity') && auth()->check()) {
+            $changes = array_values(array_diff(array_keys($user->getChanges()), ['password', 'remember_token']));
+
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($user)
+                ->withProperties(['changes' => $changes, 'roles' => array_values((array) $request->roles)])
+                ->log('user_updated');
+        }
+
         return redirect()->route('admin.users.index')
             ->with('message', 'User updated successfully');
     }
@@ -139,7 +157,16 @@ class UserController extends Controller
             Storage::disk('public')->delete($user->avatar);
         }
 
+        $deleted = ['id' => $user->id, 'name' => $user->name, 'email' => $user->email];
+
         $user->delete();
+
+        if (function_exists('activity') && auth()->check()) {
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties($deleted)
+                ->log('user_deleted');
+        }
 
         return redirect()->route('admin.users.index')
             ->with('message', 'User deleted successfully');
