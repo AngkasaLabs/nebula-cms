@@ -8,11 +8,48 @@ use App\Models\Post;
 use App\Models\Tag;
 use App\Services\TemplateHierarchy;
 use App\Support\ContentSearch;
+use App\Support\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
 class FrontendController extends Controller
 {
+    /**
+     * Sanitise stored content before it is rendered publicly.
+     *
+     * New and edited content is sanitised on save; this safety net also covers
+     * rows written before that policy existed, without requiring an artisan run.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function sanitizeContentIn(array $data): array
+    {
+        $sanitizer = app(HtmlSanitizer::class);
+
+        $sanitize = function ($model) use ($sanitizer): void {
+            if (($model instanceof Post || $model instanceof Page) && is_string($model->content) && $model->content !== '') {
+                $model->setAttribute('content', $sanitizer->sanitize($model->content));
+            }
+        };
+
+        foreach (['post', 'page'] as $key) {
+            if (isset($data[$key])) {
+                $sanitize($data[$key]);
+            }
+        }
+
+        foreach (['posts', 'relatedPosts', 'recentPosts'] as $key) {
+            if (isset($data[$key]) && is_iterable($data[$key])) {
+                foreach ($data[$key] as $model) {
+                    $sanitize($model);
+                }
+            }
+        }
+
+        return $data;
+    }
+
     /**
      * Displaying home page
      * Using template hierarchy to find the appropriate template
@@ -47,6 +84,7 @@ class FrontendController extends Controller
 
         // Apply filter for data
         $data = apply_filters('home_page_data', $data);
+        $data = $this->sanitizeContentIn($data);
 
         // Find appropriate template based on hierarchy
         $templates = TemplateHierarchy::getHomeTemplates();
@@ -117,6 +155,7 @@ class FrontendController extends Controller
 
         // Apply filter for data
         $data = apply_filters('blog_page_data', $data, $request);
+        $data = $this->sanitizeContentIn($data);
 
         // Determine template to be used based on request parameter
         $templates = [];
@@ -229,6 +268,7 @@ class FrontendController extends Controller
 
         // Apply filter for data
         $data = apply_filters('single_post_data', $data);
+        $data = $this->sanitizeContentIn($data);
 
         // Find appropriate template based on hierarchy
         $templates = TemplateHierarchy::getSingleTemplates($slug);
@@ -268,6 +308,7 @@ class FrontendController extends Controller
 
         // Apply filter for data
         $data = apply_filters('page_data', $data);
+        $data = $this->sanitizeContentIn($data);
 
         // Check if page has custom template
         $customTemplate = $page->template ?? null;
@@ -322,6 +363,7 @@ class FrontendController extends Controller
 
         // Apply filter for static page data
         $data = apply_filters('static_page_data', $data, $page);
+        $data = $this->sanitizeContentIn($data);
 
         // Define template hierarchy for static pages (without generic fallbacks)
         // Only look for specific page templates, not generic ones
@@ -418,6 +460,7 @@ class FrontendController extends Controller
         ];
 
         $data = apply_filters('single_post_data', $data);
+        $data = $this->sanitizeContentIn($data);
 
         $templates = TemplateHierarchy::getSingleTemplates($postModel->slug);
         $template = TemplateHierarchy::locateTemplate($templates, app('theme'));
@@ -445,6 +488,7 @@ class FrontendController extends Controller
         ];
 
         $data = apply_filters('page_data', $data);
+        $data = $this->sanitizeContentIn($data);
 
         $customTemplate = $pageModel->template ?? null;
 
