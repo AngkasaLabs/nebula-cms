@@ -1,7 +1,7 @@
-import FlashMessages from '@/components/flash-messages';
 import InputError from '@/components/input-error';
 import { ThemeCard } from '@/components/theme-card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,17 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, router, usePage } from '@inertiajs/react';
 import { FileText, Palette, Plus, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
+
+interface SettingsField {
+    key: string;
+    label?: string;
+    type?: string;
+    default?: unknown;
+}
+
+interface SettingsSchema {
+    fields: SettingsField[];
+}
 
 interface Theme {
     id: number;
@@ -21,6 +32,8 @@ interface Theme {
     preview: string | null;
     preview_url: string | null;
     has_preview: boolean;
+    settings: Record<string, unknown> | null;
+    settings_schema: SettingsSchema | null;
 }
 
 interface Props {
@@ -46,6 +59,8 @@ export default function Index({ themes, uploadSecurity }: Props) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [signatureFile, setSignatureFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [settingsTheme, setSettingsTheme] = useState<Theme | null>(null);
+    const [settingsForm, setSettingsForm] = useState<Record<string, unknown>>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
     const signatureInputRef = useRef<HTMLInputElement>(null);
     const signatureEmptyInputRef = useRef<HTMLInputElement>(null);
@@ -64,6 +79,35 @@ export default function Index({ themes, uploadSecurity }: Props) {
         if (e.target.files && e.target.files[0]) {
             setSignatureFile(e.target.files[0]);
         }
+    };
+
+    const openSettings = (theme: Theme) => {
+        setSettingsTheme(theme);
+
+        const initial: Record<string, unknown> = {};
+        for (const field of theme.settings_schema?.fields ?? []) {
+            if (!field.key) continue;
+
+            const value = theme.settings?.[field.key];
+            if (value !== undefined && value !== null) {
+                initial[field.key] = value;
+            } else if (field.default !== undefined) {
+                initial[field.key] = field.default;
+            } else {
+                initial[field.key] = field.type === 'boolean' || field.type === 'bool' ? false : '';
+            }
+        }
+
+        setSettingsForm(initial);
+    };
+
+    const handleSaveSettings = () => {
+        if (!settingsTheme) return;
+
+        router.patch(route('admin.themes.settings.update', settingsTheme.id), settingsForm as Record<string, string | number | boolean>, {
+            preserveScroll: true,
+            onSuccess: () => setSettingsTheme(null),
+        });
     };
 
     const handleUpload = () => {
@@ -100,8 +144,6 @@ export default function Index({ themes, uploadSecurity }: Props) {
             <Head title="Themes" />
 
             <div className="p-6">
-                <FlashMessages className="mb-6" />
-
                 {/* Header Section */}
                 <div className="mb-8">
                     <div className="mb-2 flex items-center justify-between">
@@ -268,12 +310,77 @@ export default function Index({ themes, uploadSecurity }: Props) {
                     ) : (
                         <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
                             {themes.map((theme) => (
-                                <ThemeCard key={theme.id} theme={theme} />
+                                <ThemeCard
+                                    key={theme.id}
+                                    theme={theme}
+                                    onSettings={theme.settings_schema?.fields?.length ? () => openSettings(theme) : undefined}
+                                />
                             ))}
                         </div>
                     )}
                 </div>
             </div>
+            <Dialog open={settingsTheme !== null} onOpenChange={(open) => !open && setSettingsTheme(null)}>
+                <DialogContent className="sm:max-w-md">
+                    {settingsTheme && settingsTheme.settings_schema?.fields?.length ? (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>{settingsTheme.name} settings</DialogTitle>
+                                <DialogDescription>Values are stored as JSON on the theme record.</DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-2">
+                                {(settingsTheme.settings_schema?.fields ?? []).map((field) => {
+                                    const type = field.type ?? 'text';
+
+                                    if (type === 'boolean' || type === 'bool') {
+                                        return (
+                                            <div key={field.key} className="flex items-center gap-2">
+                                                <Checkbox
+                                                    id={`tf-${settingsTheme.id}-${field.key}`}
+                                                    checked={Boolean(settingsForm[field.key])}
+                                                    onCheckedChange={(checked) =>
+                                                        setSettingsForm((current) => ({ ...current, [field.key]: checked === true }))
+                                                    }
+                                                />
+                                                <Label htmlFor={`tf-${settingsTheme.id}-${field.key}`}>{field.label ?? field.key}</Label>
+                                            </div>
+                                        );
+                                    }
+
+                                    return (
+                                        <div key={field.key} className="grid gap-2">
+                                            <Label htmlFor={`tf-${settingsTheme.id}-${field.key}`}>{field.label ?? field.key}</Label>
+                                            <Input
+                                                id={`tf-${settingsTheme.id}-${field.key}`}
+                                                type={type === 'number' || type === 'integer' || type === 'int' ? 'number' : 'text'}
+                                                value={String(settingsForm[field.key] ?? '')}
+                                                onChange={(event) => {
+                                                    const value = event.target.value;
+                                                    setSettingsForm((current) => ({
+                                                        ...current,
+                                                        [field.key]:
+                                                            type === 'number' || type === 'integer' || type === 'int'
+                                                                ? value === ''
+                                                                    ? ''
+                                                                    : Number(value)
+                                                                : value,
+                                                    }));
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setSettingsTheme(null)}>
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleSaveSettings}>Save</Button>
+                            </DialogFooter>
+                        </>
+                    ) : null}
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

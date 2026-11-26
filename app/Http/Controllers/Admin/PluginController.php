@@ -16,6 +16,7 @@ use App\Services\PluginRequirementChecker;
 use App\Support\InertiaUploadSecurity;
 use App\Support\PackageUploadSignature;
 use App\Support\PluginHooks;
+use App\Support\SettingsInput;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
@@ -142,7 +143,9 @@ class PluginController extends Controller
             return redirect()->back()->with('error', 'Invalid settings schema: no field keys.');
         }
 
-        $validated = $request->validate($rules);
+        $request->validate($rules);
+
+        $validated = SettingsInput::extract($request->all(), array_keys($rules));
 
         // Merge nested settings using dot notation
         $merged = $plugin->settings ?? [];
