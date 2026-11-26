@@ -5,6 +5,12 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property-read string|null $meta_title
+ * @property-read string|null $meta_description
+ * @property-read string|null $canonical_url
+ * @property-read string|null $robots
+ */
 class PostResource extends JsonResource
 {
     /**
@@ -17,6 +23,12 @@ class PostResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'excerpt' => $this->excerpt,
+            'seo' => [
+                'meta_title' => $this->meta_title,
+                'meta_description' => $this->meta_description,
+                'canonical_url' => $this->canonical_url,
+                'robots' => $this->robots,
+            ],
             'content' => $this->when($request->boolean('include_content'), $this->content),
             'status' => $this->status,
             'published_at' => $this->published_at?->toIso8601String(),
