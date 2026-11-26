@@ -163,7 +163,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Verify Database Connection
-        run: php artisan migrate:status --no-interaction
+        run: php artisan tinker --execute="DB::select('select 1'); echo 'database ok';"
 
       - name: Run Migrations
         run: php artisan migrate --force
