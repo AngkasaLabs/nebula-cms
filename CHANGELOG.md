@@ -13,11 +13,19 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   page instead of being invisible.
 - Theme settings dialog on **Admin → Themes**, driven by `settings_schema.fields` in
   `theme.json`.
+- **Post SEO fields:** meta title, meta description, canonical URL and robots, editable from
+  the post form, rendered by the bundled theme (including Open Graph) and exposed through
+  the public API under `seo`.
+- **Audit coverage:** settings updates, user create/update/delete, role
+  create/update/delete and media upload/delete are written to the activity log.
 
 ### Fixed
 
 - Dotted settings keys (`colors.primary`, `layout.container_width`) are now persisted for
   plugins and themes; Laravel's `validated()` dropped flat dotted keys before.
+- The bundled theme renders post featured images through `featured_image_url`, which
+  previously resolved to null.
+- README no longer claims TinyMCE support or links to documentation pages that do not exist.
 
 ## [1.13.0] - 2026-11-26
 
