@@ -16,10 +16,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and tags must match `config/nebula.php`.
 - Release tags create a **draft** release. The archive is signed offline with
   `nebula-pack sign-file` before publishing.
+- The update check reports the signature asset URL, and the admin updater and `cms:update`
+  pass it through so verification happens before the backup/extract step.
 - `CHANGELOG.md`.
 - `NEBULA_CONTENT_SEARCH_FULLTEXT=false` forces the LIKE search fallback on hosts that
   cannot create full-text indexes.
 - MySQL-only integration suite (`tests/Integration`) for full-text search.
+- **Signed core releases:** `nebula-pack sign-file` signs a CI-built archive and
+  `UpdateService` verifies it (Ed25519 + SHA-256 + size) before extracting anything.
+  Releases from 1.13.0 onwards must be signed; older releases stay installable unsigned
+  so pre-signing installs can update once.
 
 ### Changed
 
