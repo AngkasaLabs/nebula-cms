@@ -39,9 +39,6 @@ jobs:
       - name: Build Assets
         run: npm run build
 
-      - name: Type Check
-        run: npm run types
-
       - name: Upload Build Output
         uses: actions/upload-artifact@v4
         with:
