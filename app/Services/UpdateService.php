@@ -689,9 +689,8 @@ class UpdateService
         }
 
         try {
-            \Artisan::call('cache:clear');
-            \Artisan::call('view:clear');
-            \Artisan::call('config:clear');
+            // Clears config, route, view, event and application caches.
+            \Artisan::call('optimize:clear');
         } catch (\Exception $e) {
             Log::warning('Post-update cache clear failed: '.$e->getMessage());
         }
