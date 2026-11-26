@@ -75,13 +75,17 @@ test('apply succeeds when session matches and uses stubbed update service', func
 
     $stub = new class extends UpdateService
     {
+        public ?array $received = null;
+
         public function createBackup(): string
         {
             return storage_path('app/backups/stub-backup.zip');
         }
 
-        public function applyUpdate(string $downloadUrl): array
+        public function applyUpdate(string $downloadUrl, ?string $signatureUrl = null, ?string $expectedVersion = null): array
         {
+            $this->received = [$downloadUrl, $signatureUrl, $expectedVersion];
+
             return [
                 'success' => true,
                 'message' => 'Update applied successfully.',
@@ -98,6 +102,7 @@ test('apply succeeds when session matches and uses stubbed update service', func
     session([
         'pending_update' => [
             'download_url' => 'https://github.com/example/release.zip',
+            'signature_url' => 'https://github.com/example/release.zip.sig.json',
             'latest' => '1.1.0',
             'checked_at' => now()->timestamp,
         ],
@@ -109,6 +114,12 @@ test('apply succeeds when session matches and uses stubbed update service', func
         ])
         ->assertSessionHas('success')
         ->assertSessionMissing('pending_update');
+
+    expect($stub->received)->toBe([
+        'https://github.com/example/release.zip',
+        'https://github.com/example/release.zip.sig.json',
+        '1.1.0',
+    ]);
 
     expect(Cache::get(UpdateService::CACHE_KEY))->toBeNull();
 });

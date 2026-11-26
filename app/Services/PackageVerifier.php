@@ -37,7 +37,19 @@ class PackageVerifier
     public function verifyManifest(array $manifest, string $signatureBase64, ?string $keyId = null): void
     {
         $this->assertManifestComplete($manifest);
+        $this->verifySignedManifest($manifest, $signatureBase64, $keyId);
+    }
 
+    /**
+     * Verifies the Ed25519 signature over the signed manifest fields.
+     *
+     * Unlike {@see verifyManifest()} this does not enforce the plugin/theme
+     * package schema, so core releases can reuse the same trust anchor.
+     *
+     * @param  array<string, mixed>  $manifest
+     */
+    public function verifySignedManifest(array $manifest, string $signatureBase64, ?string $keyId = null): void
+    {
         $publicKey = $this->resolvePublicKey($keyId ?? ($manifest['key_id'] ?? null));
         $signature = $this->decodeBase64($signatureBase64, 'signature');
 
