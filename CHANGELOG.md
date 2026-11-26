@@ -20,6 +20,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `nebula-pack sign-file` before publishing.
 - The update check reports the signature asset URL, and the admin updater and `cms:update`
   pass it through so verification happens before the backup/extract step.
+- Post-update tasks now run `optimize:clear` so route/event caches cannot survive an
+  update, and release archives no longer ship CI-generated `bootstrap/cache/*.php`.
 - `CHANGELOG.md`.
 - `NEBULA_CONTENT_SEARCH_FULLTEXT=false` forces the LIKE search fallback on hosts that
   cannot create full-text indexes.
@@ -28,6 +30,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `UpdateService` verifies it (Ed25519 + SHA-256 + size) before extracting anything.
   Releases from 1.13.0 onwards must be signed; older releases stay installable unsigned
   so pre-signing installs can update once.
+- **Security headers and report-only CSP** on every web response, with a per-request
+  nonce and a throttled `/csp-report` endpoint (`SECURITY_*` env switches).
+- **Server-side HTML sanitisation** for users without the `unfiltered_html` permission
+  (Admin and Super Admin by default), covering posts, pages, autosave, and revision
+  restores. `php artisan content:sanitize` audits existing content (`--apply` writes).
 
 ### Changed
 
