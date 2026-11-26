@@ -7,6 +7,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.12.1] - 2026-11-26
+
 ### Added
 
 - CI matrix across PHP 8.3 and 8.4 on SQLite, plus a MySQL 8.4 job so database-specific
