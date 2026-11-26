@@ -235,8 +235,8 @@ export default function Security({
 
                         <div className="space-y-3 rounded-lg border p-4">
                             <p className="text-muted-foreground text-sm">
-                                Unsafe markup can come from older releases or from users who previously had HTML access. Scan to see how many
-                                items would change, then clean them in one click.
+                                Unsafe markup can come from older releases or from users who previously had HTML access. Scan to see how many items
+                                would change, then clean them in one click.
                             </p>
 
                             <div className="flex flex-wrap gap-2">
