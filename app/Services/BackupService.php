@@ -272,6 +272,10 @@ class BackupService
 
             Artisan::call('optimize:clear');
 
+            if (function_exists('opcache_reset')) {
+                @opcache_reset();
+            }
+
             try {
                 Artisan::call('migrate', ['--force' => true]);
             } catch (\Throwable $e) {
