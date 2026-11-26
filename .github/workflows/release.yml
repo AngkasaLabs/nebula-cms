@@ -69,6 +69,7 @@ jobs:
             -x "storage/logs/*" \
             -x "storage/framework/cache/data/*" \
             -x "storage/app/public/*" \
+            -x "bootstrap/cache/*.php" \
             -x "phpunit.xml" \
             -x "phpunit.integration.xml" \
             -x "phpstan.neon" \
