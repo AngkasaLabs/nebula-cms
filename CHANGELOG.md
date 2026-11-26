@@ -7,6 +7,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-11-26
+
 ### Added
 
 - Global toast feedback: shared flash success/error messages now appear on every admin
