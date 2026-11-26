@@ -9,7 +9,8 @@ export interface Page {
     featured_image: string | null;
     meta_description: string | null;
     meta_keywords: string | null;
-    status: 'draft' | 'published' | 'pending_review';
+    status: 'draft' | 'published' | 'scheduled' | 'pending_review';
+    published_at: string | null;
     order: number;
     user: {
         id: number;

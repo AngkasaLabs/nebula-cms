@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Page;
 use App\Models\Post;
 use Illuminate\Console\Command;
 
@@ -19,7 +20,7 @@ class PublishScheduledPosts extends Command
      *
      * @var string
      */
-    protected $description = 'Publish scheduled posts that are due';
+    protected $description = 'Publish scheduled posts and pages that are due';
 
     /**
      * Execute the console command.
@@ -30,8 +31,12 @@ class PublishScheduledPosts extends Command
             ->where('published_at', '<=', now())
             ->get();
 
-        if ($posts->isEmpty()) {
-            $this->info('No scheduled posts to publish.');
+        $pages = Page::where('status', 'scheduled')
+            ->where('published_at', '<=', now())
+            ->get();
+
+        if ($posts->isEmpty() && $pages->isEmpty()) {
+            $this->info('No scheduled content to publish.');
 
             return 0;
         }
@@ -39,11 +44,17 @@ class PublishScheduledPosts extends Command
         $count = 0;
         foreach ($posts as $post) {
             $post->update(['status' => 'published']);
-            $this->line("Published: {$post->title}");
+            $this->line("Published post: {$post->title}");
             $count++;
         }
 
-        $this->info("Published {$count} scheduled post(s).");
+        foreach ($pages as $page) {
+            $page->update(['status' => 'published']);
+            $this->line("Published page: {$page->title}");
+            $count++;
+        }
+
+        $this->info("Published {$count} scheduled item(s).");
 
         return 0;
     }

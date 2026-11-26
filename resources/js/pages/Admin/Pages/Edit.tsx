@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { Page, type SharedData } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { Eye, Link2 } from 'lucide-react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Calendar, Eye, History, Link2 } from 'lucide-react';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
@@ -25,8 +25,25 @@ interface FormData extends Record<string, string | number | null> {
     content: string;
     meta_description: string;
     meta_keywords: string;
-    status: 'draft' | 'published' | 'pending_review';
+    status: 'draft' | 'published' | 'scheduled' | 'pending_review';
+    published_at: string;
     order: number;
+}
+
+function toLocalInput(value: string | null | undefined): string {
+    if (!value) {
+        return '';
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return '';
+    }
+
+    const pad = (part: number) => String(part).padStart(2, '0');
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 const breadcrumbs = [
@@ -52,13 +69,14 @@ export default function Edit({ page, preview }: Props) {
         meta_description: page.meta_description || '',
         meta_keywords: page.meta_keywords || '',
         status: page.status,
+        published_at: page.status === 'scheduled' ? toLocalInput(page.published_at) : '',
         order: page.order,
     });
 
     const handleSubmit = useCallback(
         (e: React.FormEvent) => {
             e.preventDefault();
-            put(route('pages.update', page.id), {
+            put(route('admin.pages.update', page.id), {
                 onSuccess: () => {
                     toast.success('Halaman berhasil diperbarui');
                 },
@@ -106,6 +124,12 @@ export default function Edit({ page, preview }: Props) {
                                 <Link2 className="h-4 w-4" />
                                 {tp.copy_preview_link ?? 'Copy preview link'}
                             </Button>
+                            <Link href={route('admin.pages.revisions', page.id)}>
+                                <Button type="button" variant="outline" size="sm" className="gap-1">
+                                    <History className="h-4 w-4" />
+                                    Revisions
+                                </Button>
+                            </Link>
                         </div>
                     </div>
 
@@ -146,7 +170,14 @@ export default function Edit({ page, preview }: Props) {
                                         <Label htmlFor="status">Status</Label>
                                         <Select
                                             value={data.status}
-                                            onValueChange={(value: string) => setData('status', value as 'draft' | 'published' | 'pending_review')}
+                                            onValueChange={(value: string) => {
+                                                const status = value as FormData['status'];
+                                                setData({
+                                                    ...data,
+                                                    status,
+                                                    published_at: status === 'scheduled' ? data.published_at : '',
+                                                });
+                                            }}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Pilih status" />
@@ -155,10 +186,32 @@ export default function Edit({ page, preview }: Props) {
                                                 <SelectItem value="draft">Draft</SelectItem>
                                                 <SelectItem value="pending_review">{tp.status_pending_review ?? 'Pending review'}</SelectItem>
                                                 <SelectItem value="published">Published</SelectItem>
+                                                <SelectItem value="scheduled">Scheduled</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         {errors.status && <span className="text-sm text-red-500">{errors.status}</span>}
                                     </div>
+
+                                    {data.status === 'scheduled' && (
+                                        <div className="space-y-2">
+                                            <Label htmlFor="published_at" className="flex items-center gap-2">
+                                                <Calendar className="h-4 w-4" />
+                                                Schedule Date & Time
+                                            </Label>
+                                            <Input
+                                                id="published_at"
+                                                type="datetime-local"
+                                                value={data.published_at}
+                                                onChange={(e) => setData('published_at', e.target.value)}
+                                                min={new Date().toISOString().slice(0, 16)}
+                                                required
+                                            />
+                                            {errors.published_at && <span className="text-sm text-red-500">{errors.published_at}</span>}
+                                            <p className="text-muted-foreground text-xs">
+                                                The page will be published automatically at the scheduled time.
+                                            </p>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-2">
                                         <Label htmlFor="order">Order</Label>
