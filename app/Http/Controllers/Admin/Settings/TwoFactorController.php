@@ -31,6 +31,8 @@ class TwoFactorController extends Controller
             'recoveryCodesRemaining' => count($codes),
             'twoFactorSetup' => $twoFactorSetup,
             'recoveryCodesFlash' => $request->session()->pull('recoveryCodes'),
+            'contentSafetyReport' => $request->session()->pull('contentSafetyReport'),
+            'contentSafetyApplied' => (bool) $request->session()->pull('contentSafetyApplied', false),
         ]);
     }
 

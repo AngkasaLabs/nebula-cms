@@ -2,20 +2,19 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Page;
-use App\Models\Post;
-use App\Support\HtmlSanitizer;
+use App\Services\ContentSafetyAuditor;
 use Illuminate\Console\Command;
 
 class SanitizeContent extends Command
 {
     protected $signature = 'content:sanitize
                             {--apply : Write the sanitised HTML back to the database}
-                            {--type=all : Scan posts, pages, or all}';
+                            {--type=all : Scan posts, pages, or all}
+                            {--limit=2000 : Maximum number of items to scan in one run}';
 
     protected $description = 'Find (and optionally remove) unsafe HTML stored in post and page content';
 
-    public function handle(HtmlSanitizer $sanitizer): int
+    public function handle(ContentSafetyAuditor $auditor): int
     {
         $type = strtolower((string) $this->option('type'));
 
@@ -25,56 +24,34 @@ class SanitizeContent extends Command
             return self::FAILURE;
         }
 
-        $apply = (bool) $this->option('apply');
-
-        $scanned = 0;
-        $changed = 0;
-        $samples = [];
-
-        $scan = function (string $label, $query) use ($sanitizer, $apply, &$scanned, &$changed, &$samples): void {
-            $query->select('id', 'title', 'content')
-                ->chunkById(100, function ($rows) use ($label, $sanitizer, $apply, &$scanned, &$changed, &$samples): void {
-                    foreach ($rows as $row) {
-                        $scanned++;
-
-                        $clean = $sanitizer->sanitize($row->content);
-
-                        if ($clean === $row->content) {
-                            continue;
-                        }
-
-                        $changed++;
-
-                        if (count($samples) < 5) {
-                            $samples[] = "{$label} #{$row->id}: {$row->title}";
-                        }
-
-                        if ($apply) {
-                            $row->forceFill(['content' => $clean])->saveQuietly();
-                        }
-                    }
-                });
+        $types = match ($type) {
+            'posts' => ['post'],
+            'pages' => ['page'],
+            default => ['post', 'page'],
         };
 
-        if (in_array($type, ['all', 'posts'], true)) {
-            $scan('Post', Post::query());
-        }
+        $apply = (bool) $this->option('apply');
+        $limit = max(1, (int) $this->option('limit'));
 
-        if (in_array($type, ['all', 'pages'], true)) {
-            $scan('Page', Page::query());
-        }
+        $report = $apply
+            ? $auditor->apply($limit, $types)
+            : $auditor->scan($limit, $types);
 
-        $this->info("Scanned {$scanned} item(s).");
+        $this->info("Scanned {$report['scanned']} item(s).");
 
-        if ($changed === 0) {
+        if ($report['affected'] === 0) {
             $this->info('No unsafe markup found.');
 
             return self::SUCCESS;
         }
 
-        $this->warn("{$changed} item(s) contain markup that would be sanitised:");
-        foreach ($samples as $sample) {
-            $this->line("  - {$sample}");
+        $this->warn("{$report['affected']} item(s) contain markup that would be sanitised:");
+        foreach ($report['samples'] as $sample) {
+            $this->line("  - {$sample['label']} #{$sample['id']}: {$sample['title']}");
+        }
+
+        if ($report['truncated']) {
+            $this->comment("Stopped at the {$limit}-item limit. Run the command again to continue.");
         }
 
         if ($apply) {
