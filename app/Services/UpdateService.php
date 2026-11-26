@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\PackageVerificationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -11,6 +12,12 @@ use ZipArchive;
 class UpdateService
 {
     public const CACHE_KEY = 'update_available';
+
+    /**
+     * First release that must be signed. Older releases may be applied unsigned
+     * so installs running a pre-signing version can update once.
+     */
+    public const MINIMUM_SIGNED_VERSION = '1.13.0';
 
     /**
      * Cache key for {@see getLatestReleaseZipInfo()} (public download page).
@@ -131,13 +138,29 @@ class UpdateService
             $release = $response->json();
             $latestVersion = ltrim($release['tag_name'] ?? '', 'v');
 
-            // Find the release asset ZIP (not the source zipball)
+            // Find the release asset ZIP (not the source zipball) and its signature.
             $downloadUrl = null;
+            $signatureUrl = null;
+            $zipAssetName = null;
+            $signatureAssets = [];
+
             foreach ($release['assets'] ?? [] as $asset) {
-                if (str_ends_with($asset['name'], '.zip')) {
-                    $downloadUrl = $asset['browser_download_url'];
-                    break;
+                $name = (string) ($asset['name'] ?? '');
+
+                if ($downloadUrl === null && str_ends_with($name, '.zip')) {
+                    $downloadUrl = $asset['browser_download_url'] ?? null;
+                    $zipAssetName = $name;
                 }
+
+                if (str_ends_with($name, '.sig.json')) {
+                    $signatureAssets[$name] = $asset['browser_download_url'] ?? null;
+                }
+            }
+
+            if ($zipAssetName !== null && isset($signatureAssets[$zipAssetName.'.sig.json'])) {
+                $signatureUrl = $signatureAssets[$zipAssetName.'.sig.json'];
+            } elseif ($signatureAssets !== []) {
+                $signatureUrl = reset($signatureAssets);
             }
 
             // Fallback to zipball if no asset found
@@ -156,6 +179,7 @@ class UpdateService
                 'release_notes' => $this->summarizeReleaseBody($body),
                 'release_url' => isset($release['html_url']) ? (string) $release['html_url'] : null,
                 'download_url' => $downloadUrl,
+                'signature_url' => $signatureUrl,
                 'published_at' => $release['published_at'] ?? null,
             ];
         } catch (\Exception $e) {
@@ -320,7 +344,7 @@ class UpdateService
     /**
      * Download and apply an update from the given URL.
      */
-    public function applyUpdate(string $downloadUrl): array
+    public function applyUpdate(string $downloadUrl, ?string $signatureUrl = null, ?string $expectedVersion = null): array
     {
         $tempDir = storage_path('app/temp/update-'.uniqid());
 
@@ -342,6 +366,15 @@ class UpdateService
             if (! file_exists($zipPath) || filesize($zipPath) === 0) {
                 throw new \RuntimeException('Failed to download update file.');
             }
+
+            // Trust check happens before anything is extracted or replaced.
+            $manifest = null;
+
+            if (is_string($signatureUrl) && $signatureUrl !== '') {
+                $manifest = $this->fetchSignatureManifest($signatureUrl);
+            }
+
+            $this->verifyReleaseArchive($zipPath, $manifest, $expectedVersion);
 
             // Extract ZIP
             $extractDir = $tempDir.'/extracted';
@@ -421,6 +454,60 @@ class UpdateService
                 }
             }
         }
+    }
+
+    /**
+     * Download and decode the .sig.json asset published next to the release ZIP.
+     *
+     * @return array<string, mixed>
+     */
+    protected function fetchSignatureManifest(string $signatureUrl): array
+    {
+        $response = Http::timeout(30)->get($signatureUrl);
+
+        if (! $response->successful()) {
+            throw new PackageVerificationException('Could not download the update signature (HTTP '.$response->status().').');
+        }
+
+        $manifest = $response->json();
+
+        if (! is_array($manifest)) {
+            throw new PackageVerificationException('Update signature manifest is not valid JSON.');
+        }
+
+        return $manifest;
+    }
+
+    /**
+     * Verify a downloaded core release before it is extracted.
+     *
+     * Releases from MINIMUM_SIGNED_VERSION onwards must carry a valid signature.
+     * Older releases stay installable unsigned so versions before update signing
+     * existed can move forward once.
+     *
+     * @param  array<string, mixed>|null  $manifest
+     */
+    public function verifyReleaseArchive(string $zipPath, ?array $manifest, ?string $expectedVersion): void
+    {
+        if ($manifest !== null) {
+            $signature = $manifest['signature'] ?? null;
+
+            if (! is_string($signature) || $signature === '') {
+                throw new PackageVerificationException('Update manifest is missing the "signature" value.');
+            }
+
+            app(CoreReleaseVerifier::class)->verify($zipPath, $manifest, $signature, $expectedVersion);
+
+            return;
+        }
+
+        if ($expectedVersion === null || version_compare($expectedVersion, self::MINIMUM_SIGNED_VERSION, '>=')) {
+            throw new PackageVerificationException(
+                'This update is not signed. Check for updates again; releases from v'.self::MINIMUM_SIGNED_VERSION.' onwards must provide a signature.'
+            );
+        }
+
+        Log::warning('Applying legacy unsigned core update', ['version' => $expectedVersion]);
     }
 
     /**

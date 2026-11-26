@@ -66,7 +66,11 @@ class UpdateCms extends Command
             $this->warn('Skipping the pre-update backup as requested.');
         }
 
-        $result = $service->applyUpdate($downloadUrl);
+        $result = $service->applyUpdate(
+            $downloadUrl,
+            is_string($check['signature_url'] ?? null) ? $check['signature_url'] : null,
+            $latest,
+        );
 
         if (($result['success'] ?? false) !== true) {
             $this->error($result['message'] ?? 'Update failed.');

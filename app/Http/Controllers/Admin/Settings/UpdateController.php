@@ -43,6 +43,7 @@ class UpdateController extends Controller
             session([
                 'pending_update' => [
                     'download_url' => $result['download_url'],
+                    'signature_url' => $result['signature_url'] ?? null,
                     'latest' => $result['latest'] ?? '',
                     'checked_at' => now()->timestamp,
                 ],
@@ -86,9 +87,13 @@ class UpdateController extends Controller
             return back()->with('error', 'Backup failed: '.$e->getMessage());
         }
 
-        // Step 2: Download and apply (URL must match the last successful check in this session)
+        // Step 2: Download, verify, and apply (URL must match the last successful check in this session)
         try {
-            $result = $service->applyUpdate($downloadUrl);
+            $result = $service->applyUpdate(
+                $downloadUrl,
+                is_string($pending['signature_url'] ?? null) ? $pending['signature_url'] : null,
+                is_string($pending['latest'] ?? null) ? $pending['latest'] : null,
+            );
         } catch (\Throwable $e) {
             Log::error('System update apply crashed: '.$e->getMessage(), ['exception' => $e]);
 
