@@ -20,6 +20,10 @@ const sidebarNavItems: NavItem[] = [
         href: route('admin.settings.email'),
     },
     {
+        title: 'Backups',
+        href: route('admin.settings.backups'),
+    },
+    {
         title: 'Profile',
         href: route('profile.edit'),
     },

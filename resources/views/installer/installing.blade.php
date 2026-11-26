@@ -37,7 +37,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 const totalSteps = 6;
 /** Wizard storage token (disk); does not depend on session cookie after APP_KEY change. */
 const installToken = @json($installToken ?? '');

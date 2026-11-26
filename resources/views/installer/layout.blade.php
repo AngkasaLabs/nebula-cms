@@ -656,7 +656,7 @@
     &copy; {{ date('Y') }} NebulaCMS
 </footer>
 
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 document.getElementById('lang-toggle')?.addEventListener('click', function (e) {
     e.stopPropagation();
     document.getElementById('lang-dropdown').classList.toggle('is-open');

@@ -13,5 +13,9 @@ Artisan::command('inspire', function () {
 Schedule::command('posts:publish-scheduled')->everyMinute();
 Schedule::command('cms:check-updates')->daily();
 
+if (config('nebula.scheduled_backups', true)) {
+    Schedule::command('backup:run')->dailyAt('02:00')->withoutOverlapping();
+}
+
 // Plugins and themes may register their own recurring work (cleanup, expiry, sync).
 do_action(PluginHooks::SCHEDULE_REGISTER);

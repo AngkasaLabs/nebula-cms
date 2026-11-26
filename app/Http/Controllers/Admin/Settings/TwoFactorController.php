@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Services\TwoFactorService;
+use App\Support\SecuritySettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -33,6 +34,7 @@ class TwoFactorController extends Controller
             'recoveryCodesFlash' => $request->session()->pull('recoveryCodes'),
             'contentSafetyReport' => $request->session()->pull('contentSafetyReport'),
             'contentSafetyApplied' => (bool) $request->session()->pull('contentSafetyApplied', false),
+            'cspReportOnly' => SecuritySettings::cspReportOnly(),
         ]);
     }
 

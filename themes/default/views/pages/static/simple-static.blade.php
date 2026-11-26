@@ -10,7 +10,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
     // Add any page-specific JavaScript here
     console.log('Simple Static Page loaded');
 </script>
