@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {{-- Inline script to initialize theme --}}
-    <script>
+    <script nonce="{{ $cspNonce ?? '' }}">
         (function() {
             const theme = localStorage.getItem('theme') || 'light';
             document.documentElement.classList.remove('light', 'dark');
@@ -35,7 +35,7 @@
         $pluginAssets = app(\App\Services\PluginFrontendAssetRegistry::class)->resolveForComponent($component);
     @endphp
 
-    @routes
+    @routes(null, $cspNonce ?? null)
     @viteReactRefresh
     @vite('resources/js/plugin-runtime-host.ts')
     @foreach ($pluginAssets['styles'] as $style)
