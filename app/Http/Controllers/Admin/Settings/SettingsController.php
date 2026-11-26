@@ -99,6 +99,13 @@ class SettingsController extends Controller
             Setting::set($key, $value, $group);
         }
 
+        if (function_exists('activity') && auth()->check()) {
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties(['group' => $group, 'keys' => array_keys($settings)])
+                ->log('settings_updated');
+        }
+
         return redirect()->back()->with('success', 'Pengaturan berhasil diperbarui');
     }
 

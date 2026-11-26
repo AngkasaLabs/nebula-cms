@@ -264,6 +264,18 @@ class MediaController extends Controller
                 'folder_id' => $media->folder_id,
             ]);
 
+            if (function_exists('activity') && auth()->check()) {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($media)
+                    ->withProperties([
+                        'name' => $media->name,
+                        'mime_type' => $media->mime_type,
+                        'size' => $media->size,
+                    ])
+                    ->log('media_uploaded');
+            }
+
             $uploadedMedia[] = [
                 'id' => $media->id,
                 'name' => $media->name,
@@ -325,6 +337,14 @@ class MediaController extends Controller
     public function destroy($id)
     {
         $media = Media::findOrFail($id);
+
+        if (function_exists('activity') && auth()->check()) {
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties(['id' => $media->id, 'name' => $media->name, 'path' => $media->path])
+                ->log('media_deleted');
+        }
+
         $media->delete();
 
         return redirect()->back()

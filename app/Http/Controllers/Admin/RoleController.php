@@ -49,11 +49,20 @@ class RoleController extends Controller
             'permissions.*' => 'exists:permissions,id',
         ]);
 
+        /** @var Role $role */
         $role = Role::create([
             'name' => $validated['name'],
         ]);
 
         $role->permissions()->sync($validated['permissions']);
+
+        if (function_exists('activity') && auth()->check()) {
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($role)
+                ->withProperties(['permissions' => array_values($validated['permissions'])])
+                ->log('role_created');
+        }
 
         return redirect()->route('admin.roles.index')
             ->with('message', 'Peran berhasil dibuat');
@@ -83,13 +92,30 @@ class RoleController extends Controller
 
         $role->permissions()->sync($validated['permissions']);
 
+        if (function_exists('activity') && auth()->check()) {
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($role)
+                ->withProperties(['permissions' => array_values($validated['permissions'])])
+                ->log('role_updated');
+        }
+
         return redirect()->route('admin.roles.index')
             ->with('message', 'Peran berhasil diperbarui');
     }
 
     public function destroy(Role $role)
     {
+        $deleted = ['id' => $role->id, 'name' => $role->name];
+
         $role->delete();
+
+        if (function_exists('activity') && auth()->check()) {
+            activity()
+                ->causedBy(auth()->user())
+                ->withProperties($deleted)
+                ->log('role_deleted');
+        }
 
         return redirect()->route('admin.roles.index')
             ->with('message', 'Peran berhasil dihapus');
