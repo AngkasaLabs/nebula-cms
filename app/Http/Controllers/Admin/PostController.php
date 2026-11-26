@@ -11,6 +11,7 @@ use App\Models\Media;
 use App\Models\Post;
 use App\Models\PostRevision;
 use App\Models\Tag;
+use App\Services\ContentSanitizer;
 use App\Support\ContentSearch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,8 +22,9 @@ use Inertia\Inertia;
 
 class PostController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        protected ContentSanitizer $sanitizer,
+    ) {
         $this->middleware('permission:view content')->only(['index', 'show', 'revisions']);
         $this->middleware('permission:create content')->only(['create', 'store']);
         $this->middleware('permission:create content|edit content')->only(['autoSave']);
@@ -94,6 +96,7 @@ class PostController extends Controller
 
         $validated['user_id'] = Auth::id();
         $validated['slug'] = Str::slug($validated['title']);
+        $validated['content'] = $this->sanitizer->sanitizeForUser($validated['content'] ?? null, $request->user());
 
         if ($request->hasFile('featured_image')) {
             try {
@@ -160,6 +163,7 @@ class PostController extends Controller
         $validated = $request->validated();
 
         $validated['slug'] = Str::slug($validated['title']);
+        $validated['content'] = $this->sanitizer->sanitizeForUser($validated['content'] ?? null, $request->user());
 
         // Create a revision before updating
         $post->createRevision();
@@ -230,6 +234,10 @@ class PostController extends Controller
     public function autoSave(AutoSavePostRequest $request, ?Post $post = null)
     {
         $validated = $request->validated();
+
+        if (array_key_exists('content', $validated)) {
+            $validated['content'] = $this->sanitizer->sanitizeForUser($validated['content'], $request->user());
+        }
 
         try {
             if ($post) {
@@ -351,7 +359,7 @@ class PostController extends Controller
         // Restore the post to the revision state
         $post->update([
             'title' => $revision->title,
-            'content' => $revision->content,
+            'content' => $this->sanitizer->sanitizeForUser($revision->content, request()->user()),
             'excerpt' => $revision->excerpt,
         ]);
 

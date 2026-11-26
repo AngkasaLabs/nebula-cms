@@ -58,6 +58,7 @@ class RoleAndPermissionSeeder extends Seeder
 
             // Security & compliance
             ['name' => 'view audit log', 'group' => 'Security'],
+            ['name' => 'unfiltered_html', 'group' => 'Security'],
         ];
 
         foreach ($permissions as $permission) {
@@ -84,7 +85,7 @@ class RoleAndPermissionSeeder extends Seeder
             'view media', 'create media', 'edit media', 'delete media',
             'manage settings',
             'view dashboard', 'manage menus', 'manage themes', 'manage plugins', 'manage roles',
-            'view audit log',
+            'view audit log', 'unfiltered_html',
         ]);
 
         $editor = Role::firstOrCreate(

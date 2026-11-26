@@ -27,6 +27,7 @@
         "pragmarx/google2fa": "^9.0",
         "spatie/laravel-activitylog": "^4.12",
         "spatie/laravel-permission": "^6.16",
+        "symfony/html-sanitizer": "^7.4",
         "tightenco/ziggy": "^2.4"
     },
     "require-dev": {

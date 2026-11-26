@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Services\ContentSanitizer;
 use App\Support\ContentSearch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,8 +14,9 @@ use Inertia\Inertia;
 
 class PageController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        protected ContentSanitizer $sanitizer,
+    ) {
         $this->middleware('permission:view content')->only(['index', 'show']);
         $this->middleware('permission:create content')->only(['create', 'store']);
         $this->middleware('permission:edit content')->only(['edit', 'update']);
@@ -77,6 +79,7 @@ class PageController extends Controller
             $validated['featured_image'] = $path;
         }
 
+        $validated['content'] = $this->sanitizer->sanitizeForUser($validated['content'] ?? null, $request->user());
         $validated['user_id'] = Auth::id();
         $validated['slug'] = str($request->title)->slug();
 
@@ -139,6 +142,7 @@ class PageController extends Controller
             $validated['featured_image'] = $path;
         }
 
+        $validated['content'] = $this->sanitizer->sanitizeForUser($validated['content'] ?? null, $request->user());
         $validated['slug'] = str($request->title)->slug();
         $page->update($validated);
 
