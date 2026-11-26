@@ -47,6 +47,9 @@ jobs:
       - name: Check PHP formatting
         run: php vendor/bin/pint --test
 
+      - name: Check frontend types
+        run: npm run types
+
       - name: Check frontend formatting
         run: npm run format:check
 
