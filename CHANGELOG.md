@@ -7,6 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.13.2] - 2026-11-26
+
+### Fixed
+
+- Admin pages crashed with "usePage must be used within the Inertia component" because the
+  flash toaster was mounted outside the Inertia tree. Flash messages now come from Inertia's
+  `success` event and render through the global Toaster.
+
 ## [1.13.1] - 2026-11-26
 
 ### Added
