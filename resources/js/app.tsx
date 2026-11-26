@@ -3,6 +3,8 @@ import '../css/app.css';
 import { createInertiaApp, router } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from './components/error-boundary';
+import FlashToaster from './components/flash-toaster';
+import { Toaster } from './components/ui/sonner';
 import { AppearanceProvider } from './contexts/appearance-context';
 import { resolveInertiaPage } from './lib/resolve-inertia-page';
 
@@ -46,6 +48,8 @@ createInertiaApp({
             <ErrorBoundary>
                 <AppearanceProvider>
                     <App {...props} />
+                    <FlashToaster />
+                    <Toaster position="top-right" richColors closeButton />
                 </AppearanceProvider>
             </ErrorBoundary>,
         );

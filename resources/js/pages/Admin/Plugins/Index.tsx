@@ -1,4 +1,3 @@
-import FlashMessages from '@/components/flash-messages';
 import InputError from '@/components/input-error';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -165,8 +164,6 @@ export default function Index({ plugins, uploadSecurity }: Props) {
             <Head title="Plugins" />
 
             <div className="p-6">
-                <FlashMessages className="mb-6" />
-
                 {/* Header Section */}
                 <div className="mb-8">
                     <div className="mb-2 flex items-center justify-between">
