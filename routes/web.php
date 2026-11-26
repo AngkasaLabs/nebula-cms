@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\SitemapController;
@@ -11,6 +12,11 @@ use Illuminate\Support\Facades\Route;
 
 // Installer wizard — must be registered before any catch-all routes
 require __DIR__.'/installer.php';
+
+// Browser CSP reports (report-only policy). No auth, no CSRF, throttled.
+Route::post('/csp-report', CspReportController::class)
+    ->middleware('throttle:30,1')
+    ->name('csp.report');
 
 // Frontend Routes
 Route::get('/', [FrontendController::class, 'home'])->name('home');

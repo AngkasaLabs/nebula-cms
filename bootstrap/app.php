@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsurePendingTwoFactorLogin;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\MarkdownNegotiationMiddleware;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetLocale::class,
             HandleAppearance::class,
+            SecurityHeaders::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             AddAgentDiscoveryHeaders::class,
@@ -51,6 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // `InstallerController::run` tetap membutuhkan sesi `installer.*` (setelah lock terpasang, rute installer dialihkan).
         $middleware->validateCsrfTokens(except: [
             'install/run',
+            'csp-report',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
