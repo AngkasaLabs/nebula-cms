@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { router } from '@inertiajs/react';
-import { Trash2 } from 'lucide-react';
+import { Settings, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface ThemeCardProps {
+    onSettings?: () => void;
     theme: {
         id: number;
         name: string;
@@ -19,7 +20,7 @@ interface ThemeCardProps {
     };
 }
 
-export function ThemeCard({ theme }: ThemeCardProps) {
+export function ThemeCard({ theme, onSettings }: ThemeCardProps) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const handleActivate = () => {
@@ -63,6 +64,11 @@ export function ThemeCard({ theme }: ThemeCardProps) {
                     >
                         {theme.is_active ? 'Currently Active' : 'Activate Theme'}
                     </Button>
+                    {onSettings && (
+                        <Button variant="outline" size="icon" onClick={onSettings} aria-label={`${theme.name} settings`}>
+                            <Settings className="h-4 w-4" />
+                        </Button>
+                    )}
                     {!theme.is_active && (
                         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                             <DialogTrigger asChild>

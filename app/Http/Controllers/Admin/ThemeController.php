@@ -14,6 +14,7 @@ use App\Services\PackageVerifier;
 use App\Services\ThemeRequirementChecker;
 use App\Support\InertiaUploadSecurity;
 use App\Support\PackageUploadSignature;
+use App\Support\SettingsInput;
 use App\Support\ThemeHooks;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -315,7 +316,9 @@ class ThemeController extends Controller
             return redirect()->back()->with('error', 'Invalid settings schema: no field keys.');
         }
 
-        $validated = $request->validate($rules);
+        $request->validate($rules);
+
+        $validated = SettingsInput::extract($request->all(), array_keys($rules));
 
         // Merge nested settings using dot notation
         $merged = $theme->settings ?? [];

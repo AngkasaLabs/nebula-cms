@@ -124,6 +124,7 @@ Route::middleware(['auth', 'verified', 'permission:access admin'])->prefix('admi
         Route::get('/', [ThemeController::class, 'index'])->name('admin.themes.index');
         Route::post('/{theme}/activate', [ThemeController::class, 'activate'])->name('admin.themes.activate');
         Route::post('/{theme}/deactivate', [ThemeController::class, 'deactivate'])->name('admin.themes.deactivate');
+        Route::patch('/{theme}/settings', [ThemeController::class, 'updateSettings'])->name('admin.themes.settings.update');
         Route::post('/scan', [ThemeController::class, 'scan'])->name('admin.themes.scan');
         Route::delete('/{theme}', [ThemeController::class, 'destroy'])->name('admin.themes.destroy');
         Route::post('/upload', [ThemeController::class, 'upload'])->name('admin.themes.upload');
