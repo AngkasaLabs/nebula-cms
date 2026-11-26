@@ -7,6 +7,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Global toast feedback: shared flash success/error messages now appear on every admin
+  page instead of being invisible.
+- Theme settings dialog on **Admin → Themes**, driven by `settings_schema.fields` in
+  `theme.json`.
+
+### Fixed
+
+- Dotted settings keys (`colors.primary`, `layout.container_width`) are now persisted for
+  plugins and themes; Laravel's `validated()` dropped flat dotted keys before.
+
 ## [1.13.0] - 2026-11-26
 
 ### Added
