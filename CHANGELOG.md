@@ -35,6 +35,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Server-side HTML sanitisation** for users without the `unfiltered_html` permission
   (Admin and Super Admin by default), covering posts, pages, autosave, and revision
   restores. `php artisan content:sanitize` audits existing content (`--apply` writes).
+- **Public render safety net:** stored post/page HTML is sanitised when rendered, so legacy
+  rows cannot execute scripts before the stored content is cleaned.
+- **Settings → Security → Content HTML safety** lets admins scan up to 2,000 items, review
+  samples, and sanitise them in one click; `content:sanitize` gained `--limit` and type
+  filtering for operators.
 
 ### Changed
 
