@@ -7,6 +7,32 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-11-27
+
+### Added
+
+- **Email settings** at **Settings → Email**: SMTP host, port, encryption, credentials,
+  sender address and name, plus a test-email action. The credential blob is encrypted at
+  rest and overrides `config/mail.php` at boot, so installations no longer need `.env`
+  edits. A reset action returns to the environment configuration.
+- **Page revisions and scheduling.** Pages now keep a revision history with one-click
+  restore, can be scheduled, and disappear from the public site until their publish time.
+  The existing `posts:publish-scheduled` command publishes both posts and pages.
+- **Full-site backups** at **Settings → Backups**: application files, themes, plugins,
+  uploads and a database dump in one archive, with download, delete and restore. A safety
+  backup is created before every restore. Daily scheduled backups run at 02:00 when the
+  scheduler is configured, keeping the newest `NEBULA_BACKUP_RETENTION` archives.
+- **CSP enforcement toggle** at **Settings → Security**. The policy still ships in
+  report-only mode; administrators can enforce it after checking the reports. Bundled
+  inline scripts now carry the request nonce, jsDelivr is allowed for Bootstrap and Mermaid,
+  and plugins can extend the policy with the `security.csp_directives` filter.
+
+### Fixed
+
+- Creating or editing a page failed at runtime because the form called the non-existent
+  `pages.store` / `pages.update` route names. Both now use `admin.pages.*`.
+- Restoring pages, publishing and unpublishing now keep `published_at` consistent.
+
 ## [1.13.2] - 2026-11-26
 
 ### Fixed
