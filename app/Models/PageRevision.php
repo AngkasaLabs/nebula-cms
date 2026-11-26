@@ -23,6 +23,9 @@ class PageRevision extends Model
         return $this->belongsTo(Page::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

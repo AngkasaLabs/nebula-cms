@@ -70,7 +70,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 (function () {
     const driver   = document.getElementById('driver');
     const port     = document.getElementById('port');

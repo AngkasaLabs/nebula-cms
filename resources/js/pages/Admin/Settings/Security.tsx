@@ -1,7 +1,7 @@
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Copy, LoaderCircle, Shield } from 'lucide-react';
-import { FormEventHandler, useMemo } from 'react';
+import { FormEventHandler, useMemo, useState } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ interface Props {
     recoveryCodesFlash: string[] | null;
     contentSafetyReport?: ContentSafetyReport | null;
     contentSafetyApplied?: boolean;
+    cspReportOnly: boolean;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -50,7 +52,10 @@ export default function Security({
     recoveryCodesFlash,
     contentSafetyReport,
     contentSafetyApplied,
+    cspReportOnly,
 }: Props) {
+    const [enforceCsp, setEnforceCsp] = useState(!cspReportOnly);
+
     const confirmForm = useForm({ code: '' });
     const disableForm = useForm({ password: '' });
     const recoveryForm = useForm({ password: '' });
@@ -84,6 +89,18 @@ export default function Security({
     const copyCodes = (codes: string[]) => {
         void navigator.clipboard.writeText(codes.join('\n'));
         toast.success('Recovery codes copied to clipboard.');
+    };
+
+    const toggleCsp = (value: boolean) => {
+        setEnforceCsp(value);
+        router.post(
+            route('admin.settings.security.csp'),
+            { enforce: value },
+            {
+                preserveScroll: true,
+                onError: () => setEnforceCsp(!value),
+            },
+        );
     };
 
     return (
@@ -283,6 +300,38 @@ export default function Security({
                                         </p>
                                     )}
                                 </div>
+                            )}
+                        </div>
+
+                        <div className="space-y-3 rounded-lg border p-4">
+                            <div className="flex flex-wrap items-start justify-between gap-4">
+                                <div className="space-y-1">
+                                    <h3 className="font-semibold">Content Security Policy</h3>
+                                    <p className="text-muted-foreground text-sm">
+                                        Report-only mode records violations without blocking anything. Enforce once the reports are clean for your
+                                        theme and plugins.
+                                    </p>
+                                    <p className="text-muted-foreground text-xs">
+                                        Violations are posted to <code>/csp-report</code> and written to the application log. Plugins can extend the
+                                        policy with the <code>security.csp_directives</code> filter.
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Switch id="enforce-csp" checked={enforceCsp} onCheckedChange={toggleCsp} />
+                                    <Label htmlFor="enforce-csp">{enforceCsp ? 'Enforced' : 'Report-only'}</Label>
+                                </div>
+                            </div>
+
+                            {enforceCsp && (
+                                <Alert>
+                                    <Shield className="h-4 w-4" />
+                                    <AlertTitle>CSP is enforced</AlertTitle>
+                                    <AlertDescription>
+                                        Inline scripts now need a nonce and external sources must be allowed explicitly. Switch back to report-only if
+                                        part of the site stops working.
+                                    </AlertDescription>
+                                </Alert>
                             )}
                         </div>
                     </div>

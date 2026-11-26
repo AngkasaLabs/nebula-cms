@@ -9,7 +9,9 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PluginController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\Settings\BackupController;
 use App\Http\Controllers\Admin\Settings\ContentSafetyController;
+use App\Http\Controllers\Admin\Settings\ContentSecurityController;
 use App\Http\Controllers\Admin\Settings\MailSettingsController;
 use App\Http\Controllers\Admin\Settings\PasswordController;
 use App\Http\Controllers\Admin\Settings\ProfileController;
@@ -181,6 +183,18 @@ Route::middleware(['auth', 'verified', 'permission:access admin'])->prefix('admi
         Route::post('/email/test', [MailSettingsController::class, 'test'])->name('admin.settings.email.test');
         Route::delete('/email', [MailSettingsController::class, 'reset'])->name('admin.settings.email.reset');
 
+        Route::get('/backups', [BackupController::class, 'index'])->name('admin.settings.backups');
+        Route::post('/backups', [BackupController::class, 'create'])->name('admin.settings.backups.create');
+        Route::get('/backups/{filename}', [BackupController::class, 'download'])
+            ->where('filename', 'backup-[A-Za-z0-9_.-]+\.zip')
+            ->name('admin.settings.backups.download');
+        Route::delete('/backups/{filename}', [BackupController::class, 'destroy'])
+            ->where('filename', 'backup-[A-Za-z0-9_.-]+\.zip')
+            ->name('admin.settings.backups.destroy');
+        Route::post('/backups/{filename}/restore', [BackupController::class, 'restore'])
+            ->where('filename', 'backup-[A-Za-z0-9_.-]+\.zip')
+            ->name('admin.settings.backups.restore');
+
         Route::get('/security', [TwoFactorController::class, 'edit'])->name('admin.settings.security');
         Route::post('/two-factor/start', [TwoFactorController::class, 'start'])->name('admin.settings.two-factor.start');
         Route::post('/two-factor/confirm', [TwoFactorController::class, 'confirm'])->name('admin.settings.two-factor.confirm');
@@ -190,6 +204,7 @@ Route::middleware(['auth', 'verified', 'permission:access admin'])->prefix('admi
 
         Route::post('/security/content/scan', [ContentSafetyController::class, 'scan'])->name('admin.settings.content.scan');
         Route::post('/security/content/apply', [ContentSafetyController::class, 'apply'])->name('admin.settings.content.apply');
+        Route::post('/security/csp', [ContentSecurityController::class, 'update'])->name('admin.settings.security.csp');
 
         // Route::redirect('settings', 'admin/settings/profile');
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

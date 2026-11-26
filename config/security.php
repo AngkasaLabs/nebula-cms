@@ -30,4 +30,24 @@ return [
 
     'csp_report_uri' => '/csp-report',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Additional CSP sources
+    |--------------------------------------------------------------------------
+    |
+    | The bundled default theme loads Bootstrap from jsDelivr, so the CDN is
+    | allowed by default. Plugins can add more sources at runtime with the
+    | `security.csp_directives` filter (receives the directive map and nonce).
+    |
+    */
+
+    'csp_script_src' => [
+        'https://cdn.jsdelivr.net',
+    ],
+
+    'csp_style_src' => [
+        'https://cdn.jsdelivr.net',
+        'https://fonts.bunny.net',
+    ],
+
 ];

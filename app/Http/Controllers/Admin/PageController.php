@@ -182,7 +182,7 @@ class PageController extends Controller
                     'revision_number' => $revision->revision_number,
                     'title' => $revision->title,
                     'content_preview' => Str::limit(strip_tags($revision->content), 200),
-                    'user' => $revision->user?->name ?? 'Unknown',
+                    'user' => $revision->user->name,
                     'created_at' => $revision->created_at->format('d M Y H:i'),
                     'created_at_diff' => $revision->created_at->diffForHumans(),
                 ];

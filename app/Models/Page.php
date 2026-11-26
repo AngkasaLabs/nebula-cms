@@ -38,6 +38,9 @@ class Page extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return HasMany<PageRevision, $this>
+     */
     public function revisions(): HasMany
     {
         return $this->hasMany(PageRevision::class)->orderBy('revision_number', 'desc');

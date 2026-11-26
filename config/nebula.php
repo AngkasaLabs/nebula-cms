@@ -39,6 +39,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Scheduled backups
+    |--------------------------------------------------------------------------
+    |
+    | Runs `backup:run` daily at 02:00 when the scheduler is configured
+    | (`php artisan schedule:run` via cron). Disable with
+    | NEBULA_SCHEDULED_BACKUPS=false.
+    |
+    */
+
+    'scheduled_backups' => filter_var(env('NEBULA_SCHEDULED_BACKUPS', true), FILTER_VALIDATE_BOOLEAN),
+
+    /*
+    |--------------------------------------------------------------------------
     | Package Backup Retention
     |--------------------------------------------------------------------------
     |
